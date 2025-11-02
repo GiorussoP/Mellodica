@@ -11,6 +11,7 @@ public:
     virtual void Draw(class Renderer* renderer);
     
     void SetVisible(bool visible) { mIsVisible = visible; }
+    bool IsVisible() const { return mIsVisible; }
     
     void SetColor(const Vector3& color) { mColor = color; }
     const Vector3& GetColor() const { return mColor; }

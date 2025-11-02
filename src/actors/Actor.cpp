@@ -8,7 +8,7 @@ Actor::Actor(Game* game)
 , mState(ActorState::Active)
 , mPosition(Vector3::Zero)
 , mScale(1.0f)
-, mRotation(0.0f)
+, mRotation(Quaternion::Identity)
 {
     mGame->AddActor(this);
 }

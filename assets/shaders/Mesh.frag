@@ -1,0 +1,51 @@
+#version 330 core
+
+// From vertex shader
+in vec3 fragNormal;
+in vec2 fragTexCoord;
+flat in float fragTexIndex;         // Per vertex texturing
+
+uniform vec3 uColor;                    // Object color
+uniform vec3 uDirectionalLightColor;    // Directional light color
+uniform vec3 uAmbientLightColor;        // Ambient light color
+
+// Texture atlas uniforms
+uniform sampler2D uTextureAtlas;
+uniform vec2 uAtlasTileSize;
+uniform int uAtlasColumns;
+uniform int uTileIndex;  // Starting index
+
+out vec4 outColor;
+
+void main()
+{   
+    // Calculate tile index from starting index and per-vertex texture index
+    int tileIndex = uTileIndex + int(fragTexIndex);
+    
+    // Calculate tile position in the atlas
+    int tileX = tileIndex % uAtlasColumns;
+    int tileY = tileIndex / uAtlasColumns;
+    
+    // Calculate UV offset for the tile
+    vec2 tileOffset = vec2(float(tileX), float(tileY)) * uAtlasTileSize;
+    
+    // Scale the texture coordinates to fit within the tile
+    vec2 scaledTexCoord = fragTexCoord * uAtlasTileSize;
+    
+    // Final UV coordinates in the atlas
+    vec2 atlasUV = tileOffset + scaledTexCoord;
+    
+    // Sample from the texture atlas
+    vec4 texColor = texture(uTextureAtlas, atlasUV);
+
+    if(texColor.a < 0.1){
+        discard;
+    }
+
+    vec3 baseColor = texColor.rgb;
+    
+    // Flat shading: check if face is pointing toward light
+    // TODO: Add lighting calculations here if needed
+    
+    outColor = vec4(baseColor, texColor.a);
+}

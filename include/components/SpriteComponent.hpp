@@ -28,12 +28,15 @@ public:
     void SetSize(const Vector2& size) { mSize = size; }
     Vector2 GetSize() const { return mSize; }
     
-    // Lighting controls
-    void SetApplyLighting(bool apply) { mApplyLighting = apply; }
-    bool GetApplyLighting() const { return mApplyLighting; }
-    
     // Atlas controls
     void SetTextureAtlas(class TextureAtlas* atlas) { mTextureAtlas = atlas; }
+    class TextureAtlas* GetTextureAtlas() const { return mTextureAtlas; }
+    
+    // Get texture index (in renderer's texture array)
+    int GetTextureIndex() const { return mTextureIndex; }
+    
+    // Get current tile index (accounting for animations)
+    int GetCurrentTileIndex() const;
 
 private:
     bool LoadSpriteSheetData(const std::string& dataPath);
@@ -62,9 +65,6 @@ private:
     Vector2 mSize;
     int mWidth;
     int mHeight;
-    
-    // Lighting
-    bool mApplyLighting;
     
     // Texture atlas (not owned, just a reference)
     class TextureAtlas* mTextureAtlas;

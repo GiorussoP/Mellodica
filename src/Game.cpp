@@ -1,6 +1,8 @@
 #include "Game.hpp"
 #include "actors/Actor.hpp"
 #include "components/DrawComponent.hpp"
+#include "components/MeshComponent.hpp"
+#include "components/SpriteComponent.hpp"
 #include "render/Renderer.hpp"
 #include "render/Mesh.hpp"
 #include "render/TextureAtlas.hpp"
@@ -340,10 +342,31 @@ void Game::GenerateOutput()
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
     mRenderer->SetCameraPosition(mCameraPos);
     
-    // Draw all drawable components
+
+
+    RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
+    // Render meshes in batch
+    mRenderer->ActivateMeshShader();
     for (auto drawable : mDrawables)
     {
-        drawable->Draw(mRenderer);
+        // Check if it's a MeshComponent (not a SpriteComponent)
+        MeshComponent* meshComp = dynamic_cast<MeshComponent*>(drawable);
+        if (meshComp)
+        {
+            mRenderer->DrawMesh(*meshComp, mode);
+        }
+    }
+    
+    // Render sprites in batch
+    mRenderer->ActivateSpriteShader();
+    for (auto drawable : mDrawables)
+    {
+        // Check if it's a SpriteComponent
+        SpriteComponent* spriteComp = dynamic_cast<SpriteComponent*>(drawable);
+        if (spriteComp && spriteComp->IsVisible())
+        {
+            mRenderer->DrawSprite(*spriteComp, mode);
+        }
     }
     
     SDL_GL_SwapWindow(mWindow);

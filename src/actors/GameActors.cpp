@@ -118,17 +118,11 @@ PyramidActor::PyramidActor(Game* game, const Vector3& color,  unsigned int start
 }
 
 void PyramidActor::OnUpdate(float deltaTime) {
-    // Rotate pyramid around Y axis (like CubeActor)
-    float rotation = GetRotation();
-    rotation -= Math::ToRadians(45.0) * deltaTime;  // Rotate 45 degrees per second
-    SetRotation(rotation);
+ 
 }
 
 void CubeActor::OnUpdate(float deltaTime){
-    // Rotate cube around Y axis
-    float rotation = GetRotation();
-    rotation += Math::ToRadians(45.0) * deltaTime;  // Rotate 45 degrees per second
-    SetRotation(rotation);
+
 }
 
 // SpriteActor implementation
@@ -148,14 +142,11 @@ SpriteActor::SpriteActor(Game* game)
     
     // Setup running animation using atlas tile indices for Run1, Run2, Run3
     std::vector<int> runAnimFrames = {
-        atlas->GetTileIndex("Run1.png"),
-        atlas->GetTileIndex("Run2.png"),
-        atlas->GetTileIndex("Run3.png")
+        3,4,5
     };
     mSpriteComponent->AddAnimation("run", runAnimFrames);
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(8.0f);
-    mSpriteComponent->SetApplyLighting(false);  // Disable lighting for sprite
 }
 
 void SpriteActor::OnUpdate(float deltaTime) {
@@ -182,7 +173,6 @@ GoombaActor::GoombaActor(Game* game)
     mSpriteComponent->AddAnimation("run", {1, 2});
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(2.0f);
-    mSpriteComponent->SetApplyLighting(false);  // Disable lighting for sprite
 }
 
 void GoombaActor::OnUpdate(float deltaTime) {

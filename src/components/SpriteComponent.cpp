@@ -20,7 +20,6 @@ SpriteComponent::SpriteComponent(Actor* owner, int textureIndex, TextureAtlas* a
 , mSize(1.0f, 1.0f)  // Default to 1x1 world units
 , mWidth(atlas ? atlas->GetTileWidth() : 32)
 , mHeight(atlas ? atlas->GetTileHeight() : 32)
-, mApplyLighting(true)
 , mTextureAtlas(atlas)
 {
 }
@@ -41,43 +40,9 @@ bool SpriteComponent::LoadSpriteSheetData(const std::string& dataPath)
 
 void SpriteComponent::Draw(Renderer* renderer)
 {
-    if (!mIsVisible)
-        return;
-    
-    Vector2 size = mSize * mOwner->GetScale();
-    
-    // Get the texture atlas to fetch actual UV offsets
-    TextureAtlas* atlas = mTextureAtlas;
-    
-    // Determine which tile index to use
-    int tileIndex = mTextureIndex;  // Default to mTextureIndex for non-animated sprites
-    
-    if (!mAnimations.empty() && !mAnimName.empty())
-    {
-        // For animated sprites, get the tile index from the current animation frame
-        int frameIndex = static_cast<int>(std::floor(mAnimTimer));
-        tileIndex = mAnimations[mAnimName][frameIndex];
-    }
-    
-    // Get actual UV offset from atlas
-    float offsetX = -1.0f, offsetY = -1.0f;
-    if (atlas) {
-        atlas->GetTileUVOffset(tileIndex, offsetX, offsetY);
-    }
-    
-    renderer->DrawTexture(
-        mOwner->GetPosition(),
-        size,
-        mColor,
-        mTextureIndex,
-        tileIndex,
-        mAtlasColumns,
-        mAtlasTileSizeX,
-        mAtlasTileSizeY,
-        offsetX,
-        offsetY,
-        mApplyLighting
-    );
+    // Draw method is now handled directly in Game.cpp
+    // This method can be left empty or removed entirely
+    (void)renderer;
 }
 
 void SpriteComponent::Update(float deltaTime)
@@ -106,4 +71,19 @@ void SpriteComponent::SetAnimation(const std::string& name)
 void SpriteComponent::AddAnimation(const std::string& name, const std::vector<int>& tileIndices)
 {
     mAnimations.emplace(name, tileIndices);
+}
+
+int SpriteComponent::GetCurrentTileIndex() const
+{
+    // Determine which tile index to use
+    int tileIndex = mTextureIndex;  // Default to mTextureIndex for non-animated sprites
+    
+    if (!mAnimations.empty() && !mAnimName.empty())
+    {
+        // For animated sprites, get the tile index from the current animation frame
+        int frameIndex = static_cast<int>(std::floor(mAnimTimer));
+        tileIndex = mAnimations.at(mAnimName)[frameIndex];
+    }
+    
+    return tileIndex;
 }

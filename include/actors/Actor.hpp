@@ -27,12 +27,12 @@ public:
     void SetPosition(const Vector3& pos) { mPosition = pos; }
     
     // Scale getter/setter
-    float GetScale() const { return mScale; }
-    void SetScale(float scale) { mScale = scale; }
+    Vector3 GetScale() const { return mScale; }
+    void SetScale(const Vector3& scale) { mScale = scale; }
     
     // Rotation getter/setter (for 2D sprites, rotation around Y axis)
-    float GetRotation() const { return mRotation; }
-    void SetRotation(float rotation) { mRotation = rotation; }
+    Quaternion GetRotation() const { return mRotation; }
+    void SetRotation(const Quaternion& rotation) { mRotation = rotation; }
     
     // State getter/setter
     ActorState GetState() const { return mState; }
@@ -73,8 +73,8 @@ protected:
     
     // Transform
     Vector3 mPosition;
-    float mScale;
-    float mRotation;
+    Vector3 mScale;
+    Quaternion mRotation;
     
     // Components
     std::vector<class Component*> mComponents;

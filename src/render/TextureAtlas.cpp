@@ -6,13 +6,13 @@
 using json = nlohmann::json;
 
 TextureAtlas::TextureAtlas(unsigned int textureIndex)
-    : mTextureIndex(textureIndex)
-    , mAtlasWidth(0)
+    :  mAtlasWidth(0)
     , mAtlasHeight(0)
     , mTileWidth(0)
     , mTileHeight(0)
     , mColumns(0)
     , mRows(0)
+    , mTextureIndex(textureIndex)
 {
 }
 

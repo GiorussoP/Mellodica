@@ -1,10 +1,12 @@
 #include <GL/glew.h>
 #include <iostream>
-#include "render/Renderer.hpp"
-#include "render/Shader.hpp"
-#include "render/Mesh.hpp"
-#include "render/TextureAtlas.hpp"
-#include "components/MeshComponent.hpp"
+#include "Renderer.hpp"
+#include "Shader.hpp"
+#include "Mesh.hpp"
+#include "TextureAtlas.hpp"
+#include "MeshComponent.hpp"
+#include "SpriteComponent.hpp"
+#include "Actor.hpp"
 
 Renderer::Renderer()
 : mViewMatrix(Matrix4::Identity)
@@ -131,13 +133,16 @@ void Renderer::Clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::DrawMesh(MeshComponent& mesh, const Vector3 &position, const Vector3 &size, const Quaternion &rotation,RendererMode mode)
+void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
 {
-    
-    
+
+    Vector3 position = mesh.GetOwner()->GetPosition();
+    Vector3 size = mesh.GetOwner()->GetScale();
+    Quaternion rotation = mesh.GetOwner()->GetRotation();
+
     
     // Frustum culling - skip drawing if object is outside view frustum
-    if (!IsInFrustum(position, size)) {
+    if (!mesh.IsVisible() && !IsInFrustum(position, Math::Max(Math::Max(size.x, size.y),size.z) * 0.866f)) {
         return;
     }
     
@@ -151,7 +156,6 @@ void Renderer::DrawMesh(MeshComponent& mesh, const Vector3 &position, const Vect
         std::cerr << "Mesh shader not loaded" << std::endl;
         return;
     }
-    mMeshShader->SetActive();
     
     // Apply view matrix
     Matrix4 modelView = model * mViewMatrix;
@@ -162,38 +166,25 @@ void Renderer::DrawMesh(MeshComponent& mesh, const Vector3 &position, const Vect
     // Normal matrix uses object rotation
     Matrix4 normalMatrix = Matrix4::CreateFromQuaternion(rotation);
     
+    // Set mesh-specific uniforms
     mMeshShader->SetMatrixUniform("uWorldTransform", mvp);
     mMeshShader->SetMatrixUniform("uModelMatrix", model);
     mMeshShader->SetMatrixUniform("uNormalMatrix", normalMatrix);
 
     mMeshShader->SetVectorUniform("uColor", mesh.GetColor());
-    
-
-    Vector3 lightdir = Vector3(1.0f, -1.0f, 1.0f);
-    lightdir.Normalize();
-    mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
-
-    mMeshShader->SetVectorUniform("uDirectionalLightColor", Vector3(1.0f, 1.0f, 1.0f));
-    mMeshShader->SetVectorUniform("uAmbientLightColor", Vector3(0.2f, 0.2f, 0.2f));
- 
 
     
     // Bind atlas texture and set atlas-specific uniforms
-    if (mesh.GetStartingIndex() >= 0 && mesh.GetTextureAtlas()->GetTextureIndex() < static_cast<int>(mTextures.size())) {
+    if (mesh.GetTextureAtlas() && mesh.GetTextureAtlas()->GetTextureIndex() < mTextures.size()) {
 
         
         mTextures[mesh.GetTextureAtlas()->GetTextureIndex()]->Bind(0);
 
-        mMeshShader->SetIntegerUniform("uTileIndex", mesh.GetStartingIndex());
+        mMeshShader->SetIntegerUniform("uTileIndex", static_cast<int>(mesh.GetStartingIndex()));
         mMeshShader->SetIntegerUniform("uTextureAtlas", 0);
         mMeshShader->SetIntegerUniform("uAtlasColumns", mesh.GetTextureAtlas()->GetColumns());
         mMeshShader->SetVectorUniform("uAtlasTileSize", Vector2(mesh.GetTextureAtlas()->GetUVTileSizeX(), mesh.GetTextureAtlas()->GetUVTileSizeY()));
     }
-
-    mMeshShader->SetIntegerUniform("uIsSprite", 0); // Indicate this is not a sprite
-    
-
-
     
     mesh.GetMesh().SetActive();
     
@@ -224,17 +215,17 @@ void Renderer::Present()
 
 bool Renderer::LoadShaders()
 {
-	// Create mesh shader
+	// Create mesh shader (Base.vert -> Mesh.frag)
 	mMeshShader = new Shader();
-	if (!mMeshShader->Load("./assets/shaders/Base.vert", "./assets/shaders/Base.frag")) {
+	if (!mMeshShader->Load("./assets/shaders/Base.vert", "./assets/shaders/Mesh.frag")) {
 		delete mMeshShader;
 		mMeshShader = nullptr;
 		return false;
 	}
 
-	// Create sprite shader (using the same shaders for now, can be changed later)
+	// Create sprite shader (Base.vert -> Sprite.frag)
 	mSpriteShader = new Shader();
-	if (!mSpriteShader->Load("./assets/shaders/Base.vert", "./assets/shaders/Base.frag")) {
+	if (!mSpriteShader->Load("./assets/shaders/Base.vert", "./assets/shaders/Sprite.frag")) {
 		delete mSpriteShader;
 		mSpriteShader = nullptr;
 		return false;
@@ -323,13 +314,10 @@ TextureAtlas* Renderer::LoadAtlas(const std::string& atlasPath)
     return nullptr;
 }
 
-bool Renderer::IsInFrustum(const Vector3 &position, const Vector3 &size)
+bool Renderer::IsInFrustum(const Vector3 &position, const float radius)
 {
     // Transform position to view space
     Vector3 viewPos = Vector3::Transform(position, mViewMatrix, 1.0f);
-    
-    // Calculate bounding sphere radius (conservative estimate)
-    float radius = Math::Max(Math::Max(size.x, size.y), size.z) * 0.866f; // sqrt(3)/2 for cube diagonal
     
     // Extract orthographic frustum bounds from projection matrix
     // For orthographic projection: CreateOrtho(left, right, bottom, top, near, far)
@@ -352,11 +340,18 @@ bool Renderer::IsInFrustum(const Vector3 &position, const Vector3 &size)
     return true;
 }
 
-void Renderer::DrawTexture(const Vector3 &position, const Vector2 &size, const Vector3 &color,
-                           int textureIndex, int tileIndex, int atlasColumns,
-                           float atlasTileSizeX, float atlasTileSizeY,
-                           float tileOffsetX, float tileOffsetY, bool applyLighting)
+void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
 {
+
+    Vector3 position = sprite.GetOwner()->GetPosition();
+    Vector3 size = sprite.GetOwner()->GetScale();
+    Quaternion rotation = sprite.GetOwner()->GetRotation();
+
+    // Frustum culling - skip drawing if object is outside view frustum
+    if (!sprite.IsVisible() && !IsInFrustum(position, Math::Max(size.x, size.y) * 0.7071f)) {
+        return;
+    }
+
     if (!mSpriteQuad) {
         std::cerr << "Sprite quad not created" << std::endl;
         return;
@@ -367,11 +362,11 @@ void Renderer::DrawTexture(const Vector3 &position, const Vector2 &size, const V
         return;
     }
     
-    // Create model matrix for billboard sprite (no rotation, scale + translation)
+    // Create model matrix: Scale * Rotation * Translation
+    // For sprites, we use a billboard effect by default (rotation around Y-axis only)
     Matrix4 model = Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
+                    Matrix4::CreateFromQuaternion(rotation) *
                     Matrix4::CreateTranslation(position);
-    
-    mSpriteShader->SetActive();
     
     // Apply view matrix
     Matrix4 modelView = model * mViewMatrix;
@@ -406,88 +401,47 @@ void Renderer::DrawTexture(const Vector3 &position, const Vector2 &size, const V
     normalMatrix.mat[2][1] = mViewMatrix.mat[1][2];
     normalMatrix.mat[2][2] = mViewMatrix.mat[2][2];
     
+    // Set sprite-specific uniforms
     mSpriteShader->SetMatrixUniform("uWorldTransform", mvp);
+    mSpriteShader->SetMatrixUniform("uModelMatrix", model);
+    mSpriteShader->SetMatrixUniform("uNormalMatrix", normalMatrix);
+    mSpriteShader->SetVectorUniform("uColor", sprite.GetColor());
     
-    // Set uniforms that the shader uses
-    if (mSpriteShader->HasUniform("uModelMatrix")) {
-        mSpriteShader->SetMatrixUniform("uModelMatrix", model);
-    }
-    if (mSpriteShader->HasUniform("uNormalMatrix")) {
-        mSpriteShader->SetMatrixUniform("uNormalMatrix", normalMatrix);
-    }
-    if (mSpriteShader->HasUniform("uColor")) {
-        mSpriteShader->SetVectorUniform("uColor", color);
-    }
+    // Bind texture atlas and set atlas-specific uniforms
+    TextureAtlas* atlas = sprite.GetTextureAtlas();
+    int texIndex = sprite.GetTextureIndex();
     
-    // Set lighting parameters
-    if (applyLighting) {
-        // Apply directional lighting based on camera angle
-        if (mSpriteShader->HasUniform("uDirectionalLightDir")) {
-            // For sprites (billboards), the normal always points toward the camera
-            // So we use the inverse of the camera's forward direction as the light direction
-            // to check how much the camera is looking from the light direction
-            Vector3 cameraForward = Vector3(mViewMatrix.mat[0][2], mViewMatrix.mat[1][2], mViewMatrix.mat[2][2]);
-            cameraForward.Normalize();
-            
-            
-            // The scene light direction in world space
-            Vector3 sceneLightDir = Vector3(1.0f, -1.0f, 1.0f);
-            sceneLightDir = Vector3::Transform(sceneLightDir, modelView, 0.0f);
-            
-            // Calculate how much the camera direction aligns with the light
-            // When camera looks from light direction, sprite should be bright
-            // Use camera forward as the "normal" for billboard lighting
-            mSpriteShader->SetVectorUniform("uDirectionalLightDir", sceneLightDir);
-        }
-        if (mSpriteShader->HasUniform("uDirectionalLightColor")) {
-            mSpriteShader->SetVectorUniform("uDirectionalLightColor", Vector3(1.0f, 1.0f, 1.0f));
-        }
-        if (mSpriteShader->HasUniform("uAmbientLightColor")) {
-            mSpriteShader->SetVectorUniform("uAmbientLightColor", Vector3(0.3f, 0.3f, 0.3f));  // Ambient for sprites
-        }
-    } else {
-        // No lighting - fully lit with directional light color
-        if (mSpriteShader->HasUniform("uDirectionalLightDir")) {
-            mSpriteShader->SetVectorUniform("uDirectionalLightDir", Vector3(0.0f, 0.0f, -1.0f));
-        }
-        if (mSpriteShader->HasUniform("uDirectionalLightColor")) {
-            mSpriteShader->SetVectorUniform("uDirectionalLightColor", Vector3(0.0f, 0.0f, 0.0f));  // No directional
-        }
-        if (mSpriteShader->HasUniform("uAmbientLightColor")) {
-            mSpriteShader->SetVectorUniform("uAmbientLightColor", Vector3(1.0f, 1.0f, 1.0f));  // Full brightness
-        }
+    if (!atlas) {
+        std::cerr << "DrawSprite: sprite has no atlas!" << std::endl;
+        return;
     }
     
-    // Bind texture and set atlas uniforms
-    if (textureIndex >= 0 && textureIndex < static_cast<int>(mTextures.size())) {
-
-        mTextures[textureIndex]->Bind(0);
-        if (mSpriteShader->HasUniform("uTextureAtlas")) {
-            mSpriteShader->SetIntegerUniform("uTextureAtlas", 0);
-        }
-        if (mSpriteShader->HasUniform("uAtlasColumns")) {
-            mSpriteShader->SetIntegerUniform("uAtlasColumns", atlasColumns);
-        }
-        if (mSpriteShader->HasUniform("uAtlasTileSize")) {
-            mSpriteShader->SetVectorUniform("uAtlasTileSize", Vector2(atlasTileSizeX, atlasTileSizeY));
-        }
+    if (texIndex < 0 || texIndex >= static_cast<int>(mTextures.size())) {
+        std::cerr << "DrawSprite: invalid texture index " << texIndex << " (size=" << mTextures.size() << ")" << std::endl;
+        return;
     }
     
-    // Set the tile index as a uniform for the sprite shader
-    // This overrides the per-vertex texture index
-    if (mSpriteShader->HasUniform("uTileIndex")) {
-        mSpriteShader->SetIntegerUniform("uTileIndex", tileIndex);
-    }
-
-    mSpriteShader->SetIntegerUniform("uIsSprite", 1); // Indicate this is a sprite
+    mTextures[texIndex]->Bind(0);
+    mSpriteShader->SetIntegerUniform("uTextureAtlas", 0);
+    mSpriteShader->SetVectorUniform("uAtlasTileSize", Vector2(atlas->GetUVTileSizeX(), atlas->GetUVTileSizeY()));
     
-    // Set the tile UV offset if provided (for non-grid-based atlases)
-    if (mSpriteShader->HasUniform("uTileOffset")) {
-        mSpriteShader->SetVectorUniform("uTileOffset", Vector2(tileOffsetX, tileOffsetY));
-    }
+    // Get the current tile index (handles animation)
+    int tileIndex = sprite.GetCurrentTileIndex();
+    
+    // Get actual UV offset from atlas
+    float offsetX = 0.0f, offsetY = 0.0f;
+    atlas->GetTileUVOffset(tileIndex, offsetX, offsetY);
+    mSpriteShader->SetVectorUniform("uTileOffset", Vector2(offsetX, offsetY));
     
     mSpriteQuad->SetActive();
-    glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    
+    if (mode == RendererMode::LINES) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    } else if (mode == RendererMode::TRIANGLES) {
+        glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    }
 }
 
 void Renderer::CreateSpriteQuad()
@@ -514,4 +468,37 @@ void Renderer::CreateSpriteQuad()
     
     mSpriteQuad = new Mesh();
     mSpriteQuad->Build({vertices, triangles});
+}
+
+void Renderer::ActivateMeshShader()
+{
+    if (!mMeshShader) {
+        std::cerr << "Mesh shader not loaded" << std::endl;
+        return;
+    }
+    
+    // Activate mesh shader program
+    mMeshShader->SetActive();
+    
+    // Set frame-level uniforms (uniforms that don't change per mesh)
+    Vector3 lightdir = Vector3(1.0f, -1.0f, 1.0f);
+    lightdir.Normalize();
+    mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
+    mMeshShader->SetVectorUniform("uDirectionalLightColor", Vector3(1.0f, 1.0f, 1.0f));
+    mMeshShader->SetVectorUniform("uAmbientLightColor", Vector3(0.2f, 0.2f, 0.2f));
+}
+
+void Renderer::ActivateSpriteShader()
+{
+    if (!mSpriteShader) {
+        std::cerr << "Sprite shader not loaded" << std::endl;
+        return;
+    }
+    
+    // Activate sprite shader program
+    mSpriteShader->SetActive();
+    
+    // Set frame-level uniforms (uniforms that don't change per sprite)
+    // For sprites, lighting is typically simpler
+    // These can be configured based on your needs
 }

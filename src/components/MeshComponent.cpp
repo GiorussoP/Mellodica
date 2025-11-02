@@ -22,26 +22,7 @@ MeshComponent::~MeshComponent()
 
 void MeshComponent::Draw(Renderer* renderer)
 {
-    if (!mIsVisible) {
-        return;
-    }
-    
-    // Get actor's transform
-    Vector3 position = mOwner->GetPosition();
-    float scale = mOwner->GetScale();
-    float rotation = mOwner->GetRotation();
-    
-    // Convert rotation to quaternion (rotation around Y-axis for 3D)
-    Quaternion quat(Vector3::UnitY, rotation);
-    
-    // Draw the mesh using atlas parameters
-    // The per-triangle texture indices are already baked into the mesh vertex data
-    // but can be remapped using the mTextureIndexRemap array
-    renderer->DrawMesh(
-        *this,
-        position,
-        Vector3(scale, scale, scale),
-        quat,
-        RendererMode::TRIANGLES
-    );
+    // Draw method is now handled directly in Game.cpp
+    // This method can be left empty or removed entirely
+    (void)renderer;
 }
