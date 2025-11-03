@@ -7,10 +7,9 @@ DrawComponent::DrawComponent(Actor* owner)
 , mIsVisible(true)
 , mColor(Vector3(1.0f, 1.0f, 1.0f))
 {
-    mOwner->GetGame()->AddDrawable(this);
 }
 
 DrawComponent::~DrawComponent()
 {
-    mOwner->GetGame()->RemoveDrawable(this);
+
 }

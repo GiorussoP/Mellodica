@@ -24,11 +24,6 @@ public:
     void AddAlwaysActive(class Actor* actor);
     void RemoveAlwaysActive(class Actor* actor);
     
-    // Drawable functions
-    void AddDrawable(class DrawComponent* drawable);
-    void RemoveDrawable(class DrawComponent* drawable);
-    std::vector<class DrawComponent*>& GetDrawables() { return mDrawables; }
-    
     // Renderer getter
     class Renderer* GetRenderer() { return mRenderer; }
     
@@ -37,13 +32,13 @@ public:
     
     // Camera functions
     Vector3& GetCameraPos() { return mCameraPos; }
-    void SetCameraPos(Vector3& position);
+    void SetCameraPos(Vector3 position);
 
     Vector3& GetCameraForward() { return mCameraForward; }
-    void SetCameraForward(const Vector3& forward) { mCameraForward = forward; }
+    void SetCameraForward(const Vector3 forward) { mCameraForward = forward; }
     
     Vector3& GetCameraUp() { return mCameraUp; }
-    void SetCameraUp(const Vector3& up) { mCameraUp = up; }
+    void SetCameraUp(const Vector3 up) { mCameraUp = up; }
     
     float GetCameraYaw() const { return mCameraYaw; }
     void SetCameraYaw(float yaw) { mCameraYaw = yaw; }
@@ -66,9 +61,9 @@ private:
     // Always-active actors (updated/processed even when not visible)
     std::unordered_set<class Actor*> mAlwaysActiveActors;
     std::vector<class Actor*> mVisibleActors;
+    std::vector<class MeshComponent*  > mVisibleMeshes;
+    std::vector<class SpriteComponent* > mVisibleSprites;
     
-    // All draw components
-    std::vector<class DrawComponent*> mDrawables;
     
     // SDL window
     SDL_Window* mWindow;
