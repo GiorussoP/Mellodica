@@ -13,6 +13,9 @@ public:
     
     // Process input for this component
     virtual void ProcessInput(const Uint8* keyState);
+
+    // For debugging: draw component-specific info
+    virtual void DebugDraw(class Renderer* renderer) {};
     
     int GetUpdateOrder() const { return mUpdateOrder; }
     class Actor* GetOwner() const { return mOwner; }

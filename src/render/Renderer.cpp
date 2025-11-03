@@ -71,10 +71,10 @@ bool Renderer::Initialize(float width, float height)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Set default projection matrix (orthographic)
-    float orthoSize = 5.0f;  // Size of the orthographic view (half-height)
+    float orthoSize = 4.0f;  // Size of the orthographic view (half-height)
     float aspectRatio = width / height;
     mProjectionMatrix = Matrix4::CreateOrtho(-orthoSize * aspectRatio, orthoSize * aspectRatio,
-                                              -orthoSize, orthoSize, 0.1f, 1000.0f);
+                                              -orthoSize, orthoSize, 0.1f, 100.0f);
     
     std::cout << "Orthographic projection created: size=" << orthoSize 
               << ", width=" << (orthoSize * aspectRatio * 2.0f)
@@ -140,9 +140,8 @@ void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
     Vector3 size = mesh.GetOwner()->GetScale();
     Quaternion rotation = mesh.GetOwner()->GetRotation();
 
-    
-    // Frustum culling - skip drawing if object is outside view frustum
-    if (!mesh.IsVisible() && !IsInFrustum(position, Math::Max(Math::Max(size.x, size.y),size.z) * 0.866f)) {
+    // Visibility is now handled by spatial grid
+    if (!mesh.IsVisible()) {
         return;
     }
     
@@ -194,6 +193,125 @@ void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     } else if (mode == RendererMode::TRIANGLES) {
         glDrawElements(GL_TRIANGLES, mesh.GetMesh().GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    }
+}
+
+void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent*>& meshes, RendererMode mode)
+{
+    if (meshes.empty() || !mMeshShader) {
+        return;
+    }
+    
+    // Group meshes by their mesh pointer and texture atlas
+    struct MeshGroup {
+        Mesh* mesh;
+        TextureAtlas* atlas;
+        int textureIndex;
+        std::vector<MeshComponent*> components;
+    };
+    
+    std::vector<MeshGroup> groups;
+    
+    // Group meshes
+    for (auto* meshComp : meshes) {
+        if (!meshComp->IsVisible()) continue;
+        
+        Mesh* mesh = &meshComp->GetMesh();
+        TextureAtlas* atlas = meshComp->GetTextureAtlas();
+        int texIndex = atlas ? atlas->GetTextureIndex() : -1;
+        
+        // Find or create group
+        bool found = false;
+        for (auto& group : groups) {
+            if (group.mesh == mesh && group.atlas == atlas && group.textureIndex == texIndex) {
+                group.components.push_back(meshComp);
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            groups.push_back({mesh, atlas, texIndex, {meshComp}});
+        }
+    }
+    
+    // Draw each group with instancing
+    for (auto& group : groups) {
+        if (group.components.empty()) continue;
+        
+        // Setup instance buffer if not already done
+        if (group.mesh->GetMaxInstances() == 0) {
+            group.mesh->SetupInstanceBuffer(10000);  // Max 10k instances per mesh type
+        }
+        
+        // Prepare instance data: model matrix (16) + normal matrix (16) + color (3) + tileIndex (1) = 36 floats per instance
+        std::vector<float> instanceData;
+        instanceData.reserve(group.components.size() * 36);
+        
+        for (auto* meshComp : group.components) {
+            Vector3 position = meshComp->GetOwner()->GetPosition();
+            Vector3 size = meshComp->GetOwner()->GetScale();
+            Quaternion rotation = meshComp->GetOwner()->GetRotation();
+            
+            // Model matrix (just transform, not MVP)
+            Matrix4 model = Matrix4::CreateScale(size) *
+                           Matrix4::CreateFromQuaternion(rotation) *
+                           Matrix4::CreateTranslation(position);
+            
+            // Add model matrix (16 floats)
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    instanceData.push_back(model.mat[row][col]);
+                }
+            }
+            
+            // Normal matrix (just rotation)
+            Matrix4 normalMatrix = Matrix4::CreateFromQuaternion(rotation);
+            
+            // Add normal matrix (16 floats)
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    instanceData.push_back(normalMatrix.mat[row][col]);
+                }
+            }
+            
+            // Add color (3 floats)
+            Vector3 color = meshComp->GetColor();
+            instanceData.push_back(color.x);
+            instanceData.push_back(color.y);
+            instanceData.push_back(color.z);
+            
+            // Add tile index (1 float)
+            instanceData.push_back(static_cast<float>(meshComp->GetStartingIndex()));
+        }
+        
+        // Upload instance data
+        group.mesh->UpdateInstanceBuffer(instanceData, group.components.size());
+        
+        // Set view-projection matrix uniform (same for all instances)
+        Matrix4 viewProj = mViewMatrix * mProjectionMatrix;
+        mMeshShader->SetMatrixUniform("uViewProjection", viewProj);
+        
+        // Bind texture atlas
+        if (group.atlas && group.textureIndex >= 0 && group.textureIndex < static_cast<int>(mTextures.size())) {
+            mTextures[group.textureIndex]->Bind(0);
+            mMeshShader->SetIntegerUniform("uTextureAtlas", 0);
+            mMeshShader->SetIntegerUniform("uAtlasColumns", group.atlas->GetColumns());
+            mMeshShader->SetVectorUniform("uAtlasTileSize", 
+                Vector2(group.atlas->GetUVTileSizeX(), group.atlas->GetUVTileSizeY()));
+        }
+        
+        // Activate mesh VAO
+        group.mesh->SetActive();
+        
+        // Draw all instances
+        if (mode == RendererMode::LINES) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawElementsInstanced(GL_TRIANGLES, group.mesh->GetNumIndices(), GL_UNSIGNED_INT, nullptr, group.components.size());
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        } else {
+            glDrawElementsInstanced(GL_TRIANGLES, group.mesh->GetNumIndices(), GL_UNSIGNED_INT, nullptr, group.components.size());
+        }
     }
 }
 
@@ -314,31 +432,6 @@ TextureAtlas* Renderer::LoadAtlas(const std::string& atlasPath)
     return nullptr;
 }
 
-bool Renderer::IsInFrustum(const Vector3 &position, const float radius)
-{
-    // Transform position to view space
-    Vector3 viewPos = Vector3::Transform(position, mViewMatrix, 1.0f);
-    
-    // Extract orthographic frustum bounds from projection matrix
-    // For orthographic projection: CreateOrtho(left, right, bottom, top, near, far)
-    // Projection matrix structure for ortho:
-    // [2/(r-l)    0         0        -(r+l)/(r-l)]
-    // [0        2/(t-b)     0        -(t+b)/(t-b)]
-    // [0          0      -2/(f-n)    -(f+n)/(f-n)]
-    // [0          0         0             1      ]
-    
-    float right = 1.0f / mProjectionMatrix.mat[0][0];
-    float top = 1.0f / mProjectionMatrix.mat[1][1];
-    float far = -(mProjectionMatrix.mat[2][3] - 1.0f) / mProjectionMatrix.mat[2][2];
-    float near = -(mProjectionMatrix.mat[2][3] + 1.0f) / mProjectionMatrix.mat[2][2];
-    
-        // Check if object (with radius) is within orthographic bounds in view space
-    if (viewPos.x + radius < -right || viewPos.x - radius > right) return false;
-    if (viewPos.y + radius < -top || viewPos.y - radius > top) return false;
-    if (viewPos.z + radius < near || viewPos.z - radius > far) return false;
-    
-    return true;
-}
 
 void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
 {
@@ -347,8 +440,8 @@ void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
     Vector3 size = sprite.GetOwner()->GetScale();
     Quaternion rotation = sprite.GetOwner()->GetRotation();
 
-    // Frustum culling - skip drawing if object is outside view frustum
-    if (!sprite.IsVisible() && !IsInFrustum(position, Math::Max(size.x, size.y) * 0.7071f)) {
+    // Visibility is now handled by spatial grid - no need for frustum check
+    if (!sprite.IsVisible()) {
         return;
     }
 
@@ -441,6 +534,165 @@ void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     } else if (mode == RendererMode::TRIANGLES) {
         glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    }
+}
+
+void Renderer::DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites, RendererMode mode)
+{
+    if (sprites.empty() || !mSpriteShader || !mSpriteQuad) {
+        return;
+    }
+    
+    // Group sprites by texture atlas
+    struct SpriteGroup {
+        TextureAtlas* atlas;
+        int textureIndex;
+        std::vector<SpriteComponent*> components;
+    };
+    
+    std::vector<SpriteGroup> groups;
+    
+    // Group sprites by atlas
+    for (auto* spriteComp : sprites) {
+        if (!spriteComp->IsVisible()) continue;
+        
+        TextureAtlas* atlas = spriteComp->GetTextureAtlas();
+        int texIndex = spriteComp->GetTextureIndex();
+        
+        // Find or create group
+        bool found = false;
+        for (auto& group : groups) {
+            if (group.atlas == atlas && group.textureIndex == texIndex) {
+                group.components.push_back(spriteComp);
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            groups.push_back({atlas, texIndex, {spriteComp}});
+        }
+    }
+    
+    // Setup sprite quad instance buffer if not already done
+    if (mSpriteQuad->GetMaxInstances() == 0) {
+        mSpriteQuad->SetupInstanceBuffer(100000);  // Max 100k sprite instances
+    }
+    
+    // Draw each group with instancing
+    for (auto& group : groups) {
+        if (group.components.empty()) continue;
+        
+        // Prepare instance data: model matrix (16) + normal matrix (16) + color (3) + tileIndex (1) = 36 floats per instance
+        std::vector<float> instanceData;
+        instanceData.reserve(group.components.size() * 36);
+        
+        for (auto* spriteComp : group.components) {
+            Vector3 position = spriteComp->GetOwner()->GetPosition();
+            Vector3 size = spriteComp->GetOwner()->GetScale();
+            Quaternion rotation = spriteComp->GetOwner()->GetRotation();
+            
+            // Create initial model matrix
+            Matrix4 model = Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
+                           Matrix4::CreateFromQuaternion(rotation) *
+                           Matrix4::CreateTranslation(position);
+            
+            // Transform to view space
+            Matrix4 modelView = model * mViewMatrix;
+            
+            // Billboard effect: strip rotation from modelView, keep only translation and scale
+            // In our row-major matrix: mat[row][col]
+            // Row 0 is X-axis, Row 1 is Y-axis, Row 2 is Z-axis, Row 3 is homogeneous
+            Matrix4 billboard = Matrix4::Identity;
+            
+            // Row 0: X-axis (scaled, no rotation)
+            billboard.mat[0][0] = size.x;
+            billboard.mat[0][1] = 0.0f;
+            billboard.mat[0][2] = 0.0f;
+            billboard.mat[0][3] = 0.0f;
+            
+            // Row 1: Y-axis (scaled, no rotation)
+            billboard.mat[1][0] = 0.0f;
+            billboard.mat[1][1] = size.y;
+            billboard.mat[1][2] = 0.0f;
+            billboard.mat[1][3] = 0.0f;
+            
+            // Row 2: Z-axis (no rotation)
+            billboard.mat[2][0] = 0.0f;
+            billboard.mat[2][1] = 0.0f;
+            billboard.mat[2][2] = 1.0f;
+            billboard.mat[2][3] = 0.0f;
+            
+            // Row 3: Translation (from view-transformed position)
+            billboard.mat[3][0] = modelView.mat[3][0];
+            billboard.mat[3][1] = modelView.mat[3][1];
+            billboard.mat[3][2] = modelView.mat[3][2];
+            billboard.mat[3][3] = 1.0f;
+            
+            // Add billboard modelView matrix (16 floats)
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    instanceData.push_back(billboard.mat[row][col]);
+                }
+            }
+            
+            // Normal matrix for sprites (camera-facing)
+            Matrix4 normalMatrix = Matrix4::Identity;
+            normalMatrix.mat[0][0] = mViewMatrix.mat[0][0];
+            normalMatrix.mat[0][1] = mViewMatrix.mat[1][0];
+            normalMatrix.mat[0][2] = mViewMatrix.mat[2][0];
+            
+            normalMatrix.mat[1][0] = mViewMatrix.mat[0][1];
+            normalMatrix.mat[1][1] = mViewMatrix.mat[1][1];
+            normalMatrix.mat[1][2] = mViewMatrix.mat[2][1];
+            
+            normalMatrix.mat[2][0] = mViewMatrix.mat[0][2];
+            normalMatrix.mat[2][1] = mViewMatrix.mat[1][2];
+            normalMatrix.mat[2][2] = mViewMatrix.mat[2][2];
+            
+            // Add normal matrix (16 floats)
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    instanceData.push_back(normalMatrix.mat[row][col]);
+                }
+            }
+            
+            // Add color (3 floats)
+            Vector3 color = spriteComp->GetColor();
+            instanceData.push_back(color.x);
+            instanceData.push_back(color.y);
+            instanceData.push_back(color.z);
+            
+            // Add current tile index (handles animation) (1 float)
+            instanceData.push_back(static_cast<float>(spriteComp->GetCurrentTileIndex()));
+        }
+        
+        // Upload instance data
+        mSpriteQuad->UpdateInstanceBuffer(instanceData, group.components.size());
+        
+        // Set view-projection (just projection since billboard is already in view space)
+        mSpriteShader->SetMatrixUniform("uViewProjection", mProjectionMatrix);
+        
+        // Bind texture atlas
+        if (group.atlas && group.textureIndex >= 0 && group.textureIndex < static_cast<int>(mTextures.size())) {
+            mTextures[group.textureIndex]->Bind(0);
+            mSpriteShader->SetIntegerUniform("uTextureAtlas", 0);
+            mSpriteShader->SetIntegerUniform("uAtlasColumns", group.atlas->GetColumns());
+            mSpriteShader->SetVectorUniform("uAtlasTileSize", 
+                Vector2(group.atlas->GetUVTileSizeX(), group.atlas->GetUVTileSizeY()));
+        }
+        
+        // Activate sprite quad VAO
+        mSpriteQuad->SetActive();
+        
+        // Draw all sprite instances
+        if (mode == RendererMode::LINES) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawElementsInstanced(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr, group.components.size());
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        } else {
+            glDrawElementsInstanced(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr, group.components.size());
+        }
     }
 }
 

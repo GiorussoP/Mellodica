@@ -54,7 +54,23 @@ bool TextureAtlas::Load(const std::string& jsonPath)
         return false;
     }
     
-    int tileIndex = 0;
+    // First pass: determine tile size and calculate columns/rows
+    int firstTileWidth = 0;
+    int firstTileHeight = 0;
+    
+    if (atlasData["frames"].size() > 0) {
+        firstTileWidth = atlasData["frames"][0]["frame"]["w"];
+        firstTileHeight = atlasData["frames"][0]["frame"]["h"];
+        mTileWidth = firstTileWidth;
+        mTileHeight = firstTileHeight;
+        
+        if (mTileWidth > 0 && mTileHeight > 0) {
+            mColumns = mAtlasWidth / mTileWidth;
+            mRows = mAtlasHeight / mTileHeight;
+        }
+    }
+    
+    int jsonIndex = 0;
     for (const auto& frame : atlasData["frames"]) {
         AtlasTile tile;
         tile.name = frame["filename"];
@@ -62,26 +78,25 @@ bool TextureAtlas::Load(const std::string& jsonPath)
         tile.y = frame["frame"]["y"];
         tile.width = frame["frame"]["w"];
         tile.height = frame["frame"]["h"];
-        tile.tileIndex = tileIndex;
+        
+        // Calculate the grid-based tile index from pixel position
+        // This matches the shader's grid calculation: tileX = index % columns, tileY = index / columns
+        int gridX = tile.x / mTileWidth;
+        int gridY = tile.y / mTileHeight;
+        int gridIndex = gridY * mColumns + gridX;
+        
+        tile.tileIndex = gridIndex;
 
         // Debug print
-        std::cout << "Atlas tile: index=" << tileIndex << ", name='" << tile.name << "'" << std::endl;
-
-        // Assume uniform tile sizes (use first tile as reference)
-        if (tileIndex == 0) {
-            mTileWidth = tile.width;
-            mTileHeight = tile.height;
-        }
+        std::cout << "Atlas tile: json_index=" << jsonIndex 
+                  << ", grid_index=" << gridIndex 
+                  << ", pos=(" << tile.x << "," << tile.y << ")"
+                  << ", grid=(" << gridX << "," << gridY << ")"
+                  << ", name='" << tile.name << "'" << std::endl;
 
         mTiles[tile.name] = tile;
         mTileList.push_back(tile);
-        tileIndex++;
-    }
-    
-    // Calculate columns and rows
-    if (mTileWidth > 0 && mTileHeight > 0) {
-        mColumns = mAtlasWidth / mTileWidth;
-        mRows = mAtlasHeight / mTileHeight;
+        jsonIndex++;
     }
     
     std::cout << "Loaded texture atlas: " << mTileList.size() << " tiles, "

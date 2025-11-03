@@ -7,6 +7,7 @@
 #include "render/Mesh.hpp"
 #include "render/TextureAtlas.hpp"
 #include "actors/GameActors.hpp"
+#include "ChunkGrid.hpp"
 #include <GL/glew.h>
 #include <iostream>
 #include <algorithm>
@@ -21,13 +22,15 @@ Game::Game()
 , mWindow(nullptr)
 , mGLContext(nullptr)
 , mRenderer(nullptr)
-, mCameraPos(0.0f, 3.0f, 10.0f)
+, mChunkGrid(nullptr)
+, mCameraPos(0.0f, 5.0f, 20.0f)  // Higher and further back to see the grid center
 , mCameraForward(0.0f, 0.0f, -1.0f)  // Looking toward negative Z
 , mCameraUp(0.0f, 1.0f, 0.0f)
 , mCameraYaw(0.0f)
-, mCameraPitch(-15.0f)  // Looking down 15 degrees
+, mCameraPitch(-45.0f)  // Looking down more to see the grid
 , mTicksCount(0)
 , mIsRunning(true)
+, mIsDebugging(false)
 {
     // Update forward vector based on pitch
     float pitchRad = Math::ToRadians(mCameraPitch);
@@ -100,6 +103,9 @@ bool Game::Initialize()
     
     mTicksCount = SDL_GetTicks();
     
+    // Create Chunk grid
+    mChunkGrid = new ChunkGrid(Vector3(-100.0f, -10.0f, -1000.0f), Vector3(100.0f, 10.0f, 1000.0f), 10.0f);
+    
     // Initialize game actors
     InitializeActors();
     
@@ -113,13 +119,19 @@ void Game::InitializeActors()
     // Create camera controller
     new CameraController(this);
     
+    std::cout << "Starting actor creation..." << std::endl;
+    
     // Create a grid of cube actors (alternating grass, rock, and red cubes)
-    const int gridSize = 3;
-    const float spacing = 2.5f;
+    const int gridSize = 300;
+    const float spacing = 1.0f;
     const float gridOffset = (gridSize - 1) * spacing * 0.5f;
     
+    int actorCount = 0;
     for (int x = 0; x < gridSize; x++)
     {
+        if (x % 50 == 0) {
+            std::cout << "Creating actors row " << x << "/" << gridSize << "..." << std::endl;
+        }
         for (int z = 0; z < gridSize; z++)
         {
             // Alternate between grass, rock, and red cubes
@@ -150,58 +162,112 @@ void Game::InitializeActors()
             
             sprite->SetPosition(Vector3(cubePos.x, cubePos.y + 1.0f, cubePos.z));
             // Sprite defaults to scale 1.0, making it 1x1 unit (same as cube)
+            
+            actorCount += 2;
         }
     }
     
-    std::cout << "Initialized " << gridSize * gridSize << " cube actors and " << gridSize * gridSize << " sprite actors" << std::endl;
+    std::cout << "Initialized " << actorCount / 2 << " cube actors and " << actorCount / 2 << " sprite actors" << std::endl;
+    std::cout << "Total actors in grid: " << (mChunkGrid ? mChunkGrid->GetTotalActorCount() : 0) << std::endl;
 }
 
 void Game::RunLoop()
 {
     while (mIsRunning)
     {
+        // Calculate actual elapsed time since last frame
+        Uint32 currentTicks = SDL_GetTicks();
+        float deltaTime = (currentTicks - mTicksCount) / 1000.0f;
+        mTicksCount = currentTicks;
+        
+        // Cap deltaTime to prevent huge jumps (max 0.25 seconds)
+        if (deltaTime > 0.05f)
+        {
+            deltaTime = 0.05f;
+        }
+        
+        // Update game with actual deltaTime
         ProcessInput();
-        UpdateGame(1.0f / static_cast<float>(FPS));  // Fixed timestep
+        UpdateGame(deltaTime);
         GenerateOutput();
         
-        // Frame rate limiting
-        Uint32 frameTime = SDL_GetTicks() - mTicksCount;
+        // Frame rate limiting - delay to maintain 60 FPS
+        Uint32 frameTime = SDL_GetTicks() - currentTicks;
         if (frameTime < FRAME_TIME)
         {
             SDL_Delay(FRAME_TIME - frameTime);
         }
-        mTicksCount = SDL_GetTicks();
     }
 }
 
 void Game::Shutdown()
 {
-    // Delete actors (which will delete their components)
-    while (!mActors.empty())
+    std::cout << "Shutdown: Starting cleanup..." << std::endl;
+    
+    // Close the window immediately so user sees it close
+    if (mWindow)
     {
-        delete mActors.back();
+        std::cout << "Shutdown: Closing window..." << std::endl;
+        SDL_DestroyWindow(mWindow);
+        mWindow = nullptr;
+        std::cout << "Shutdown: Window closed" << std::endl;
     }
+    
+    // Now do the cleanup in the background
+    
+    // Clear always-active set first (actors will try to unregister during deletion)
+    mAlwaysActiveActors.clear();
+    
+    // Delete Chunk grid first
+    if (mChunkGrid)
+    {
+        std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
+        delete mChunkGrid;
+        mChunkGrid = nullptr;
+        std::cout << "Shutdown: Chunk grid deleted" << std::endl;
+    }
+    
+    std::cout << "Shutdown: Deleting " << mActors.size() << " actors..." << std::endl;
+    Uint32 startTime = SDL_GetTicks();
+    
+    // Fast mass deletion - delete in batches
+    size_t total = mActors.size();
+    size_t deleted = 0;
+    
+    for (size_t i = 0; i < total; ++i)
+    {
+        delete mActors[i];
+        deleted++;
+        
+        if (deleted % 20000 == 0) {
+            Uint32 elapsed = SDL_GetTicks() - startTime;
+            std::cout << "Deleted " << deleted << "/" << total << " actors in " << elapsed << "ms..." << std::endl;
+        }
+    }
+    
+    Uint32 totalTime = SDL_GetTicks() - startTime;
+    mActors.clear();
+    std::cout << "Shutdown: All actors deleted in " << totalTime << "ms" << std::endl;
     
     if (mRenderer)
     {
+        std::cout << "Shutdown: Shutting down renderer..." << std::endl;
         mRenderer->Shutdown();
         delete mRenderer;
         mRenderer = nullptr;
+        std::cout << "Shutdown: Renderer deleted" << std::endl;
     }
     
     if (mGLContext)
     {
+        std::cout << "Shutdown: Deleting GL context..." << std::endl;
         SDL_GL_DeleteContext(mGLContext);
         mGLContext = nullptr;
     }
     
-    if (mWindow)
-    {
-        SDL_DestroyWindow(mWindow);
-        mWindow = nullptr;
-    }
-    
+    std::cout << "Shutdown: Quitting SDL..." << std::endl;
     SDL_Quit();
+    std::cout << "Shutdown: Complete!" << std::endl;
 }
 
 void Game::AddActor(Actor* actor)
@@ -213,11 +279,29 @@ void Game::AddActor(Actor* actor)
     else
     {
         mActors.emplace_back(actor);
+        // Chunk grid registration happens automatically in Actor constructor
     }
 }
 
 void Game::RemoveActor(Actor* actor)
 {
+    // During mass deletion (shutdown with mChunkGrid == nullptr), 
+    // skip all operations for performance
+    if (!mChunkGrid && mActors.size() > 10000)
+    {
+        // Fast path during shutdown
+        return;
+    }
+    
+    // Normal removal: unregister from Chunk grid
+    if (mChunkGrid)
+    {
+        mChunkGrid->UnregisterActor(actor);
+    }
+    
+    // Remove from always-active if present
+    mAlwaysActiveActors.erase(actor);
+    
     // Check pending actors
     auto iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
     if (iter != mPendingActors.end())
@@ -234,6 +318,16 @@ void Game::RemoveActor(Actor* actor)
         std::iter_swap(iter, mActors.end() - 1);
         mActors.pop_back();
     }
+}
+
+void Game::AddAlwaysActive(Actor* actor)
+{
+    mAlwaysActiveActors.insert(actor);
+}
+
+void Game::RemoveAlwaysActive(Actor* actor)
+{
+    mAlwaysActiveActors.erase(actor);
 }
 
 void Game::AddDrawable(DrawComponent* drawable)
@@ -288,18 +382,66 @@ void Game::ProcessInput()
     // Get keyboard state for continuous input
     const Uint8* keyState = SDL_GetKeyboardState(nullptr);
     
-    // Process input for all actors
-    for (auto actor : mActors)
+    // Always process always-active actors first (like camera controller)
+    for (auto actor : mAlwaysActiveActors)
     {
         actor->ProcessInput(keyState);
+    }
+    
+    // Only process input for visible actors (skip if already processed as always-active)
+    if (mChunkGrid)
+    {
+        auto visibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
+        for (auto actor : visibleActors)
+        {
+            // Skip if this actor is always-active (already processed above)
+            if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
+            {
+                continue;
+            }
+            actor->ProcessInput(keyState);
+        }
+    }
+    else
+    {
+        // Fallback: process all actors
+        for (auto actor : mActors)
+        {
+            actor->ProcessInput(keyState);
+        }
     }
 }
 
 void Game::UpdateActors(float deltaTime)
 {
-    mUpdatingActors = true;
-    for (auto actor : mActors)
+    // Get only visible actors (camera cell + 8 adjacent cells)
+    std::vector<Actor*> visibleActors;
+    if (mChunkGrid)
     {
+        visibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
+    }
+    else
+    {
+        // Fallback: update all actors
+        visibleActors = mActors;
+    }
+    
+    mUpdatingActors = true;
+    
+    // Always update always-active actors first (like camera controller)
+    for (auto actor : mAlwaysActiveActors)
+    {
+        actor->Update(deltaTime);
+    }
+    
+    // Only update visible actors (skip if already updated as always-active)
+    for (auto actor : visibleActors)
+    {
+        // Skip if this actor is always-active (already updated above)
+        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
+        {
+            continue;
+        }
         actor->Update(deltaTime);
     }
     mUpdatingActors = false;
@@ -308,6 +450,7 @@ void Game::UpdateActors(float deltaTime)
     for (auto pending : mPendingActors)
     {
         mActors.emplace_back(pending);
+        // Chunk grid registration happens automatically when actor is created
     }
     mPendingActors.clear();
     
@@ -335,6 +478,10 @@ void Game::UpdateGame(float deltaTime)
 
 void Game::GenerateOutput()
 {
+    static Uint32 lastTime = SDL_GetTicks();
+    static int frameCount = 0;
+    Uint32 startFrame = SDL_GetTicks();
+    
     mRenderer->Clear();
     
     // Update camera
@@ -342,32 +489,103 @@ void Game::GenerateOutput()
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
     mRenderer->SetCameraPosition(mCameraPos);
     
-
-
-    RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
-    // Render meshes in batch
-    mRenderer->ActivateMeshShader();
-    for (auto drawable : mDrawables)
+    Uint32 afterCameraSetup = SDL_GetTicks();
+    
+    // Get visible actors from Chunk grid (camera cell + 8 adjacent)
+    std::vector<Actor*> visibleActors;
+    
+    if (mChunkGrid)
     {
-        // Check if it's a MeshComponent (not a SpriteComponent)
-        MeshComponent* meshComp = dynamic_cast<MeshComponent*>(drawable);
-        if (meshComp)
-        {
-            mRenderer->DrawMesh(*meshComp, mode);
+        visibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
+        
+        frameCount++;
+        if (frameCount % 60 == 0) {  // Debug every 60 frames
+            Uint32 currentTime = SDL_GetTicks();
+            float fps = 60000.0f / (currentTime - lastTime);
+            lastTime = currentTime;
+            
+            std::cout << "=== Performance Stats ===" << std::endl;
+            std::cout << "FPS: " << fps << std::endl;
+            std::cout << "Camera pos: (" << mCameraPos.x << ", " << mCameraPos.y << ", " << mCameraPos.z << ")" << std::endl;
+            std::cout << "Total actors in grid: " << mChunkGrid->GetTotalActorCount() << std::endl;
+            std::cout << "Visible actors: " << visibleActors.size() << std::endl;
+            std::cout << "Total drawables: " << mDrawables.size() << std::endl;
         }
     }
     
-    // Render sprites in batch
-    mRenderer->ActivateSpriteShader();
-    for (auto drawable : mDrawables)
+    Uint32 afterChunkQuery = SDL_GetTicks();
+    
+    // Collect visible drawables directly from visible actors (much faster!)
+    std::vector<MeshComponent*> visibleMeshes;
+    std::vector<SpriteComponent*> visibleSprites;
+    
+    // First, collect from always-active actors
+    for (auto actor : mAlwaysActiveActors)
     {
-        // Check if it's a SpriteComponent
-        SpriteComponent* spriteComp = dynamic_cast<SpriteComponent*>(drawable);
-        if (spriteComp && spriteComp->IsVisible())
+        auto& components = actor->GetComponents();
+        for (auto component : components)
         {
-            mRenderer->DrawSprite(*spriteComp, mode);
+            if (auto mesh = dynamic_cast<MeshComponent*>(component))
+            {
+                if (mesh->IsVisible())
+                {
+                    visibleMeshes.push_back(mesh);
+                }
+            }
+            else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
+            {
+                if (sprite->IsVisible())
+                {
+                    visibleSprites.push_back(sprite);
+                }
+            }
         }
     }
+    
+    // Then, collect from Chunkly visible actors
+    for (auto actor : visibleActors)
+    {
+        // Get all drawable components from this actor
+        auto& components = actor->GetComponents();
+        for (auto component : components)
+        {
+            // Quick type check without virtual call
+            if (auto mesh = dynamic_cast<MeshComponent*>(component))
+            {
+                if (mesh->IsVisible())
+                {
+                    visibleMeshes.push_back(mesh);
+                }
+            }
+            else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
+            {
+                if (sprite->IsVisible())
+                {
+                    visibleSprites.push_back(sprite);
+                }
+            }
+        }
+    }
+    
+    Uint32 afterCollect = SDL_GetTicks();
+    
+    if (frameCount % 60 == 0 && mChunkGrid) {
+        std::cout << "Visible meshes: " << visibleMeshes.size() << std::endl;
+        std::cout << "Visible sprites: " << visibleSprites.size() << std::endl;
+        std::cout << "Time - Camera: " << (afterCameraSetup - startFrame) 
+                  << "ms, Chunk: " << (afterChunkQuery - afterCameraSetup)
+                  << "ms, Collect: " << (afterCollect - afterChunkQuery) << "ms" << std::endl;
+    }
+
+    RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
+    
+    // Render meshes with instancing (batch draw)
+    mRenderer->ActivateMeshShader();
+    mRenderer->DrawMeshesInstanced(visibleMeshes, mode);
+    
+    // Render sprites with instancing (batch draw)
+    mRenderer->ActivateSpriteShader();
+    mRenderer->DrawSpritesInstanced(visibleSprites, mode);
     
     SDL_GL_SwapWindow(mWindow);
 }

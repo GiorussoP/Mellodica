@@ -4,8 +4,9 @@
 in vec3 fragNormal;
 in vec2 fragTexCoord;
 flat in float fragTexIndex;         // Per vertex texturing
+in vec3 fragColor;                  // Per instance color
+flat in float fragTileIndex;        // Per instance tile index
 
-uniform vec3 uColor;                    // Object color
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 
@@ -13,14 +14,13 @@ uniform vec3 uAmbientLightColor;        // Ambient light color
 uniform sampler2D uTextureAtlas;
 uniform vec2 uAtlasTileSize;
 uniform int uAtlasColumns;
-uniform int uTileIndex;  // Starting index
 
 out vec4 outColor;
 
 void main()
 {   
-    // Calculate tile index from starting index and per-vertex texture index
-    int tileIndex = uTileIndex + int(fragTexIndex);
+    // Calculate tile index from instance tile index and per-vertex texture index
+    int tileIndex = int(fragTileIndex) + int(fragTexIndex);
     
     // Calculate tile position in the atlas
     int tileX = tileIndex % uAtlasColumns;
@@ -42,7 +42,7 @@ void main()
         discard;
     }
 
-    vec3 baseColor = texColor.rgb;
+    vec3 baseColor = texColor.rgb * fragColor;
     
     // Flat shading: check if face is pointing toward light
     // TODO: Add lighting calculations here if needed

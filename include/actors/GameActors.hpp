@@ -15,6 +15,18 @@ class CameraController : public Actor
 public:
     CameraController(Game* game);
     void OnProcessInput(const Uint8* keyState) override;
+    void OnUpdate(float deltaTime) override;
+    
+private:
+    // Store input state to apply in Update with deltaTime
+    bool mMoveForward;
+    bool mMoveBackward;
+    bool mMoveLeft;
+    bool mMoveRight;
+    bool mRotateLeft;
+    bool mRotateRight;
+    bool mRotateUp;
+    bool mRotateDown;
 };
 
 // Simple cube actor with MeshComponent

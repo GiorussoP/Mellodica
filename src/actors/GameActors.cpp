@@ -9,10 +9,33 @@
 // CameraController implementation
 CameraController::CameraController(Game* game)
 : Actor(game)
+, mMoveForward(false)
+, mMoveBackward(false)
+, mMoveLeft(false)
+, mMoveRight(false)
+, mRotateLeft(false)
+, mRotateRight(false)
+, mRotateUp(false)
+, mRotateDown(false)
 {
+    // Register as always-active so camera works even when far from origin
+    game->AddAlwaysActive(this);
 }
 
 void CameraController::OnProcessInput(const Uint8* keyState)
+{
+    // Just store the input state - movement will happen in OnUpdate with proper deltaTime
+    mMoveForward = keyState[SDL_SCANCODE_W];
+    mMoveBackward = keyState[SDL_SCANCODE_S];
+    mMoveLeft = keyState[SDL_SCANCODE_A];
+    mMoveRight = keyState[SDL_SCANCODE_D];
+    mRotateLeft = keyState[SDL_SCANCODE_LEFT];
+    mRotateRight = keyState[SDL_SCANCODE_RIGHT];
+    mRotateUp = keyState[SDL_SCANCODE_UP];
+    mRotateDown = keyState[SDL_SCANCODE_DOWN];
+}
+
+void CameraController::OnUpdate(float deltaTime)
 {
     Game* game = GetGame();
     Vector3 cameraPos = game->GetCameraPos();
@@ -21,45 +44,53 @@ void CameraController::OnProcessInput(const Uint8* keyState)
     float yaw = game->GetCameraYaw();
     float pitch = game->GetCameraPitch();
     
-    // Movement (WASD)
-    if (keyState[SDL_SCANCODE_W])
-    {
-        cameraPos += cameraForward * CAMERA_MOVE_SPEED * (1.0f / 60.0f);
-    }
-    if (keyState[SDL_SCANCODE_S])
-    {
-        cameraPos -= cameraForward * CAMERA_MOVE_SPEED * (1.0f / 60.0f);
-    }
-    if (keyState[SDL_SCANCODE_A])
-    {
-        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
-        right.Normalize();
-        cameraPos += right * CAMERA_MOVE_SPEED * (1.0f / 60.0f);
-    }
-    if (keyState[SDL_SCANCODE_D])
-    {
-        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
-        right.Normalize();
-        cameraPos -= right * CAMERA_MOVE_SPEED * (1.0f / 60.0f);
+    // Debug: log position and deltaTime
+    static int debugCounter = 0;
+    debugCounter++;
+    if (debugCounter % 60 == 0) {
+        std::cout << "Camera at (" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z 
+                  << ") - deltaTime: " << deltaTime << std::endl;
     }
     
-    // Rotation (Arrow keys)
-    if (keyState[SDL_SCANCODE_LEFT])
+    // Movement (WASD) - now using actual deltaTime!
+    if (mMoveForward)
     {
-        yaw += CAMERA_ROTATE_SPEED * (1.0f / 60.0f);
+        cameraPos += cameraForward * CAMERA_MOVE_SPEED * deltaTime;
     }
-    if (keyState[SDL_SCANCODE_RIGHT])
+    if (mMoveBackward)
     {
-        yaw -= CAMERA_ROTATE_SPEED * (1.0f / 60.0f);
+        cameraPos -= cameraForward * CAMERA_MOVE_SPEED * deltaTime;
     }
-    if (keyState[SDL_SCANCODE_UP])
+    if (mMoveLeft)
     {
-        pitch += CAMERA_ROTATE_SPEED * (1.0f / 60.0f);
+        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
+        right.Normalize();
+        cameraPos += right * CAMERA_MOVE_SPEED * deltaTime;
+    }
+    if (mMoveRight)
+    {
+        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
+        right.Normalize();
+        cameraPos -= right * CAMERA_MOVE_SPEED * deltaTime;
+    }
+    
+    // Rotation (Arrow keys) - now using actual deltaTime!
+    if (mRotateLeft)
+    {
+        yaw += CAMERA_ROTATE_SPEED * deltaTime;
+    }
+    if (mRotateRight)
+    {
+        yaw -= CAMERA_ROTATE_SPEED * deltaTime;
+    }
+    if (mRotateUp)
+    {
+        pitch += CAMERA_ROTATE_SPEED * deltaTime;
         if (pitch > 89.0f) pitch = 89.0f;
     }
-    if (keyState[SDL_SCANCODE_DOWN])
+    if (mRotateDown)
     {
-        pitch -= CAMERA_ROTATE_SPEED * (1.0f / 60.0f);
+        pitch -= CAMERA_ROTATE_SPEED * deltaTime;
         if (pitch < -89.0f) pitch = -89.0f;
     }
     
@@ -141,10 +172,8 @@ SpriteActor::SpriteActor(Game* game)
     mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
     
     // Setup running animation using atlas tile indices for Run1, Run2, Run3
-    std::vector<int> runAnimFrames = {
-        3,4,5
-    };
-    mSpriteComponent->AddAnimation("run", runAnimFrames);
+
+    mSpriteComponent->AddAnimation("run",{"Run1.png","Run2.png","Run3.png"});
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(8.0f);
 }
@@ -169,8 +198,8 @@ GoombaActor::GoombaActor(Game* game)
     // Create sprite component with atlas
     mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
 
-    // Setup running animation with frames 1, 2 (Run1, Run2)
-    mSpriteComponent->AddAnimation("run", {1, 2});
+    // Setup running animation with Walk0 and Walk1 frames
+    mSpriteComponent->AddAnimation("run", {"Walk0.png", "Walk1.png"});
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(2.0f);
 }

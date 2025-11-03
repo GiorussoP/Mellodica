@@ -12,14 +12,13 @@ public:
     
     ~SpriteComponent() override;
     
-    void Draw(class Renderer* renderer) override;
     void Update(float deltaTime) override;
     
     // Animation controls
     void SetAnimFPS(float fps) { mAnimFPS = fps; }
     void SetAnimation(const std::string& name);
     void SetIsPaused(bool pause) { mIsPaused = pause; }
-    void AddAnimation(const std::string& name, const std::vector<int>& tileIndices);
+    void AddAnimation(const std::string& name, const std::vector<std::string>& frameNames);
     
     // Tile/texture index (for non-animated sprites, set the tile to display)
     void SetTileIndex(int index) { mTextureIndex = index; }

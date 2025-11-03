@@ -38,12 +38,6 @@ bool SpriteComponent::LoadSpriteSheetData(const std::string& dataPath)
     return true;
 }
 
-void SpriteComponent::Draw(Renderer* renderer)
-{
-    // Draw method is now handled directly in Game.cpp
-    // This method can be left empty or removed entirely
-    (void)renderer;
-}
 
 void SpriteComponent::Update(float deltaTime)
 {
@@ -68,8 +62,26 @@ void SpriteComponent::SetAnimation(const std::string& name)
     }
 }
 
-void SpriteComponent::AddAnimation(const std::string& name, const std::vector<int>& tileIndices)
+void SpriteComponent::AddAnimation(const std::string& name, const std::vector<std::string>& frameNames)
 {
+    if (!mTextureAtlas) {
+        std::cerr << "Cannot add animation '" << name << "': no texture atlas set" << std::endl;
+        return;
+    }
+    
+    // Convert frame names to tile indices using the atlas
+    std::vector<int> tileIndices;
+    tileIndices.reserve(frameNames.size());
+    
+    for (const auto& frameName : frameNames) {
+        int tileIndex = mTextureAtlas->GetTileIndex(frameName);
+        if (tileIndex < 0) {
+            std::cerr << "Warning: Frame '" << frameName << "' not found in atlas for animation '" << name << "'" << std::endl;
+            tileIndex = 0;  // Fallback to first tile
+        }
+        tileIndices.push_back(tileIndex);
+    }
+    
     mAnimations.emplace(name, tileIndices);
 }
 

@@ -36,11 +36,17 @@ public:
     // Atlas management
     TextureAtlas* LoadAtlas(const std::string& atlasPath);
 
-    // Drawing with texture atlas
+    // Drawing with texture atlas (legacy - single mesh)
     void DrawMesh(MeshComponent& mesh, RendererMode mode);
     
-    // Drawing sprites
+    // Instanced drawing - draw multiple instances of the same mesh
+    void DrawMeshesInstanced(const std::vector<MeshComponent*>& meshes, RendererMode mode);
+    
+    // Drawing sprites (legacy - single sprite)
     void DrawSprite(SpriteComponent& sprite, RendererMode mode);
+    
+    // Instanced sprite drawing - draw multiple sprites
+    void DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites, RendererMode mode);
 
     // Batch rendering - set frame-level uniforms once before drawing multiple objects
     void ActivateMeshShader();
@@ -58,7 +64,6 @@ public:
 
 private:
 	bool LoadShaders();
-    bool IsInFrustum(const Vector3 &position, const float radius);
     void CreateSpriteQuad();  // Create a simple quad for sprite rendering
 
 	// Projection and view matrices

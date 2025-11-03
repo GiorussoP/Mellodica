@@ -4,23 +4,36 @@
 in vec3 fragNormal;
 in vec2 fragTexCoord;
 flat in float fragTexIndex;         // Per vertex texturing
+in vec3 fragColor;                  // Per instance color
+flat in float fragTileIndex;        // Per instance tile index (used as direct tile index for sprites)
 
-uniform vec3 uColor;                    // Object color
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 
 // Texture atlas uniforms
 uniform sampler2D uTextureAtlas;
 uniform vec2 uAtlasTileSize;
-uniform vec2 uTileOffset;  // Actual UV offset for the tile (for sprites)
+uniform int uAtlasColumns;
 
 out vec4 outColor;
 
 void main()
 {   
-    // For sprites, use the precomputed tile offset
+    // For sprites, use the instance tile index directly
+    int tileIndex = int(fragTileIndex);
+    
+    // Calculate tile position in the atlas
+    int tileX = tileIndex % uAtlasColumns;
+    int tileY = tileIndex / uAtlasColumns;
+    
+    // Calculate UV offset for the tile
+    vec2 tileOffset = vec2(float(tileX), float(tileY)) * uAtlasTileSize;
+    
+    // Scale the texture coordinates to fit within the tile
     vec2 scaledTexCoord = fragTexCoord * uAtlasTileSize;
-    vec2 atlasUV = uTileOffset + scaledTexCoord;
+    
+    // Final UV coordinates in the atlas
+    vec2 atlasUV = tileOffset + scaledTexCoord;
     
     // Sample from the texture atlas
     vec4 texColor = texture(uTextureAtlas, atlasUV);
@@ -29,7 +42,7 @@ void main()
         discard;
     }
 
-    vec3 baseColor = texColor.rgb;
+    vec3 baseColor = texColor.rgb * fragColor;
     
     // Sprites typically use full brightness or simple lighting
     // TODO: Add sprite-specific lighting calculations here if needed

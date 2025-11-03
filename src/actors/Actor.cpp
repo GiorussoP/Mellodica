@@ -1,6 +1,7 @@
 #include "actors/Actor.hpp"
 #include "Game.hpp"
 #include "components/Component.hpp"
+#include "ChunkGrid.hpp"
 #include <algorithm>
 
 Actor::Actor(Game* game)
@@ -11,6 +12,14 @@ Actor::Actor(Game* game)
 , mRotation(Quaternion::Identity)
 {
     mGame->AddActor(this);
+    
+    // Register with spatial grid at default position (0,0,0)
+    // Only register if spatial grid exists
+    auto* grid = mGame->GetChunkGrid();
+    if (grid)
+    {
+        grid->RegisterActor(this);
+    }
 }
 
 Actor::~Actor()
@@ -85,4 +94,12 @@ void Actor::AddComponent(Component* c)
     }
     
     mComponents.insert(iter, c);
+}
+
+void Actor::SetPosition(const Vector3& pos)
+{
+    mPosition = pos;
+
+    // Automatically update chunk grid when position changes
+    mGame->GetChunkGrid()->UpdateActor(this);
 }

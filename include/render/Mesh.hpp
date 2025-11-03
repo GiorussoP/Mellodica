@@ -46,9 +46,17 @@ public:
     // Activate this mesh for rendering
     void SetActive() const;
     
+    // Setup instance buffer with transform data
+    void SetupInstanceBuffer(size_t maxInstances);
+    
+    // Update instance buffer with new data
+    // Each instance needs: mat4 model (16 floats), mat4 normal (16 floats), vec3 color (3 floats), float tileIndex (1 float) = 36 floats
+    void UpdateInstanceBuffer(const std::vector<float>& instanceData, size_t instanceCount);
+    
     // Get rendering info
     unsigned int GetNumIndices() const { return mNumIndices; }
     unsigned int GetNumVerts() const { return mNumVerts; }
+    size_t GetMaxInstances() const { return mMaxInstances; }
     
     // Get number of triangles
     size_t GetTriangleCount() const { return mTriangles.size(); }
@@ -59,11 +67,14 @@ protected:
     unsigned int mVertexArray;
     unsigned int mVertexBuffer;
     unsigned int mIndexBuffer;
+    unsigned int mInstanceBuffer;  // New: instance buffer
     
     // Mesh info
     unsigned int mNumVerts;
     unsigned int mNumIndices;
     std::vector<Triangle> mTriangles;
+    
+    size_t mMaxInstances;  // Maximum number of instances
 };
 
 // Cube mesh class

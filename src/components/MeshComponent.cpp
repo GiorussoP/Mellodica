@@ -20,9 +20,3 @@ MeshComponent::~MeshComponent()
     // Don't delete the mesh - it's owned by someone else or cached
 }
 
-void MeshComponent::Draw(Renderer* renderer)
-{
-    // Draw method is now handled directly in Game.cpp
-    // This method can be left empty or removed entirely
-    (void)renderer;
-}

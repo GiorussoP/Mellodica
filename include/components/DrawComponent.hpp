@@ -8,7 +8,6 @@ public:
     DrawComponent(class Actor* owner);
     ~DrawComponent();
     
-    virtual void Draw(class Renderer* renderer);
     
     void SetVisible(bool visible) { mIsVisible = visible; }
     bool IsVisible() const { return mIsVisible; }

@@ -14,8 +14,3 @@ DrawComponent::~DrawComponent()
 {
     mOwner->GetGame()->RemoveDrawable(this);
 }
-
-void DrawComponent::Draw(Renderer* renderer)
-{
-    (void)renderer;
-}

@@ -9,8 +9,10 @@ Mesh::Mesh()
     : mVertexArray(0)
     , mVertexBuffer(0)
     , mIndexBuffer(0)
+    , mInstanceBuffer(0)
     , mNumVerts(0)
     , mNumIndices(0)
+    , mMaxInstances(0)
 {
 }
 
@@ -23,6 +25,10 @@ Mesh::~Mesh()
     if (mIndexBuffer != 0) {
         glDeleteBuffers(1, &mIndexBuffer);
         mIndexBuffer = 0;
+    }
+    if (mInstanceBuffer != 0) {
+        glDeleteBuffers(1, &mInstanceBuffer);
+        mInstanceBuffer = 0;
     }
     if (mVertexArray != 0) {
         glDeleteVertexArrays(1, &mVertexArray);
@@ -332,4 +338,73 @@ PyramidMesh::PyramidMesh()
         data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, checkerTileIndex));  // CCW
     }
     Build(data);
+}
+
+void Mesh::SetupInstanceBuffer(size_t maxInstances)
+{
+    mMaxInstances = maxInstances;
+    
+    if (mInstanceBuffer != 0) {
+        glDeleteBuffers(1, &mInstanceBuffer);
+    }
+    
+    // Bind VAO to modify it
+    glBindVertexArray(mVertexArray);
+    
+    // Create instance buffer
+    glGenBuffers(1, &mInstanceBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mInstanceBuffer);
+    
+    // Allocate buffer (36 floats per instance: 16 + 16 + 3 + 1)
+    glBufferData(GL_ARRAY_BUFFER, maxInstances * 36 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    
+    // Setup instance attribute pointers
+    // Model matrix (mat4) - locations 4, 5, 6, 7
+    for (int i = 0; i < 4; i++) {
+        glEnableVertexAttribArray(4 + i);
+        glVertexAttribPointer(4 + i, 4, GL_FLOAT, GL_FALSE, 36 * sizeof(float), 
+                              (void*)(i * 4 * sizeof(float)));
+        glVertexAttribDivisor(4 + i, 1);  // Advance once per instance
+    }
+    
+    // Normal matrix (mat4) - locations 8, 9, 10, 11
+    for (int i = 0; i < 4; i++) {
+        glEnableVertexAttribArray(8 + i);
+        glVertexAttribPointer(8 + i, 4, GL_FLOAT, GL_FALSE, 36 * sizeof(float), 
+                              (void*)((16 + i * 4) * sizeof(float)));
+        glVertexAttribDivisor(8 + i, 1);  // Advance once per instance
+    }
+    
+    // Color (vec3) - location 12
+    glEnableVertexAttribArray(12);
+    glVertexAttribPointer(12, 3, GL_FLOAT, GL_FALSE, 36 * sizeof(float), 
+                          (void*)(32 * sizeof(float)));
+    glVertexAttribDivisor(12, 1);  // Advance once per instance
+    
+    // Tile index (float) - location 13
+    glEnableVertexAttribArray(13);
+    glVertexAttribPointer(13, 1, GL_FLOAT, GL_FALSE, 36 * sizeof(float), 
+                          (void*)(35 * sizeof(float)));
+    glVertexAttribDivisor(13, 1);  // Advance once per instance
+    
+    // Unbind
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::UpdateInstanceBuffer(const std::vector<float>& instanceData, size_t instanceCount)
+{
+    if (mInstanceBuffer == 0) {
+        std::cerr << "Instance buffer not set up. Call SetupInstanceBuffer first." << std::endl;
+        return;
+    }
+    
+    if (instanceCount > mMaxInstances) {
+        std::cerr << "Instance count (" << instanceCount << ") exceeds max instances (" << mMaxInstances << ")" << std::endl;
+        return;
+    }
+    
+    glBindBuffer(GL_ARRAY_BUFFER, mInstanceBuffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <vector>
+#include <unordered_set>
 #include "Math.hpp"
 
 class Game
@@ -19,6 +20,10 @@ public:
     void AddActor(class Actor* actor);
     void RemoveActor(class Actor* actor);
     
+    // Always-active actor functions
+    void AddAlwaysActive(class Actor* actor);
+    void RemoveAlwaysActive(class Actor* actor);
+    
     // Drawable functions
     void AddDrawable(class DrawComponent* drawable);
     void RemoveDrawable(class DrawComponent* drawable);
@@ -26,6 +31,9 @@ public:
     
     // Renderer getter
     class Renderer* GetRenderer() { return mRenderer; }
+    
+    // Chunk grid getter (for automatic actor tracking)
+    class ChunkGrid* GetChunkGrid() { return mChunkGrid; }
     
     // Camera functions
     Vector3& GetCameraPos() { return mCameraPos; }
@@ -55,6 +63,9 @@ private:
     std::vector<class Actor*> mActors;
     std::vector<class Actor*> mPendingActors;
     
+    // Always-active actors (updated/processed even when not visible)
+    std::unordered_set<class Actor*> mAlwaysActiveActors;
+    
     // All draw components
     std::vector<class DrawComponent*> mDrawables;
     
@@ -67,6 +78,9 @@ private:
     // Renderer
     class Renderer* mRenderer;
     
+    // Chunk grid for efficient queries
+    class ChunkGrid* mChunkGrid;
+    
     // Camera state
     Vector3 mCameraPos;
     Vector3 mCameraForward;
@@ -77,5 +91,5 @@ private:
     // Game state
     Uint32 mTicksCount;
     bool mIsRunning;
-    bool mIsDebugging = false;
+    bool mIsDebugging;
 };
