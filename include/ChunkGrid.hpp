@@ -24,6 +24,9 @@ public:
     int GetTotalActorCount() const;
     Vector3 GetCellBounds(int cellIndex) const;
     
+    // Calculate which cell a position belongs to
+    int GetCellIndex(const Vector3& position) const;
+    
 private:
     struct Cell
     {
@@ -31,8 +34,6 @@ private:
         int x, z;  // Cell coordinates
     };
     
-    // Calculate which cell a position belongs to
-    int GetCellIndex(const Vector3& position) const;
     void GetCellCoords(const Vector3& position, int& outX, int& outZ) const;
     int CoordsToIndex(int x, int z) const;
     

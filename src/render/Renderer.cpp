@@ -14,7 +14,7 @@ Renderer::Renderer()
 , mMeshShader(nullptr)
 , mSpriteShader(nullptr)
 , mSpriteQuad(nullptr)
-, mCameraPosition(Vector3::Zero)
+
 {
 
 }

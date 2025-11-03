@@ -37,8 +37,8 @@ public:
     
     // Camera functions
     Vector3& GetCameraPos() { return mCameraPos; }
-    void SetCameraPos(const Vector3& position) { mCameraPos = position; }
-    
+    void SetCameraPos(Vector3& position);
+
     Vector3& GetCameraForward() { return mCameraForward; }
     void SetCameraForward(const Vector3& forward) { mCameraForward = forward; }
     
@@ -65,6 +65,7 @@ private:
     
     // Always-active actors (updated/processed even when not visible)
     std::unordered_set<class Actor*> mAlwaysActiveActors;
+    std::vector<class Actor*> mVisibleActors;
     
     // All draw components
     std::vector<class DrawComponent*> mDrawables;
@@ -80,6 +81,7 @@ private:
     
     // Chunk grid for efficient queries
     class ChunkGrid* mChunkGrid;
+    int mCurrentChunk;
     
     // Camera state
     Vector3 mCameraPos;

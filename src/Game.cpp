@@ -23,7 +23,8 @@ Game::Game()
 , mGLContext(nullptr)
 , mRenderer(nullptr)
 , mChunkGrid(nullptr)
-, mCameraPos(0.0f, 5.0f, 20.0f)  // Higher and further back to see the grid center
+, mCurrentChunk(-1)
+, mCameraPos(Vector3::Zero) 
 , mCameraForward(0.0f, 0.0f, -1.0f)  // Looking toward negative Z
 , mCameraUp(0.0f, 1.0f, 0.0f)
 , mCameraYaw(0.0f)
@@ -118,6 +119,8 @@ void Game::InitializeActors()
     
     // Create camera controller
     new CameraController(this);
+    Vector3 cameraPos = Vector3(0.0f,5.0,0.0);
+    SetCameraPos(cameraPos);
     
     std::cout << "Starting actor creation..." << std::endl;
     
@@ -169,6 +172,16 @@ void Game::InitializeActors()
     
     std::cout << "Initialized " << actorCount / 2 << " cube actors and " << actorCount / 2 << " sprite actors" << std::endl;
     std::cout << "Total actors in grid: " << (mChunkGrid ? mChunkGrid->GetTotalActorCount() : 0) << std::endl;
+}
+
+void Game::SetCameraPos(Vector3& position){
+    mCameraPos = position;
+    
+    int newChunk = mChunkGrid->GetCellIndex(mCameraPos);
+    if(newChunk != mCurrentChunk){
+        mCurrentChunk = newChunk;
+        mVisibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
+    }
 }
 
 void Game::RunLoop()
@@ -389,26 +402,14 @@ void Game::ProcessInput()
     }
     
     // Only process input for visible actors (skip if already processed as always-active)
-    if (mChunkGrid)
+    for (auto actor : mVisibleActors)
     {
-        auto visibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
-        for (auto actor : visibleActors)
+        // Skip if this actor is always-active (already processed above)
+        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
         {
-            // Skip if this actor is always-active (already processed above)
-            if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
-            {
-                continue;
-            }
-            actor->ProcessInput(keyState);
+            continue;
         }
-    }
-    else
-    {
-        // Fallback: process all actors
-        for (auto actor : mActors)
-        {
-            actor->ProcessInput(keyState);
-        }
+        actor->ProcessInput(keyState);
     }
 }
 
@@ -487,7 +488,7 @@ void Game::GenerateOutput()
     // Update camera
     Vector3 targetPos = mCameraPos + mCameraForward;
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
-    mRenderer->SetCameraPosition(mCameraPos);
+
     
     Uint32 afterCameraSetup = SDL_GetTicks();
     

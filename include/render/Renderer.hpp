@@ -57,7 +57,6 @@ public:
                      
     void SetViewMatrix(const Matrix4 &view);
     void SetProjectionMatrix(const Matrix4 &projection);
-    void SetCameraPosition(const Vector3 &position) { mCameraPosition = position; }
 
     void Clear();
     void Present();
@@ -86,6 +85,4 @@ private:
     
     // Atlases
     std::unordered_map<std::string, TextureAtlas*> mAtlasCache;
-	
-    Vector3 mCameraPosition;
 };
