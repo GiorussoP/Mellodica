@@ -96,7 +96,7 @@ void Actor::AddComponent(Component* c)
     mComponents.insert(iter, c);
 }
 
-void Actor::SetPosition(const Vector3& pos)
+void Actor::SetPosition(const Vector3 pos)
 {
     mPosition = pos;
 

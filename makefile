@@ -1,9 +1,10 @@
 # Compiler and flags
 CXX = g++
 CC = gcc
-CXXFLAGS = -Wall -Wextra -std=c++17
-CFLAGS = -Wall -Wextra
-LDFLAGS = -lSDL2 -lSDL2_image -lGLEW -lGL
+CXXFLAGS = -Wall -Wextra -O3 -std=c++17
+CFLAGS = -Wall -Wextra -O3
+
+LDFLAGS = -lSDL2 -lSDL2_image -lGLEW -lGL -lfluidsynth
 
 # Directories
 EXEC_NAME = a.out

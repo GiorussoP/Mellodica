@@ -24,15 +24,15 @@ public:
     
     // Position getter/setter
     const Vector3& GetPosition() const { return mPosition; }
-    void SetPosition(const Vector3& pos);
+    void SetPosition(const Vector3 pos);
     
     // Scale getter/setter
     Vector3 GetScale() const { return mScale; }
-    void SetScale(const Vector3& scale) { mScale = scale; }
+    void SetScale(const Vector3 scale) { mScale = scale; }
     
     // Rotation getter/setter (for 2D sprites, rotation around Y axis)
     Quaternion GetRotation() const { return mRotation; }
-    void SetRotation(const Quaternion& rotation) { mRotation = rotation; }
+    void SetRotation(const Quaternion rotation) { mRotation = rotation; }
     
     // State getter/setter
     ActorState GetState() const { return mState; }

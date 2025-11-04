@@ -6,8 +6,11 @@
 #include "render/Renderer.hpp"
 #include "render/Mesh.hpp"
 #include "render/TextureAtlas.hpp"
-#include "actors/GameActors.hpp"
+#include "actors/TestActors.hpp"
 #include "ChunkGrid.hpp"
+#include "SynthEngine.hpp"
+#include "MIDIPlayer.hpp"
+
 #include <GL/glew.h>
 #include <iostream>
 #include <algorithm>
@@ -16,6 +19,7 @@ const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 const int FPS = 60;
 const int FRAME_TIME = 1000 / FPS;
+const float MIDI_UPDATE_INTERVAL = 0.001f;  // Update MIDI every 1ms
 
 Game::Game()
 : mUpdatingActors(false)
@@ -45,7 +49,7 @@ Game::Game()
 bool Game::Initialize()
 {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return false;
@@ -115,7 +119,31 @@ bool Game::Initialize()
 
 void Game::InitializeActors()
 {
-    std::cout << "Shared resources created!" << std::endl;
+    SynthEngine::init("assets/songs/sf.sf2");
+    for (auto preset : SynthEngine::getSoundPresets()) {
+        std::cout << preset.first << ": "<<preset.second.bank_num<<"/"<<preset.second.num<<'\n';
+    }
+    SynthEngine::setChannels({
+        {0,0},
+        {0,2},
+        {0,32},
+        {0,24},
+        {0,25},
+        {0,40},
+        {0,48},
+        {0,56},
+        {0,66},
+        {128,0},
+        {0,89},
+        {0,73},
+        {0,57},
+        {0,42},
+        {0,11},
+        {0,52}
+    });
+    MIDIPlayer::loadSong("assets/songs/5.mid",true);
+    MIDIPlayer::play();
+
     
     std::cout << "Starting actor creation..." << std::endl;
     
@@ -133,34 +161,23 @@ void Game::InitializeActors()
         for (int z = 0; z < gridSize; z++)
         {
             // Alternate between grass, rock, and red cubes
-            Actor* cube = nullptr;
+            Actor* mesh = nullptr;
             Actor* sprite = nullptr;
             int pattern = (x + z) % 3;
             if (pattern == 0) {
-                cube = new GrassCubeActor(this);
-                sprite = new GoombaActor(this);
+                mesh = new GrassCubeActor(this);
+                sprite = new MarioActor(this);
+                sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
             } else if (pattern == 1) {
-                cube = new RockCubeActor(this);
+                mesh = new RockCubeActor(this);
                 sprite = new GoombaActor(this);
+                sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
             } else {
-                // Red color-only cube (no texture)
-                cube = new PyramidActor(this, Color::Red,{3});
-                sprite = new SpriteActor(this);
+                
+                mesh = new PyramidActor(this, Color::Cyan,{3});
             }
             
-            Vector3 cubePos = Vector3(
-                x * spacing - gridOffset,
-                0.0f,
-                z * spacing - gridOffset
-            );
-            cube->SetPosition(cubePos);
-            // All cubes at default size 1.0
-            
-            // Create a Mario sprite on top of each cube
-            
-            sprite->SetPosition(Vector3(cubePos.x, cubePos.y + 1.0f, cubePos.z));
-            // Sprite defaults to scale 1.0, making it 1x1 unit (same as cube)
-            
+            mesh->SetPosition(Vector3( x * spacing - gridOffset,0.0f,z * spacing - gridOffset));
             actorCount += 2;
         }
     }
@@ -171,7 +188,7 @@ void Game::InitializeActors()
 
     // Create camera controller
     new CameraController(this);
-    SetCameraPos(Vector3(0.0f,5.0,0.0));
+    //SetCameraPos(Vector3(0.0f,5.0,0.0));
 }
 
 void Game::SetCameraPos(Vector3 position){
@@ -509,6 +526,9 @@ void Game::UpdateActors(float deltaTime)
 
 void Game::UpdateGame(float deltaTime)
 {
+    // Update MIDI player
+    MIDIPlayer::update(deltaTime);
+
     // Update all actors
     UpdateActors(deltaTime);
 }
@@ -525,8 +545,9 @@ void Game::GenerateOutput()
     Vector3 targetPos = mCameraPos + mCameraForward;
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
 
-    
+    /*
     Uint32 afterCameraSetup = SDL_GetTicks();
+    
     
     
     if (mChunkGrid)
@@ -544,6 +565,7 @@ void Game::GenerateOutput()
             std::cout << "Total actors in grid: " << mChunkGrid->GetTotalActorCount() << std::endl;
             std::cout << "Visible actors: " << mVisibleActors.size() << std::endl;
         }
+
     }
     
     Uint32 afterChunkQuery = SDL_GetTicks();
@@ -551,6 +573,7 @@ void Game::GenerateOutput()
     
     Uint32 afterCollect = SDL_GetTicks();
     
+
     if (frameCount % 60 == 0 && mChunkGrid) {
         std::cout << "Visible meshes: " << mVisibleMeshes.size() << std::endl;
         std::cout << "Visible sprites: " << mVisibleSprites.size() << std::endl;
@@ -559,8 +582,12 @@ void Game::GenerateOutput()
                   << "ms, Collect: " << (afterCollect - afterChunkQuery) << "ms" << std::endl;
     }
 
+    */
+
+
     RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
-    
+   
+
     // Render meshes with instancing (batch draw)
     mRenderer->ActivateMeshShader();
     mRenderer->DrawMeshesInstanced(mVisibleMeshes, mode);
