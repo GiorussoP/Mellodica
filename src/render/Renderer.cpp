@@ -132,7 +132,7 @@ void Renderer::Clear()
     // Clear the color and depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
+/*
 void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
 {
 
@@ -179,7 +179,7 @@ void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
         
         mTextures[mesh.GetTextureAtlas()->GetTextureIndex()]->Bind(0);
 
-        mMeshShader->SetIntegerUniform("uTileIndex", static_cast<int>(mesh.GetStartingIndex()));
+        mMeshShader->SetIntegerUniform("uTileIndex", mode == RendererMode::TRIANGLES ? static_cast<int>(mesh.GetStartingIndex()) : -1);
         mMeshShader->SetIntegerUniform("uTextureAtlas", 0);
         mMeshShader->SetIntegerUniform("uAtlasColumns", mesh.GetTextureAtlas()->GetColumns());
         mMeshShader->SetVectorUniform("uAtlasTileSize", Vector2(mesh.GetTextureAtlas()->GetUVTileSizeX(), mesh.GetTextureAtlas()->GetUVTileSizeY()));
@@ -195,6 +195,7 @@ void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
         glDrawElements(GL_TRIANGLES, mesh.GetMesh().GetNumIndices(), GL_UNSIGNED_INT, nullptr);
     }
 }
+    */
 
 void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent*>& meshes, RendererMode mode)
 {
@@ -432,7 +433,7 @@ TextureAtlas* Renderer::LoadAtlas(const std::string& atlasPath)
     return nullptr;
 }
 
-
+/*
 void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
 {
 
@@ -536,6 +537,7 @@ void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
         glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
     }
 }
+    */
 
 void Renderer::DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites, RendererMode mode)
 {
@@ -557,7 +559,7 @@ void Renderer::DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites
         if (!spriteComp->IsVisible()) continue;
         
         TextureAtlas* atlas = spriteComp->GetTextureAtlas();
-        int texIndex = spriteComp->GetTextureIndex();
+        int texIndex = mode == RendererMode::TRIANGLES ? spriteComp->GetTextureIndex() : -1;
         
         // Find or create group
         bool found = false;

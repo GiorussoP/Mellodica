@@ -109,7 +109,7 @@ void CameraController::OnUpdate(float deltaTime)
 }
 
 // CubeActor implementation
-CubeActor::CubeActor(Game* game, const Vector3& color,  unsigned int startingIndex)
+CubeActor::CubeActor(Game* game, const Vector3& color,  int startingIndex)
 : Actor(game)
 , mMeshComponent(nullptr)
 {
@@ -127,7 +127,7 @@ CubeActor::CubeActor(Game* game, const Vector3& color,  unsigned int startingInd
 
 
 
-PyramidActor::PyramidActor(Game* game, const Vector3& color,  unsigned int startingIndex)
+PyramidActor::PyramidActor(Game* game, const Vector3& color,  int startingIndex)
 : Actor(game)
 , mMeshComponent(nullptr)
 {

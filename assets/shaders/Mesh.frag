@@ -19,22 +19,30 @@ out vec4 outColor;
 
 void main()
 {   
+    // If fragTileIndex is negative (e.g. -1) treat this as a uniformly colored object
+    if (fragTileIndex < 0.0)
+    {
+        // Draw the object with the instance color only (opaque)
+        outColor = vec4(fragColor, 1.0);
+        return;
+    }
+
     // Calculate tile index from instance tile index and per-vertex texture index
     int tileIndex = int(fragTileIndex) + int(fragTexIndex);
-    
+
     // Calculate tile position in the atlas
     int tileX = tileIndex % uAtlasColumns;
     int tileY = tileIndex / uAtlasColumns;
-    
+
     // Calculate UV offset for the tile
     vec2 tileOffset = vec2(float(tileX), float(tileY)) * uAtlasTileSize;
-    
+
     // Scale the texture coordinates to fit within the tile
     vec2 scaledTexCoord = fragTexCoord * uAtlasTileSize;
-    
+
     // Final UV coordinates in the atlas
     vec2 atlasUV = tileOffset + scaledTexCoord;
-    
+
     // Sample from the texture atlas
     vec4 texColor = texture(uTextureAtlas, atlasUV);
 

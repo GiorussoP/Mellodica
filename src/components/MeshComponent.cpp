@@ -6,7 +6,7 @@
 #include "render/TextureAtlas.hpp"
 
 
-MeshComponent::MeshComponent(Actor* owner, Mesh& mesh, Texture* texture, TextureAtlas* textureAtlas, unsigned int startingIndex) :
+MeshComponent::MeshComponent(Actor* owner, Mesh& mesh, Texture* texture, TextureAtlas* textureAtlas, int startingIndex) :
     DrawComponent(owner)
     , mMesh(mesh)
     , mTexture(texture)

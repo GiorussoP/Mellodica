@@ -33,7 +33,7 @@ private:
 class CubeActor : public Actor
 {
 public:
-    CubeActor(Game* game, const Vector3& color = Color::White, unsigned int startingIndex = 0);
+    CubeActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
     void OnUpdate(float deltaTime) override;
     
 private:
@@ -46,7 +46,7 @@ private:
 class PyramidActor : public Actor
 {
 public:
-    PyramidActor(Game* game, const Vector3& color = Color::White, unsigned int startingIndex = 0);
+    PyramidActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
     void OnUpdate(float deltaTime) override;
 
 private:

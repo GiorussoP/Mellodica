@@ -64,7 +64,7 @@ bool Game::Initialize()
     
     // Create window
     mWindow = SDL_CreateWindow(
-        "TP1 - Game",
+        "TP Final - Mellodica",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH,
@@ -158,17 +158,33 @@ void Game::InitializeActors()
         {
             Actor* mesh = nullptr;
             Actor* sprite = nullptr;
-            int pattern = (x + z) % 3;
-            if (pattern == 0) {
-                mesh = new GrassCubeActor(this);
-                sprite = new MarioActor(this);
-                sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
-            } else if (pattern == 1) {
-                mesh = new RockCubeActor(this);
-                sprite = new GoombaActor(this);
-                sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
-            } else {
-                mesh = new PyramidActor(this, Color::Cyan,{3});
+            int pattern = (x + z) % 5;
+
+
+            switch (pattern) {
+                case 0:
+                    mesh = new GrassCubeActor(this);
+                    sprite = new MarioActor(this);
+                    sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
+                    break;
+                case 1:
+                    mesh = new RockCubeActor(this);
+                    sprite = new GoombaActor(this);
+                    sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
+                    break;
+                case 2:
+                    mesh = new PyramidActor(this, Color::Magenta);
+                    break;
+                case 3:
+                    mesh = new CubeActor(this, Color::Cyan,4);
+                    mesh->SetScale(Vector3(0.25f,1.5f,0.25f));
+                    break;
+                case 4:
+                    mesh = new CubeActor(this, Color::Yellow);
+                    mesh->SetScale(Vector3(1.0f,0.5f,1.0f));
+                    break;
+                default:
+                    break;
             }
             
             mesh->SetPosition(Vector3( x * spacing - gridOffset,0.0f,z * spacing - gridOffset));
@@ -190,6 +206,7 @@ void Game::SetCameraPos(Vector3 position){
     int newChunk = mChunkGrid->GetCellIndex(mCameraPos);
     if(newChunk != mCurrentChunk){
         mCurrentChunk = newChunk;
+
         mVisibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
 
 
@@ -463,6 +480,10 @@ void Game::ProcessInput()
                             SDL_SetWindowFullscreen(mWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
                         }
                     }
+                }
+                else if (event.key.keysym.sym == SDLK_F1)
+                {
+                    mIsDebugging = !mIsDebugging;
                 }
                 break;
         }
