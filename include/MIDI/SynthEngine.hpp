@@ -17,7 +17,7 @@ struct SoundPreset {
 class SynthEngine {
 public:
 
-    static void init(const char* soundfont_path = "songs/sf.sf2", const char* audio_driver = "sdl2");
+    static void init(const char* soundfont_path = "assets/songs/sf.sf2", const char* audio_driver = "sdl2");
     static void clean();
     static void setChannels(const std::vector<SoundPreset>& presets);
     static std::vector<std::pair<std::string,SoundPreset>> getSoundPresets();

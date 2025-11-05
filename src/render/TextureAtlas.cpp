@@ -87,12 +87,14 @@ bool TextureAtlas::Load(const std::string& jsonPath)
         
         tile.tileIndex = gridIndex;
 
+        /*
         // Debug print
         std::cout << "Atlas tile: json_index=" << jsonIndex 
                   << ", grid_index=" << gridIndex 
                   << ", pos=(" << tile.x << "," << tile.y << ")"
                   << ", grid=(" << gridX << "," << gridY << ")"
                   << ", name='" << tile.name << "'" << std::endl;
+        */
 
         mTiles[tile.name] = tile;
         mTileList.push_back(tile);

@@ -28,11 +28,16 @@ void SynthEngine::init(const char* soundfont_path, const char* audio_driver) {
     fluid_synth_set_polyphony(synth,1024);
 
 
+    
     sfid = fluid_synth_sfload(synth, soundfont_path, /*reset_presets=*/0);
     if (sfid < 0) {
         std::cerr << "Failed to load SF2: "  <<soundfont_path<<std::endl;
     }
     driver = nullptr;
+
+    std::cout<<"Loaded SoundFont: "<<soundfont_path<<std::endl;
+    for (auto preset : getSoundPresets())
+        std::cout << preset.first << ": "<<preset.second.bank_num<<"/"<<preset.second.num<<'\n';
 }
 
 

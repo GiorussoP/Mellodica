@@ -139,6 +139,7 @@ std::vector<Actor*> ChunkGrid::GetVisibleActors(const Vector3& cameraPos)
     int camX, camZ;
     GetCellCoords(cameraPos, camX, camZ);
     
+    /*
     static bool debugPrinted = false;
     if (!debugPrinted) {
         std::cout << "Camera cell coords: (" << camX << ", " << camZ << ")" << std::endl;
@@ -160,6 +161,7 @@ std::vector<Actor*> ChunkGrid::GetVisibleActors(const Vector3& cameraPos)
         
         debugPrinted = true;
     }
+    */
     
     // Collect actors from camera cell + 8 adjacent cells (3x3 grid)
     for (int dz = -1; dz <= 1; dz++)

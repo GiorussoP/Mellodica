@@ -6,7 +6,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include  <iostream>
+#include <iostream>
+#include <chrono>
 
 std::vector<Channel> MIDIPlayer::channels = std::vector<Channel>(16);
 
@@ -16,7 +17,13 @@ double MIDIPlayer::song_length = 0.0f;
 double MIDIPlayer::song_speed = 1.0f;
 bool MIDIPlayer::loop_song = true;
 
+std::thread MIDIPlayer::midiThread;
+std::atomic<bool> MIDIPlayer::threadRunning(false);
+std::mutex MIDIPlayer::midiMutex;
+
 void MIDIPlayer::loadSong(const char * filename,bool loop_enabled) {
+    std::lock_guard<std::mutex> lock(midiMutex);
+    
     channels.clear();
     channels = std::vector<Channel>(16);
     paused = true;
@@ -80,10 +87,10 @@ void MIDIPlayer::loadSong(const char * filename,bool loop_enabled) {
                     uint8_t value = data & 0xFF;              // Second data byte
                     
                     if (controller == 10) {  // Pan
-                        std::cout << "Channel " << (int)channel << ": Pan set to " << (int)value << std::endl;
+                        //std::cout << "Channel " << (int)channel << ": Pan set to " << (int)value << std::endl;
                         SynthEngine::setPan(channel, value);
                     } else if (controller == 7) {  // Volume
-                        std::cout << "Channel " << (int)channel << ": Volume set to " << (int)value << std::endl;
+                        //std::cout << "Channel " << (int)channel << ": Volume set to " << (int)value << std::endl;
                         fluid_synth_cc(SynthEngine::synth, channel, 7, value);
                     } else {
                         // Other control changes
@@ -125,11 +132,14 @@ void MIDIPlayer::loadSong(const char * filename,bool loop_enabled) {
 }
 
 void MIDIPlayer::setSpeed(double speed) {
+    std::lock_guard<std::mutex> lock(midiMutex);
     song_speed = speed;
 }
 
 
 void MIDIPlayer::update(float dt) {
+    std::lock_guard<std::mutex> lock(midiMutex);
+    
     if (!paused) {
         if (time < song_length)
             time += dt * song_speed;
@@ -168,7 +178,8 @@ void MIDIPlayer::update(float dt) {
     }
 
 void MIDIPlayer::play() {
-
+    std::lock_guard<std::mutex> lock(midiMutex);
+    
     if (time >= song_length) {
         time = fmod(time,song_length);
         for (int i = 0; i < 16; ++i) {
@@ -179,23 +190,77 @@ void MIDIPlayer::play() {
     }
     paused = false;
 }
+
 void MIDIPlayer::pause() {
+    std::lock_guard<std::mutex> lock(midiMutex);
     fluid_synth_all_notes_off(SynthEngine::synth,-1);
     paused = true;
 }
 
 void MIDIPlayer::jumpTo(float seconds) {
-    pause();
+    std::lock_guard<std::mutex> lock(midiMutex);
+    fluid_synth_all_notes_off(SynthEngine::synth,-1);
+    paused = true;
     time = seconds;
-    update(0.0);
+    // Reset channel positions to match new time
+    for (int i = 0; i < 16; ++i) {
+        channels[i].pos = 0;
+        // Find the correct position for this time
+        while (channels[i].pos < channels[i].notes.size() && 
+               channels[i].notes[channels[i].pos].start < time) {
+            channels[i].pos++;
+        }
+    }
     paused = false;
 }
+
 void MIDIPlayer::muteChannel(unsigned int channel) {
+    std::lock_guard<std::mutex> lock(midiMutex);
     fluid_synth_all_notes_off(SynthEngine::synth,channel);
     channels[channel].active = false;
 }
 
 void MIDIPlayer::unmuteChannel(unsigned int channel) {
+    std::lock_guard<std::mutex> lock(midiMutex);
     if (channels[channel].notes.size() > 0)
         channels[channel].active = true;
+}
+
+void MIDIPlayer::startMIDIThread() {
+    if (threadRunning.load()) {
+        std::cerr << "MIDI thread already running!" << std::endl;
+        return;
+    }
+    
+    threadRunning.store(true);
+    midiThread = std::thread(midiThreadFunction);
+    std::cout << "MIDI thread started" << std::endl;
+}
+
+void MIDIPlayer::stopMIDIThread() {
+    if (!threadRunning.load()) {
+        return;
+    }
+    
+    threadRunning.store(false);
+    if (midiThread.joinable()) {
+        midiThread.join();
+    }
+    std::cout << "MIDI thread stopped" << std::endl;
+}
+
+void MIDIPlayer::midiThreadFunction() {
+    const double MIDI_UPDATE_INTERVAL = 0.001;  // 1ms = 1000 updates per second
+    const auto interval = std::chrono::microseconds(static_cast<long>(MIDI_UPDATE_INTERVAL * 1000000));
+    
+    auto nextUpdate = std::chrono::high_resolution_clock::now();
+    
+    while (threadRunning.load()) {
+        // Update MIDI player with fixed timestep
+        update(static_cast<float>(MIDI_UPDATE_INTERVAL));
+        
+        // Sleep until next update time
+        nextUpdate += interval;
+        std::this_thread::sleep_until(nextUpdate);
+    }
 }

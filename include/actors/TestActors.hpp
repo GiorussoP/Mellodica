@@ -91,3 +91,24 @@ private:
 };
 
 
+
+// Actor that demonstrates thread-safe MIDI control from keyboard input
+class MIDIControlActor : public Actor
+{
+public:
+    MIDIControlActor(Game* game);
+    void OnProcessInput(const Uint8* keyState) override;
+    
+private:
+    // Debounce flags to prevent repeated key presses
+    bool mPrevSpacePressed;
+    bool mPrevRPressed;
+    bool mPrevJPressed;
+    bool mPrevMPressed;
+    bool mPrevUPressed;
+    bool mPrevPlusPressed;
+    bool mPrevMinusPressed;
+    bool mPrevPPressed;
+};
+
+

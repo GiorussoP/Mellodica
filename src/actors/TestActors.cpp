@@ -3,6 +3,7 @@
 #include "render/Mesh.hpp"
 #include "render/Renderer.hpp"
 #include "render/Texture.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 #include <iostream>
 
 
@@ -20,11 +21,15 @@ CameraController::CameraController(Game* game)
 {
     // Register as always-active so camera works even when far from origin
     game->AddAlwaysActive(this);
+
+    std::cout<<"\n============================================="<<std::endl;
+    std::cout << "CameraController created - WASD to move and ARROWS to look" << std::endl;
+    std::cout<<"============================================="<<std::endl;
 }
 
 void CameraController::OnProcessInput(const Uint8* keyState)
 {
-    // Just store the input state - movement will happen in OnUpdate with proper deltaTime
+    // Just store the input state
     mMoveForward = keyState[SDL_SCANCODE_W];
     mMoveBackward = keyState[SDL_SCANCODE_S];
     mMoveLeft = keyState[SDL_SCANCODE_A];
@@ -44,18 +49,8 @@ void CameraController::OnUpdate(float deltaTime)
     float yaw = game->GetCameraYaw();
     float pitch = game->GetCameraPitch();
     
-    // Debug: log position and deltaTime
-    static int debugCounter = 0;
-    debugCounter++;
 
-    /*
-    if (debugCounter % 60 == 0) {
-        std::cout << "Camera at (" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z 
-                  << ") - deltaTime: " << deltaTime << std::endl;
-    }
-    */
-    
-    // Movement (WASD) - now using actual deltaTime!
+    // Movement (WASD)
     if (mMoveForward)
     {
         cameraPos += cameraForward * CAMERA_MOVE_SPEED * deltaTime;
@@ -77,7 +72,7 @@ void CameraController::OnUpdate(float deltaTime)
         cameraPos -= right * CAMERA_MOVE_SPEED * deltaTime;
     }
     
-    // Rotation (Arrow keys) - now using actual deltaTime!
+    // Rotation (Arrow keys)
     if (mRotateLeft)
     {
         yaw += CAMERA_ROTATE_SPEED * deltaTime;
@@ -209,4 +204,159 @@ GoombaActor::GoombaActor(Game* game)
 void GoombaActor::OnUpdate(float deltaTime) {
     // Update the sprite component
     mSpriteComponent->Update(deltaTime);
+}
+
+
+MIDIControlActor::MIDIControlActor(Game* game)
+: Actor(game)
+, mPrevSpacePressed(false)
+, mPrevRPressed(false)
+, mPrevJPressed(false)
+, mPrevMPressed(false)
+, mPrevUPressed(false)
+, mPrevPlusPressed(false)
+, mPrevMinusPressed(false)
+, mPrevPPressed(false)
+{
+    // Register as always-active so controls work anywhere
+    game->AddAlwaysActive(this);
+    
+    std::cout << "\n=== MIDI Control Actor Created ===" << std::endl;
+    std::cout << "Controls:" << std::endl;
+    std::cout << "  SPACE    - Play/Pause" << std::endl;
+    std::cout << "  R        - Reload song" << std::endl;
+    std::cout << "  J        - Jump to 30 seconds" << std::endl;
+    std::cout << "  M        - Mute channel 0" << std::endl;
+    std::cout << "  U        - Unmute channel 0" << std::endl;
+    std::cout << "  +/=      - Increase speed (1.5x)" << std::endl;
+    std::cout << "  -        - Decrease speed (0.5x)" << std::endl;
+    std::cout << "  P        - Print current channel states" << std::endl;
+    std::cout << "===================================\n" << std::endl;
+}
+
+void MIDIControlActor::OnProcessInput(const Uint8* keyState)
+{
+    // SPACE - Play/Pause toggle
+    bool spacePressed = keyState[SDL_SCANCODE_SPACE];
+    if (spacePressed && !mPrevSpacePressed)
+    {
+        // Thread-safe: can call from UpdateActors without issues
+        static bool isPlaying = true;
+        if (isPlaying) {
+            std::cout << "[MIDI] Pausing..." << std::endl;
+            MIDIPlayer::pause();
+            isPlaying = false;
+        } else {
+            std::cout << "[MIDI] Playing..." << std::endl;
+            MIDIPlayer::play();
+            isPlaying = true;
+        }
+    }
+    mPrevSpacePressed = spacePressed;
+    
+    // R - Reload song
+    bool rPressed = keyState[SDL_SCANCODE_R];
+    if (rPressed && !mPrevRPressed)
+    {
+        std::cout << "[MIDI] Reloading song..." << std::endl;
+        // Thread-safe: loadSong acquires mutex
+        MIDIPlayer::jumpTo(0.0f); // Reset position
+    }
+    mPrevRPressed = rPressed;
+    
+    // J - Jump to 30 seconds
+    bool jPressed = keyState[SDL_SCANCODE_J];
+    if (jPressed && !mPrevJPressed)
+    {
+        std::cout << "[MIDI] Jumping to 30 seconds..." << std::endl;
+        // Thread-safe: jumpTo acquires mutex and resets positions
+        MIDIPlayer::jumpTo(30.0f);
+    }
+    mPrevJPressed = jPressed;
+    
+    // M - Mute channel 0
+    bool mPressed = keyState[SDL_SCANCODE_M];
+    if (mPressed && !mPrevMPressed)
+    {
+        std::cout << "[MIDI] Muting channel 0..." << std::endl;
+        // Thread-safe: muteChannel acquires mutex
+        MIDIPlayer::muteChannel(0);
+    }
+    mPrevMPressed = mPressed;
+    
+    // U - Unmute channel 0
+    bool uPressed = keyState[SDL_SCANCODE_U];
+    if (uPressed && !mPrevUPressed)
+    {
+        std::cout << "[MIDI] Unmuting channel 0..." << std::endl;
+        // Thread-safe: unmuteChannel acquires mutex
+        MIDIPlayer::unmuteChannel(0);
+    }
+    mPrevUPressed = uPressed;
+    
+    // + (or =) - Increase speed
+    bool plusPressed = keyState[SDL_SCANCODE_EQUALS] || keyState[SDL_SCANCODE_KP_PLUS];
+    if (plusPressed && !mPrevPlusPressed)
+    {
+        std::cout << "[MIDI] Increasing speed to 1.5x..." << std::endl;
+        // Thread-safe: setSpeed acquires mutex
+        MIDIPlayer::setSpeed(1.5);
+    }
+    mPrevPlusPressed = plusPressed;
+    
+    // - Decrease speed
+    bool minusPressed = keyState[SDL_SCANCODE_MINUS] || keyState[SDL_SCANCODE_KP_MINUS];
+    if (minusPressed && !mPrevMinusPressed)
+    {
+        std::cout << "[MIDI] Decreasing speed to 0.5x..." << std::endl;
+        // Thread-safe: setSpeed acquires mutex
+        MIDIPlayer::setSpeed(0.5);
+    }
+    mPrevMinusPressed = minusPressed;
+    
+    // P - Print current channel states
+    bool pPressed = keyState[SDL_SCANCODE_P];
+    if (pPressed && !mPrevPPressed)
+    {
+        std::cout << "\n=== Current MIDI Channel States ===" << std::endl;
+        // Thread-safe: getChannels returns reference but mutex protects access
+        auto& channels = MIDIPlayer::getChannels();
+        
+        for (int i = 0; i < channels.size(); ++i)
+        {
+            const auto& channel = channels[i];
+            
+            if (!channel.active)
+            {
+                std::cout << "Channel " << i << ": INACTIVE" << std::endl;
+                continue;
+            }
+            
+            std::cout << "Channel " << i << ": ACTIVE" << std::endl;
+            std::cout << "  Total notes: " << channel.notes.size() << std::endl;
+            std::cout << "  Current position: " << channel.pos << "/" << channel.notes.size() << std::endl;
+            
+            // Show next few upcoming notes
+            if (channel.pos < channel.notes.size())
+            {
+                std::cout << "  Next notes:" << std::endl;
+                int notesToShow = std::min(5, static_cast<int>(channel.notes.size() - channel.pos));
+                for (int j = 0; j < notesToShow; ++j)
+                {
+                    const auto& note = channel.notes[channel.pos + j];
+                    std::cout << "    [" << (channel.pos + j) << "] "
+                              << "Time: " << note.start << "s, "
+                              << "Note: " << note.note << ", "
+                              << (note.on ? "ON" : "OFF") << ", "
+                              << "Vel: " << note.velocity << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "  (All notes played)" << std::endl;
+            }
+        }
+        std::cout << "===================================\n" << std::endl;
+    }
+    mPrevPPressed = pPressed;
 }

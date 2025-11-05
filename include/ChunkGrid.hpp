@@ -11,7 +11,7 @@ public:
     ChunkGrid(const Vector3& worldMin, const Vector3& worldMax, float cellSize);
     ~ChunkGrid();
     
-    // Automatically called by Game - developers don't need to worry about these
+    // Automatically called by Game - don't need to worry about these
     void RegisterActor(Actor* actor);
     void UnregisterActor(Actor* actor);
     void UpdateActor(Actor* actor);  // Call when actor moves

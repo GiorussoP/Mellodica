@@ -8,8 +8,8 @@
 #include "render/TextureAtlas.hpp"
 #include "actors/TestActors.hpp"
 #include "ChunkGrid.hpp"
-#include "SynthEngine.hpp"
-#include "MIDIPlayer.hpp"
+#include "MIDI/SynthEngine.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 
 #include <GL/glew.h>
 #include <iostream>
@@ -119,10 +119,8 @@ bool Game::Initialize()
 
 void Game::InitializeActors()
 {
-    SynthEngine::init("assets/songs/sf.sf2");
-    for (auto preset : SynthEngine::getSoundPresets()) {
-        std::cout << preset.first << ": "<<preset.second.bank_num<<"/"<<preset.second.num<<'\n';
-    }
+    // Initializing the SynthEngine
+    SynthEngine::init();
     SynthEngine::setChannels({
         {0,0},
         {0,2},
@@ -141,26 +139,23 @@ void Game::InitializeActors()
         {0,11},
         {0,52}
     });
-    MIDIPlayer::loadSong("assets/songs/5.mid",true);
+
+    // Initializing MIDI Player
+    MIDIPlayer::loadSong("assets/songs/1.mid",true);
+    MIDIPlayer::startMIDIThread();
     MIDIPlayer::play();
+    
 
     
-    std::cout << "Starting actor creation..." << std::endl;
-    
-    // Create a grid of cube actors (alternating grass, rock, and red cubes)
+    // Some actors for testing
     const int gridSize = 300;
     const float spacing = 1.0f;
     const float gridOffset = (gridSize - 1) * spacing * 0.5f;
-    
     int actorCount = 0;
     for (int x = 0; x < gridSize; x++)
-    {
-        if (x % 50 == 0) {
-            std::cout << "Creating actors row " << x << "/" << gridSize << "..." << std::endl;
-        }
+    {   
         for (int z = 0; z < gridSize; z++)
         {
-            // Alternate between grass, rock, and red cubes
             Actor* mesh = nullptr;
             Actor* sprite = nullptr;
             int pattern = (x + z) % 3;
@@ -173,7 +168,6 @@ void Game::InitializeActors()
                 sprite = new GoombaActor(this);
                 sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
             } else {
-                
                 mesh = new PyramidActor(this, Color::Cyan,{3});
             }
             
@@ -182,14 +176,13 @@ void Game::InitializeActors()
         }
     }
     
-    std::cout << "Initialized " << actorCount / 2 << " cube actors and " << actorCount / 2 << " sprite actors" << std::endl;
-    std::cout << "Total actors in grid: " << (mChunkGrid ? mChunkGrid->GetTotalActorCount() : 0) << std::endl;
-
-
     // Create camera controller
     new CameraController(this);
-    //SetCameraPos(Vector3(0.0f,5.0,0.0));
+    
+    // Create MIDI control actor for testing operations
+    new MIDIControlActor(this);
 }
+    
 
 void Game::SetCameraPos(Vector3 position){
     mCameraPos = position;
@@ -230,11 +223,9 @@ void Game::SetCameraPos(Vector3 position){
     // Then, collect from Chunkly visible actors
     for (auto actor : mVisibleActors)
     {
-        // Get all drawable components from this actor
         auto& components = actor->GetComponents();
         for (auto component : components)
         {
-            // Quick type check without virtual call
             if (auto mesh = dynamic_cast<MeshComponent*>(component))
             {
                 if (mesh->IsVisible())
@@ -295,6 +286,10 @@ void Game::RunLoop()
 void Game::Shutdown()
 {
     std::cout << "Shutdown: Starting cleanup..." << std::endl;
+    
+    // Stop MIDI thread first
+    std::cout << "Shutdown: Stopping MIDI thread..." << std::endl;
+    MIDIPlayer::stopMIDIThread();
     
     // Close the window immediately so user sees it close
     if (mWindow)
@@ -453,6 +448,22 @@ void Game::ProcessInput()
                 {
                     mIsRunning = false;
                 }
+                else if (event.key.keysym.sym == SDLK_F11)
+                {
+                    // Toggle fullscreen (use desktop fullscreen for best compatibility)
+                    if (mWindow)
+                    {
+                        Uint32 flags = SDL_GetWindowFlags(mWindow);
+                        if (flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP))
+                        {
+                            SDL_SetWindowFullscreen(mWindow, 0); // windowed
+                        }
+                        else
+                        {
+                            SDL_SetWindowFullscreen(mWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -526,10 +537,7 @@ void Game::UpdateActors(float deltaTime)
 
 void Game::UpdateGame(float deltaTime)
 {
-    // Update MIDI player
-    MIDIPlayer::update(deltaTime);
-
-    // Update all actors
+    // MIDI is updated in its own thread now, just update actors
     UpdateActors(deltaTime);
 }
 
@@ -544,45 +552,6 @@ void Game::GenerateOutput()
     // Update camera
     Vector3 targetPos = mCameraPos + mCameraForward;
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
-
-    /*
-    Uint32 afterCameraSetup = SDL_GetTicks();
-    
-    
-    
-    if (mChunkGrid)
-    {
-        
-        frameCount++;
-        if (frameCount % 60 == 0) {  // Debug every 60 frames
-            Uint32 currentTime = SDL_GetTicks();
-            float fps = 60000.0f / (currentTime - lastTime);
-            lastTime = currentTime;
-            
-            std::cout << "=== Performance Stats ===" << std::endl;
-            std::cout << "FPS: " << fps << std::endl;
-            std::cout << "Camera pos: (" << mCameraPos.x << ", " << mCameraPos.y << ", " << mCameraPos.z << ")" << std::endl;
-            std::cout << "Total actors in grid: " << mChunkGrid->GetTotalActorCount() << std::endl;
-            std::cout << "Visible actors: " << mVisibleActors.size() << std::endl;
-        }
-
-    }
-    
-    Uint32 afterChunkQuery = SDL_GetTicks();
-    
-    
-    Uint32 afterCollect = SDL_GetTicks();
-    
-
-    if (frameCount % 60 == 0 && mChunkGrid) {
-        std::cout << "Visible meshes: " << mVisibleMeshes.size() << std::endl;
-        std::cout << "Visible sprites: " << mVisibleSprites.size() << std::endl;
-        std::cout << "Time - Camera: " << (afterCameraSetup - startFrame) 
-                  << "ms, Chunk: " << (afterChunkQuery - afterCameraSetup)
-                  << "ms, Collect: " << (afterCollect - afterChunkQuery) << "ms" << std::endl;
-    }
-
-    */
 
 
     RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;

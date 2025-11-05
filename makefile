@@ -1,8 +1,12 @@
+
+OPTIMIZATION_LEVEL = 1
+
 # Compiler and flags
 CXX = g++
 CC = gcc
-CXXFLAGS = -Wall -Wextra -O3 -std=c++17
-CFLAGS = -Wall -Wextra -O3
+
+CXXFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -std=c++17
+CFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL)
 
 LDFLAGS = -lSDL2 -lSDL2_image -lGLEW -lGL -lfluidsynth
 
