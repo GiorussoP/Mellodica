@@ -13,14 +13,30 @@ Renderer::Renderer()
 , mProjectionMatrix(Matrix4::Identity)
 , mMeshShader(nullptr)
 , mSpriteShader(nullptr)
+, mFramebufferShader(nullptr)
 , mSpriteQuad(nullptr)
-
+, mScreenQuad(nullptr)
+, mFramebuffer(0)
+, mFramebufferTexture(0)
+, mFramebufferDepthStencil(0)
+, mFramebufferWidth(320)
+, mFramebufferHeight(240)
 {
-
 }
 
 Renderer::~Renderer()
 {
+    // Delete framebuffer objects
+    if (mFramebuffer) {
+        glDeleteFramebuffers(1, &mFramebuffer);
+    }
+    if (mFramebufferTexture) {
+        glDeleteTextures(1, &mFramebufferTexture);
+    }
+    if (mFramebufferDepthStencil) {
+        glDeleteRenderbuffers(1, &mFramebufferDepthStencil);
+    }
+    
     // Delete shaders
     if (mMeshShader) {
         delete mMeshShader;
@@ -30,11 +46,21 @@ Renderer::~Renderer()
         delete mSpriteShader;
         mSpriteShader = nullptr;
     }
+    if (mFramebufferShader) {
+        delete mFramebufferShader;
+        mFramebufferShader = nullptr;
+    }
     
     // Delete sprite quad
     if (mSpriteQuad) {
         delete mSpriteQuad;
         mSpriteQuad = nullptr;
+    }
+    
+    // Delete screen quad
+    if (mScreenQuad) {
+        delete mScreenQuad;
+        mScreenQuad = nullptr;
     }
     
     // Delete all textures
@@ -54,6 +80,12 @@ bool Renderer::Initialize(float width, float height)
 	
 	// Create sprite quad for simple sprite rendering
 	CreateSpriteQuad();
+	
+	// Create screen quad for framebuffer rendering
+	CreateScreenQuad();
+	
+	// Create framebuffer for render-to-texture
+	CreateFramebuffer();
 
     // Set the clear color to light grey
     glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
@@ -70,15 +102,15 @@ bool Renderer::Initialize(float width, float height)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Set default projection matrix (orthographic)
+    // Set default projection matrix based on framebuffer size (orthographic)
     float orthoSize = 4.0f;  // Size of the orthographic view (half-height)
-    float aspectRatio = width / height;
+    float aspectRatio = static_cast<float>(mFramebufferWidth) / static_cast<float>(mFramebufferHeight);
     mProjectionMatrix = Matrix4::CreateOrtho(-orthoSize * aspectRatio, orthoSize * aspectRatio,
                                               -orthoSize, orthoSize, 0.1f, 100.0f);
     
     std::cout << "Orthographic projection created: size=" << orthoSize 
-              << ", width=" << (orthoSize * aspectRatio * 2.0f)
-              << ", height=" << (orthoSize * 2.0f) << std::endl;
+              << ", framebuffer=" << mFramebufferWidth << "x" << mFramebufferHeight
+              << ", aspect=" << aspectRatio << std::endl;
 
     // Activate mesh shader
     if (mMeshShader) {
@@ -347,6 +379,14 @@ bool Renderer::LoadShaders()
 	if (!mSpriteShader->Load("./assets/shaders/Base.vert", "./assets/shaders/Sprite.frag")) {
 		delete mSpriteShader;
 		mSpriteShader = nullptr;
+		return false;
+	}
+	
+	// Create framebuffer shader (Screenspace.vert -> Framebuffer.frag)
+	mFramebufferShader = new Shader();
+	if (!mFramebufferShader->Load("./assets/shaders/Screenspace.vert", "./assets/shaders/Framebuffer.frag")) {
+		delete mFramebufferShader;
+		mFramebufferShader = nullptr;
 		return false;
 	}
 
@@ -838,4 +878,123 @@ void Renderer::DrawSingleMesh(Mesh* mesh, const Vector3& position, const Vector3
     
     // Re-enable depth test
     glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::CreateScreenQuad()
+{
+    // Create a fullscreen quad in NDC space (-1 to 1) for displaying the framebuffer
+    std::vector<Vertex> vertices;
+    std::vector<Triangle> triangles;
+    
+    // Vertices for a fullscreen quad (-1 to 1 in NDC)
+    // UVs: bottom-left is (0,0), top-right is (1,1)
+    vertices.push_back(Vertex(Vector3(-1.0f,  1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f), Vector2(0.0f, 1.0f)));  // Top-left
+    vertices.push_back(Vertex(Vector3(-1.0f, -1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f), Vector2(0.0f, 0.0f)));  // Bottom-left
+    vertices.push_back(Vertex(Vector3( 1.0f, -1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f), Vector2(1.0f, 0.0f)));  // Bottom-right
+    vertices.push_back(Vertex(Vector3( 1.0f,  1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f), Vector2(1.0f, 1.0f)));  // Top-right
+    
+    // Two triangles to form a quad
+    triangles.push_back(Triangle(0, 1, 2, 0));  // First triangle
+    triangles.push_back(Triangle(0, 2, 3, 0));  // Second triangle
+    
+    mScreenQuad = new Mesh();
+    MeshData meshData;
+    meshData.vertices = vertices;
+    meshData.triangles = triangles;
+    mScreenQuad->Build(meshData);
+}
+
+void Renderer::CreateFramebuffer()
+{
+    // Generate framebuffer
+    glGenFramebuffers(1, &mFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+    
+    // Create color texture
+    glGenTextures(1, &mFramebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mFramebufferWidth, mFramebufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // Pixel-perfect scaling
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFramebufferTexture, 0);
+    
+    // Create depth and stencil renderbuffer
+    glGenRenderbuffers(1, &mFramebufferDepthStencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, mFramebufferDepthStencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mFramebufferWidth, mFramebufferHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mFramebufferDepthStencil);
+    
+    // Check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "ERROR: Framebuffer is not complete!" << std::endl;
+    }
+    
+    // Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    std::cout << "Framebuffer created: " << mFramebufferWidth << "x" << mFramebufferHeight << std::endl;
+}
+
+void Renderer::BeginFramebuffer()
+{
+    // Bind to framebuffer for rendering
+    glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+    glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
+    
+    // Clear framebuffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::EndFramebuffer()
+{
+    // Unbind framebuffer (render to screen)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    // Get actual window size from SDL instead of viewport (which might be set to framebuffer size)
+    int windowWidth, windowHeight;
+    SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &windowWidth, &windowHeight);
+    
+    // Debug output
+    static bool debugOnce = false;
+    if (!debugOnce) {
+        SDL_Log("Window drawable size: %d x %d", windowWidth, windowHeight);
+        SDL_Log("Framebuffer size: %d x %d", mFramebufferWidth, mFramebufferHeight);
+        debugOnce = true;
+    }
+    
+    // Set viewport to full window
+    glViewport(0, 0, windowWidth, windowHeight);
+    
+    // Clear screen to black
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // Disable depth test for screen quad
+    glDisable(GL_DEPTH_TEST);
+    
+    // Activate framebuffer shader
+    mFramebufferShader->SetActive();
+    
+    // Bind framebuffer texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
+    mFramebufferShader->SetIntegerUniform("uFramebufferTexture", 0);
+    
+    // Draw fullscreen quad directly without transformation
+    mScreenQuad->SetActive();
+    glDrawElements(GL_TRIANGLES, mScreenQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    
+    // Debug: check for OpenGL errors
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        SDL_Log("OpenGL error after drawing screen quad: %d", err);
+    }
+    
+    // Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
+    
+    // Restore clear color for next frame
+    glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
 }

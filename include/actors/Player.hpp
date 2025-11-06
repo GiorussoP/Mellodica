@@ -14,11 +14,6 @@ public:
     void OnCollision(Vector3 penetration, ColliderComponent* other) override;
     
 private:
-    static constexpr float PLAYER_MOVE_SPEED = 10.0f;
-    static constexpr float CAMERA_TURN_SPEED = 90.0f;
-    
-    float mMoveSpeed;
-    float mTurnSpeed;
 
     bool mMoveForward;
     bool mMoveBackward;

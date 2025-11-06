@@ -601,16 +601,15 @@ void Game::GenerateOutput()
     static int frameCount = 0;
     Uint32 startFrame = SDL_GetTicks();
     
-    mRenderer->Clear();
+    // Begin rendering to framebuffer
+    mRenderer->BeginFramebuffer();
     
     // Update camera
     Vector3 targetPos = mCameraPos + mCameraForward;
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
 
-
     RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
    
-
     // Render meshes with instancing (batch draw)
     mRenderer->ActivateMeshShader();
     mRenderer->DrawMeshesInstanced(mVisibleMeshes, mode);
@@ -627,6 +626,9 @@ void Game::GenerateOutput()
     // Render sprites with instancing (batch draw)
     mRenderer->ActivateSpriteShader();
     mRenderer->DrawSpritesInstanced(mVisibleSprites, mode);
+    
+    // End framebuffer rendering and display to screen
+    mRenderer->EndFramebuffer();
     
     SDL_GL_SwapWindow(mWindow);
 }

@@ -61,10 +61,20 @@ public:
 
     void Clear();
     void Present();
+    
+    // Framebuffer rendering
+    void BeginFramebuffer();  // Start rendering to framebuffer
+    void EndFramebuffer();    // Render framebuffer to screen
+    
+    // Get framebuffer dimensions
+    int GetFramebufferWidth() const { return mFramebufferWidth; }
+    int GetFramebufferHeight() const { return mFramebufferHeight; }
 
 private:
 	bool LoadShaders();
     void CreateSpriteQuad();  // Create a simple quad for sprite rendering
+    void CreateFramebuffer(); // Create framebuffer for render-to-texture
+    void CreateScreenQuad();  // Create fullscreen quad for framebuffer display
 
 	// Projection and view matrices
 	Matrix4 mViewMatrix;
@@ -73,6 +83,7 @@ private:
 	// Shaders
 	Shader* mMeshShader;
 	Shader* mSpriteShader;
+	Shader* mFramebufferShader;
     
     // Textures
     std::vector<Texture*> mTextures;
@@ -83,6 +94,16 @@ private:
     
     // Sprite quad mesh for simple sprite rendering
     Mesh* mSpriteQuad;
+    
+    // Screen quad for framebuffer rendering
+    Mesh* mScreenQuad;
+    
+    // Framebuffer objects
+    GLuint mFramebuffer;
+    GLuint mFramebufferTexture;
+    GLuint mFramebufferDepthStencil;
+    int mFramebufferWidth;
+    int mFramebufferHeight;
     
     // Atlases
     std::unordered_map<std::string, TextureAtlas*> mAtlasCache;

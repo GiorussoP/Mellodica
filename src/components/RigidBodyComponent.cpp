@@ -36,7 +36,7 @@ void RigidBodyComponent::Update(float deltaTime) {
         mAcceleration += Vector3(0.0f, -1.0f, 0.0f) * GRAVITY;
     }
 
-    if (mFriction != 0.0f && mVelocity.LengthSq() > MAX_SPEED * MAX_SPEED)
+    if (mFriction != 0.0f && mVelocity.LengthSq() > 0.01f * 0.01f)
     {
         ApplyForce(Vector3::Normalize(mVelocity) * -mFriction);
     }
@@ -50,7 +50,7 @@ void RigidBodyComponent::Update(float deltaTime) {
         mVelocity = Vector3::Normalize(mVelocity) * MAX_SPEED;
     }
 
-    if (mVelocity.LengthSq() < 0.01f * 0.01f) {
+    if (mVelocity.LengthSq() < 0.1f * 0.1f) {
         mVelocity = Vector3::Zero;
     }
 

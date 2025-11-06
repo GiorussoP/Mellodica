@@ -5,13 +5,14 @@
 #include "Texture.hpp"
 #include "Renderer.hpp"
 
-// Local camera move speed for player
+constexpr float PLAYER_MOVE_SPEED = 7.0f;
+constexpr float PLAYER_ACCELERATION = 50.0f;
+constexpr float PLAYER_FRICTION = 30.0f;
 constexpr float CAMERA_MOVE_SPEED = 5.0f;
+constexpr float CAMERA_TURN_SPEED = 90.0f;
 
 Player::Player(Game* game)
     : Actor(game)
-    , mMoveSpeed(600.0f)
-    , mTurnSpeed(180.0f)
     , mMoveForward(false)
     , mMoveBackward(false)
     , mMoveLeft(false)
@@ -24,10 +25,10 @@ Player::Player(Game* game)
     // Mark player as always active so it's always visible
     game->AddAlwaysActive(this);
     
-    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 5.0f, false);  // Disable gravity for now
+    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, PLAYER_FRICTION, false);  // Disable gravity for now
     //mColliderComponent = new SphereCollider(this, ColliderLayer::Player, Vector3::Zero, 0.5f);
 
-    mColliderComponent = new AABBCollider(this,ColliderLayer::Player,Vector3::Zero,Vector3(0.5f),false);
+    mColliderComponent = new SphereCollider(this,ColliderLayer::Player,Vector3::Zero,0.5f,false);
 
     // Get atlas from renderer cache
     TextureAtlas* atlas = game->GetRenderer()->LoadAtlas("./assets/textures/Mario.json");
@@ -84,7 +85,7 @@ void Player::OnUpdate(float deltaTime)
     {
         moveDir.Normalize();
         // Set velocity directly for responsive player control
-        mRigidBodyComponent->ApplyForce(moveDir * mMoveSpeed * deltaTime);
+        mRigidBodyComponent->ApplyForce(moveDir * PLAYER_ACCELERATION);
 
         if(mRigidBodyComponent->GetVelocity().LengthSq()>PLAYER_MOVE_SPEED * PLAYER_MOVE_SPEED){
             mRigidBodyComponent->SetVelocity(Vector3::Normalize(mRigidBodyComponent->GetVelocity()) * PLAYER_MOVE_SPEED);
