@@ -1,6 +1,8 @@
 #include "render/Mesh.hpp"
 #include <iostream>
 #include <fstream>
+#include <array>
+#include <cmath>
 
 
 // ============== Base Mesh Class ==============
@@ -162,6 +164,11 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 CubeMesh::CubeMesh()
 {
+    Build(GenerateCubeData());
+}
+
+MeshData CubeMesh::GenerateCubeData()
+{
     MeshData data;
     
     // Tile indices for each face
@@ -180,8 +187,8 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile0));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile0));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile0));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile0));
     }
     
     // Back face (Z-)
@@ -192,8 +199,8 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(-0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile1));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile1));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile1));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile1));
     }
     
     // Right face (X+)
@@ -204,8 +211,8 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile2));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile2));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile2));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile2));
     }
     
     // Left face (X-)
@@ -216,8 +223,8 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile3));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile3));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile3));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile3));
     }
     
     // Top face (Y+)
@@ -228,8 +235,8 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile4));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile4));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile4));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile4));
     }
     
     // Bottom face (Y-)
@@ -240,17 +247,43 @@ CubeMesh::CubeMesh()
         data.vertices.push_back(Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile5));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile5));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile5));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile5));
     }
+    
+    return data;
+}
 
-    Build(data);
+
+PlaneMesh::PlaneMesh()
+{
+    Build(GeneratePlaneData());
+}
+
+MeshData PlaneMesh::GeneratePlaneData()
+{
+    MeshData data;
+    
+    Vector3 normal(0.0f, 1.0f, 0.0f);
+    data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.triangles.push_back(Triangle(0, 2, 1, 0));
+    data.triangles.push_back(Triangle(0, 3, 2, 0));
+
+    return data;
 }
 
 
 // ============== PyramidMesh Class ==============
 
 PyramidMesh::PyramidMesh()
+{
+    Build(GeneratePyramidData());
+}
+
+MeshData PyramidMesh::GeneratePyramidData()
 {
     MeshData data;
     
@@ -273,7 +306,7 @@ PyramidMesh::PyramidMesh()
         data.vertices.push_back(Vertex(v0, normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(v1, normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(apex, normal, Vector2(0.5f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));
     }
     
     // Right face (X+)
@@ -289,7 +322,7 @@ PyramidMesh::PyramidMesh()
         data.vertices.push_back(Vertex(v0, normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(v1, normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(apex, normal, Vector2(0.5f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));
     }
     
     // Back face (Z-)
@@ -305,7 +338,7 @@ PyramidMesh::PyramidMesh()
         data.vertices.push_back(Vertex(v0, normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(v1, normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(apex, normal, Vector2(0.5f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));
     }
     
     // Left face (X-)
@@ -321,7 +354,7 @@ PyramidMesh::PyramidMesh()
         data.vertices.push_back(Vertex(v0, normal, Vector2(0.0f, 0.0f)));
         data.vertices.push_back(Vertex(v1, normal, Vector2(1.0f, 0.0f)));
         data.vertices.push_back(Vertex(apex, normal, Vector2(0.5f, 1.0f)));
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, brickTileIndex));
     }
     
     // Bottom face (Y-)
@@ -334,10 +367,146 @@ PyramidMesh::PyramidMesh()
         data.vertices.push_back(Vertex(Vector3(0.5f, baseHeight, 0.5f), normal, Vector2(1.0f, 1.0f)));
         data.vertices.push_back(Vertex(Vector3(-0.5f, baseHeight, 0.5f), normal, Vector2(0.0f, 1.0f)));
         
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, checkerTileIndex));  // CCW
-        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, checkerTileIndex));  // CCW
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, checkerTileIndex));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, checkerTileIndex));
     }
-    Build(data);
+    
+    return data;
+}
+/*
+      Vector3 normal(0.0f, 1.0f, 0.0f);
+        unsigned int baseIdx = data.vertices.size();
+        data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+        data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+        data.vertices.push_back(Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+        data.vertices.push_back(Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+2, baseIdx+1, tile4));
+        data.triangles.push_back(Triangle(baseIdx+0, baseIdx+3, baseIdx+2, tile4));
+*/
+
+// ============== SphereMesh Class (Icosahedron) ==============
+
+SphereMesh::SphereMesh()
+{
+    Build(GenerateIcosahedronData());
+}
+
+MeshData SphereMesh::GenerateIcosahedronData()
+{
+    MeshData data;
+    
+    // Golden ratio for icosahedron
+    const float phi = (1.0f + Math::Sqrt(5.0f)) / 2.0f;
+    const float a = 0.5f;
+    const float b = a / phi;
+    
+    // 12 vertices of an icosahedron (scaled to fit in unit sphere)
+    // Normalize to make it a unit sphere
+    std::vector<Vector3> positions = {
+        Vector3(-b, a, 0.0f),   // 0
+        Vector3(b, a, 0.0f),    // 1
+        Vector3(-b, -a, 0.0f),  // 2
+        Vector3(b, -a, 0.0f),   // 3
+        
+        Vector3(0.0f, -b, a),   // 4
+        Vector3(0.0f, b, a),    // 5
+        Vector3(0.0f, -b, -a),  // 6
+        Vector3(0.0f, b, -a),   // 7
+        
+        Vector3(a, 0.0f, -b),   // 8
+        Vector3(a, 0.0f, b),    // 9
+        Vector3(-a, 0.0f, -b),  // 10
+        Vector3(-a, 0.0f, b)    // 11
+    };
+    
+    // Normalize all positions to make them lie on a unit sphere
+    for (auto& pos : positions) {
+        pos.Normalize();
+        pos = pos * 0.5f; // Scale to fit in [-0.5, 0.5] bounds
+    }
+    
+    // 20 triangular faces of an icosahedron
+    std::vector<std::array<unsigned int, 3>> faces = {
+        // 5 faces around point 0
+        {{0, 11, 5}},
+        {{0, 5, 1}},
+        {{0, 1, 7}},
+        {{0, 7, 10}},
+        {{0, 10, 11}},
+        
+        // 5 adjacent faces
+        {{1, 5, 9}},
+        {{5, 11, 4}},
+        {{11, 10, 2}},
+        {{10, 7, 6}},
+        {{7, 1, 8}},
+        
+        // 5 faces around point 3
+        {{3, 9, 4}},
+        {{3, 4, 2}},
+        {{3, 2, 6}},
+        {{3, 6, 8}},
+        {{3, 8, 9}},
+        
+        // 5 adjacent faces
+        {{4, 9, 5}},
+        {{2, 4, 11}},
+        {{6, 2, 10}},
+        {{8, 6, 7}},
+        {{9, 8, 1}}
+    };
+    
+    // Calculate vertex normals by averaging face normals
+    std::vector<Vector3> normals(positions.size(), Vector3::Zero);
+    std::vector<int> normalCounts(positions.size(), 0);
+    
+    for (const auto& face : faces) {
+        // Calculate face normal
+        Vector3 v0 = positions[face[0]];
+        Vector3 v1 = positions[face[1]];
+        Vector3 v2 = positions[face[2]];
+        
+        Vector3 edge1 = v1 - v0;
+        Vector3 edge2 = v2 - v0;
+        Vector3 faceNormal = Vector3::Cross(edge1, edge2);
+        faceNormal.Normalize();
+        
+        // Add to vertex normals
+        normals[face[0]] += faceNormal;
+        normals[face[1]] += faceNormal;
+        normals[face[2]] += faceNormal;
+        normalCounts[face[0]]++;
+        normalCounts[face[1]]++;
+        normalCounts[face[2]]++;
+    }
+    
+    // Average and normalize vertex normals
+    for (size_t i = 0; i < normals.size(); ++i) {
+        if (normalCounts[i] > 0) {
+            normals[i] = normals[i] * (1.0f / normalCounts[i]);
+            normals[i].Normalize();
+        }
+    }
+    
+    // Create vertices with normals and texture coordinates
+    for (size_t i = 0; i < positions.size(); ++i) {
+        // Simple spherical UV mapping
+        Vector3 n = positions[i];
+        n.Normalize();
+        
+        float u = 0.5f + (Math::Atan2(n.z, n.x) / (2.0f * Math::Pi));
+        float v = 0.5f - (asinf(n.y) / Math::Pi);
+        
+        data.vertices.push_back(Vertex(positions[i], normals[i], Vector2(u, v)));
+    }
+    
+    // Create triangles
+    int tileIndex = 0;
+    for (const auto& face : faces) {
+        data.triangles.push_back(Triangle(face[0], face[1], face[2], tileIndex));
+    }
+    
+    return data;
 }
 
 void Mesh::SetupInstanceBuffer(size_t maxInstances)

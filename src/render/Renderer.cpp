@@ -400,6 +400,13 @@ Mesh* Renderer::LoadMesh(const std::string& meshName)
         mesh = new CubeMesh();
     } else if (meshName == "pyramid") {
         mesh = new PyramidMesh();
+    } else if (meshName == "plane") {
+        mesh = new PlaneMesh();
+    } else if (meshName == "sphere") {
+        mesh = new SphereMesh();
+    } else {
+        std::cerr << "LoadMesh: unknown mesh name '" << meshName << "'" << std::endl;
+        return nullptr;
     }
     
     if (mesh) {
@@ -753,6 +760,76 @@ void Renderer::ActivateSpriteShader()
     mSpriteShader->SetActive();
     
     // Set frame-level uniforms (uniforms that don't change per sprite)
-    // For sprites, lighting is typically simpler
-    // These can be configured based on your needs
+}
+
+void Renderer::DrawSingleMesh(Mesh* mesh, const Vector3& position, const Vector3& scale, const Quaternion& rotation)
+{
+    if (!mesh || !mMeshShader) {
+        return;
+    }
+    
+    // Setup instance buffer if not already done
+    if (mesh->GetMaxInstances() == 0) {
+        mesh->SetupInstanceBuffer(1000);  // Setup with reasonable max instances
+    }
+    
+    // Disable depth test for debug drawing
+    glDisable(GL_DEPTH_TEST);
+    
+    // Activate the mesh VAO
+    mesh->SetActive();
+    
+    // Set polygon mode to wireframe for debug drawing
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
+    // Set the view-projection matrix
+    Matrix4 viewProj = mViewMatrix * mProjectionMatrix;
+    mMeshShader->SetMatrixUniform("uViewProjection", viewProj);
+    
+    // Build model matrix from position, rotation, and scale
+    // Use the same order as DrawMeshesInstanced
+    Matrix4 model = Matrix4::CreateScale(scale) *
+                   Matrix4::CreateFromQuaternion(rotation) *
+                   Matrix4::CreateTranslation(position);
+    
+    // Normal matrix (for lighting, if needed)
+    Matrix4 normalMatrix = Matrix4::CreateFromQuaternion(rotation);
+    
+    // Prepare instance data for a single mesh
+    std::vector<float> instanceData;
+    instanceData.reserve(36); // 36 floats per instance
+    
+    // Add model matrix (16 floats)
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            instanceData.push_back(model.mat[row][col]);
+        }
+    }
+    
+    // Add normal matrix (16 floats)
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            instanceData.push_back(normalMatrix.mat[row][col]);
+        }
+    }
+    
+    // Add green color (3 floats) for all debug colliders
+    instanceData.push_back(0.0f);  // R
+    instanceData.push_back(1.0f);  // G
+    instanceData.push_back(0.0f);  // B
+    
+    // Add tile index (1 float) - -1 means no texture
+    instanceData.push_back(-1.0f);
+    
+    // Update instance buffer with single instance
+    mesh->UpdateInstanceBuffer(instanceData, 1);
+    
+    // Draw using instanced rendering with 1 instance
+    glDrawElementsInstanced(GL_TRIANGLES, mesh->GetNumIndices(), GL_UNSIGNED_INT, nullptr, 1);
+    
+    // Restore polygon mode
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    // Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
 }

@@ -3,6 +3,7 @@
 #include "render/Mesh.hpp"
 #include "render/Renderer.hpp"
 #include "render/Texture.hpp"
+#include "components/ColliderComponent.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include <iostream>
 
@@ -124,7 +125,25 @@ CubeActor::CubeActor(Game* game, const Vector3& color,  int startingIndex)
     mMeshComponent->SetColor(color);
 }
 
+GroundActor::GroundActor(Game* game, const Vector3& color,  int startingIndex)
+    : Actor(game)
+    , mMeshComponent(nullptr)
+{
+    Texture* texture = game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+    // Get atlas from renderer cache
+    TextureAtlas* atlas = game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+    
+    // Get shared mesh from renderer cache (only one instance created)
+    Mesh* mesh = game->GetRenderer()->LoadMesh("plane");
 
+    mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, startingIndex);
+    mMeshComponent->SetColor(color);
+}
+
+void GroundActor::OnUpdate(float deltaTime)
+{
+    // No specific behavior for ground - just render
+}
 
 
 PyramidActor::PyramidActor(Game* game, const Vector3& color,  int startingIndex)
@@ -173,6 +192,9 @@ MarioActor::MarioActor(Game* game)
     mSpriteComponent->AddAnimation("run",{"Run1.png","Run2.png","Run3.png"});
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(8.0f);
+
+    // Collider component - static since Mario doesn't move
+    mColliderComponent = new SphereCollider(this, ColliderLayer::Player, Vector3::Zero, 0.5f, true);
 }
 
 void MarioActor::OnUpdate(float deltaTime) {
@@ -199,11 +221,33 @@ GoombaActor::GoombaActor(Game* game)
     mSpriteComponent->AddAnimation("run", {"Walk0.png", "Walk1.png"});
     mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetAnimFPS(2.0f);
+
+    mColliderComponent = new AABBCollider(this,ColliderLayer::Player, Vector3::Zero,Vector3(0.5f,0.5f,0.5f));
 }
 
 void GoombaActor::OnUpdate(float deltaTime) {
     // Update the sprite component
     mSpriteComponent->Update(deltaTime);
+}
+
+// OBBTestActor implementation
+OBBTestActor::OBBTestActor(Game* game)
+: Actor(game)
+, mColliderComponent(nullptr)
+{
+    // Register as always-active so it's included in collision detection
+    game->AddAlwaysActive(this);
+    
+    // Create a tilted OBB collider (45 degrees around Y axis)
+    mColliderComponent = new OBBCollider(this, ColliderLayer::Player, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f), true);
+    
+    // Rotate 45 degrees around Y axis
+    Quaternion rotation = Quaternion(Vector3::UnitY, Math::ToRadians(45.0f));
+    SetRotation(rotation);
+}
+
+void OBBTestActor::OnUpdate(float deltaTime) {
+    // Static actor - no update needed
 }
 
 

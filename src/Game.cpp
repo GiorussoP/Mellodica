@@ -3,6 +3,7 @@
 #include "components/DrawComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
+#include "components/ColliderComponent.hpp"
 #include "render/Renderer.hpp"
 #include "render/Mesh.hpp"
 #include "render/TextureAtlas.hpp"
@@ -10,6 +11,7 @@
 #include "ChunkGrid.hpp"
 #include "MIDI/SynthEngine.hpp"
 #include "MIDI/MIDIPlayer.hpp"
+#include "Player.hpp"
 
 #include <GL/glew.h>
 #include <iostream>
@@ -148,7 +150,7 @@ void Game::InitializeActors()
 
     
     // Some actors for testing
-    const int gridSize = 300;
+    const int gridSize = 3;
     const float spacing = 1.0f;
     const float gridOffset = (gridSize - 1) * spacing * 0.5f;
     int actorCount = 0;
@@ -160,7 +162,7 @@ void Game::InitializeActors()
             Actor* sprite = nullptr;
             int pattern = (x + z) % 5;
 
-
+        
             switch (pattern) {
                 case 0:
                     mesh = new GrassCubeActor(this);
@@ -193,10 +195,17 @@ void Game::InitializeActors()
     }
     
     // Create camera controller
-    new CameraController(this);
+    //new CameraController(this);
     
     // Create MIDI control actor for testing operations
     new MIDIControlActor(this);
+
+    // Create test OBB actor (tilted 45 degrees)
+    auto obbTest = new OBBTestActor(this);
+    obbTest->SetPosition(Vector3(5.0f, 1.0f, 0.0f));  // Place it to the right of spawn
+
+    auto p = new Player(this);
+    p->SetPosition(Vector3(10.0f,1.0f,0.0f));
 }
     
 
@@ -209,10 +218,8 @@ void Game::SetCameraPos(Vector3 position){
 
         mVisibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
 
-
         mVisibleMeshes.clear();
         mVisibleSprites.clear();
-        
     
         // First, collect from always-active actors
         for (auto actor : mAlwaysActiveActors)
@@ -237,38 +244,23 @@ void Game::SetCameraPos(Vector3 position){
             }
         }
     
-    // Then, collect from Chunkly visible actors
-    for (auto actor : mVisibleActors)
-    {
-        auto& components = actor->GetComponents();
-        for (auto component : components)
-        {
-            if (auto mesh = dynamic_cast<MeshComponent*>(component))
-            {
-                if (mesh->IsVisible())
-                {
-                    mVisibleMeshes.push_back(mesh);
+        // Then, collect from Chunk visible actors
+        for (auto actor : mVisibleActors){
+            auto& components = actor->GetComponents();
+            for (auto component : components) {
+                if (auto mesh = dynamic_cast<MeshComponent*>(component)) {
+                    if (mesh->IsVisible()) {
+                        mVisibleMeshes.push_back(mesh);
+                    }
                 }
-            }
-            else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
-            {
-                if (sprite->IsVisible())
-                {
-                    mVisibleSprites.push_back(sprite);
+                else if (auto sprite = dynamic_cast<SpriteComponent*>(component)) {
+                    if (sprite->IsVisible()) {
+                        mVisibleSprites.push_back(sprite);
+                    }
                 }
             }
         }
     }
-
-
-
-    }
-
-
-    
-
-
-
 }
 
 void Game::RunLoop()
@@ -308,62 +300,42 @@ void Game::Shutdown()
     std::cout << "Shutdown: Stopping MIDI thread..." << std::endl;
     MIDIPlayer::stopMIDIThread();
     
-    // Close the window immediately so user sees it close
-    if (mWindow)
-    {
+    // Close the window
+    if (mWindow) {
         std::cout << "Shutdown: Closing window..." << std::endl;
         SDL_DestroyWindow(mWindow);
         mWindow = nullptr;
         std::cout << "Shutdown: Window closed" << std::endl;
     }
     
-    // Now do the cleanup in the background
-    
-    // Clear always-active set first (actors will try to unregister during deletion)
     mAlwaysActiveActors.clear();
+    mVisibleActors.clear();
+    mVisibleMeshes.clear();
+    mVisibleSprites.clear();
     
     // Delete Chunk grid first
-    if (mChunkGrid)
-    {
-        std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
-        delete mChunkGrid;
-        mChunkGrid = nullptr;
-        std::cout << "Shutdown: Chunk grid deleted" << std::endl;
-    }
+    std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
+    delete mChunkGrid;
+    mChunkGrid = nullptr;
+    std::cout << "Shutdown: Chunk grid deleted" << std::endl;
     
+    // Delete all actors
     std::cout << "Shutdown: Deleting " << mActors.size() << " actors..." << std::endl;
-    Uint32 startTime = SDL_GetTicks();
-    
-    // Fast mass deletion - delete in batches
-    size_t total = mActors.size();
-    size_t deleted = 0;
-    
-    for (size_t i = 0; i < total; ++i)
-    {
-        delete mActors[i];
-        deleted++;
-        
-        if (deleted % 20000 == 0) {
-            Uint32 elapsed = SDL_GetTicks() - startTime;
-            std::cout << "Deleted " << deleted << "/" << total << " actors in " << elapsed << "ms..." << std::endl;
-        }
+    while (!mActors.empty()) {
+        delete mActors.back();
     }
-    
-    Uint32 totalTime = SDL_GetTicks() - startTime;
     mActors.clear();
-    std::cout << "Shutdown: All actors deleted in " << totalTime << "ms" << std::endl;
+    std::cout << "Shutdown: All actors deleted" << std::endl;
+
+    // Shutdown renderer
+    std::cout << "Shutdown: Shutting down renderer..." << std::endl;
+    mRenderer->Shutdown();
+    delete mRenderer;
+    mRenderer = nullptr;
+    std::cout << "Shutdown: Renderer deleted" << std::endl;
+
     
-    if (mRenderer)
-    {
-        std::cout << "Shutdown: Shutting down renderer..." << std::endl;
-        mRenderer->Shutdown();
-        delete mRenderer;
-        mRenderer = nullptr;
-        std::cout << "Shutdown: Renderer deleted" << std::endl;
-    }
-    
-    if (mGLContext)
-    {
+    if (mGLContext) {
         std::cout << "Shutdown: Deleting GL context..." << std::endl;
         SDL_GL_DeleteContext(mGLContext);
         mGLContext = nullptr;
@@ -389,14 +361,6 @@ void Game::AddActor(Actor* actor)
 
 void Game::RemoveActor(Actor* actor)
 {
-    // During mass deletion (shutdown with mChunkGrid == nullptr), 
-    // skip all operations for performance
-    if (!mChunkGrid && mActors.size() > 10000)
-    {
-        // Fast path during shutdown
-        return;
-    }
-    
     // Normal removal: unregister from Chunk grid
     if (mChunkGrid)
     {
@@ -484,6 +448,7 @@ void Game::ProcessInput()
                 else if (event.key.keysym.sym == SDLK_F1)
                 {
                     mIsDebugging = !mIsDebugging;
+                    std::cout << "=== DEBUG MODE " << (mIsDebugging ? "ENABLED" : "DISABLED") << " ===" << std::endl;
                 }
                 break;
         }
@@ -560,6 +525,80 @@ void Game::UpdateGame(float deltaTime)
 {
     // MIDI is updated in its own thread now, just update actors
     UpdateActors(deltaTime);
+    
+    // Check collisions after all actors have been updated
+    CheckCollisions();
+}
+
+void Game::CheckCollisions()
+{
+    // Collect all colliders from active actors
+    std::vector<ColliderComponent*> colliders;
+    
+    // Collect from always-active actors
+    for (auto actor : mAlwaysActiveActors)
+    {
+        auto collider = actor->GetComponent<ColliderComponent>();
+        if (collider)
+        {
+            colliders.push_back(collider);
+        }
+    }
+    
+    // Collect from visible actors
+    for (auto actor : mVisibleActors)
+    {
+        // Skip if already added from always-active
+        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
+        {
+            continue;
+        }
+        
+        auto collider = actor->GetComponent<ColliderComponent>();
+        if (collider)
+        {
+            colliders.push_back(collider);
+        }
+    }
+    
+    // Check collisions between all pairs
+    for (size_t i = 0; i < colliders.size(); i++)
+    {
+        for (size_t j = i + 1; j < colliders.size(); j++)
+        {
+            ColliderComponent* colliderA = colliders[i];
+            ColliderComponent* colliderB = colliders[j];
+            
+            // Check if they intersect
+            if (colliderA->Intersect(*colliderB))
+            {
+                // Get penetration vector for A (how much to push A out of B)
+                Vector3 penetrationA = colliderA->DetectCollision(*colliderB);
+                
+                // Determine who gets pushed based on static flags
+                bool aIsStatic = colliderA->IsStatic();
+                bool bIsStatic = colliderB->IsStatic();
+                
+                if (!aIsStatic && !bIsStatic)
+                {
+                    // Both dynamic - split the penetration
+                    colliderA->GetOwner()->OnCollision(penetrationA * 0.5f, colliderB);
+                    colliderB->GetOwner()->OnCollision(penetrationA * -0.5f, colliderA);
+                }
+                else if (!aIsStatic && bIsStatic)
+                {
+                    // A is dynamic, B is static - only push A
+                    colliderA->GetOwner()->OnCollision(penetrationA, colliderB);
+                }
+                else if (aIsStatic && !bIsStatic)
+                {
+                    // A is static, B is dynamic - only push B
+                    colliderB->GetOwner()->OnCollision(penetrationA * -1.0f, colliderA);
+                }
+                // else: both static - no response needed
+            }
+        }
+    }
 }
 
 void Game::GenerateOutput()
@@ -581,6 +620,15 @@ void Game::GenerateOutput()
     // Render meshes with instancing (batch draw)
     mRenderer->ActivateMeshShader();
     mRenderer->DrawMeshesInstanced(mVisibleMeshes, mode);
+
+    if (mIsDebugging) {
+        for (auto actor : mVisibleActors) {
+            auto& components = actor->GetComponents();
+            for (auto component : components) {
+                component->DebugDraw(mRenderer);
+            }
+        }
+    }
     
     // Render sprites with instancing (batch draw)
     mRenderer->ActivateSpriteShader();

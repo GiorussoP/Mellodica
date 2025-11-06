@@ -2,6 +2,8 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include "Math.hpp"
+#include "ColliderComponent.hpp"
+
 
 enum class ActorState
 {
@@ -43,6 +45,9 @@ public:
     
     // Components getter
     const std::vector<class Component*>& GetComponents() const { return mComponents; }
+    
+    // Called when the actor collides
+    virtual void OnCollision(Vector3 penetration, ColliderComponent* other) {};
     
     // Returns component of type T, or null if doesn't exist
     template <typename T>

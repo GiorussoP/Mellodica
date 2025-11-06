@@ -3,7 +3,10 @@
 #include "Game.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
+#include "components/ColliderComponent.hpp"
+#include "components/RigidBodyComponent.hpp"
 #include "Math.hpp"
+
 
 // Camera movement speed constants
 const float CAMERA_MOVE_SPEED = 5.0f;
@@ -40,7 +43,14 @@ private:
     MeshComponent* mMeshComponent;
 };
 
+class GroundActor : public Actor {
+public:
+    GroundActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
+    void OnUpdate(float deltaTime) override;
 
+private:
+        MeshComponent* mMeshComponent;
+};
 
 // Simple pyramid actor with MeshComponent
 class PyramidActor : public Actor
@@ -78,6 +88,8 @@ public:
     
 private:
     SpriteComponent* mSpriteComponent;
+    ColliderComponent* mColliderComponent;
+    RigidBodyComponent* mRigidBodyComponent;
 };
 
 class GoombaActor : public Actor
@@ -88,8 +100,19 @@ public:
     
 private:
     SpriteComponent* mSpriteComponent;
+    ColliderComponent* mColliderComponent;
 };
 
+// Test actor with tilted OBB collider
+class OBBTestActor : public Actor
+{
+public:
+    OBBTestActor(Game* game);
+    void OnUpdate(float deltaTime) override;
+    
+private:
+    ColliderComponent* mColliderComponent;
+};
 
 
 // Actor that demonstrates thread-safe MIDI control from keyboard input

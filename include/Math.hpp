@@ -392,6 +392,22 @@ public:
 		z /= length;
 	}
 
+	// Project on plane defined by normal
+	void ProjectOnPlane(const Vector3& normal) {
+		Vector3 n = normal;
+		n.Normalize();
+		float dist = Vector3::Dot(*this, n);
+		*this -= dist * n;
+	}
+
+	// Project this vector onto the plane defined by the normal
+	[[nodiscard]] Vector3 ProjectedOnPlane(const Vector3& normal) const {
+		Vector3 n = normal;
+		n.Normalize();
+		float dist = Vector3::Dot(*this, n);
+		return *this - dist * n;
+	}
+
 	// Normalize the provided vector
 	[[nodiscard]] static Vector3 Normalize(const Vector3& vec)
 	{

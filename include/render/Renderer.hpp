@@ -52,8 +52,9 @@ public:
     void ActivateMeshShader();
     void ActivateSpriteShader();
 
-
     
+    // Draw a single mesh without instancing (for debug drawing)
+    void DrawSingleMesh(Mesh* mesh, const Vector3& position, const Vector3& scale, const Quaternion& rotation = Quaternion::Identity);
                      
     void SetViewMatrix(const Matrix4 &view);
     void SetProjectionMatrix(const Matrix4 &projection);

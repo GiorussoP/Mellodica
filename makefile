@@ -5,8 +5,8 @@ OPTIMIZATION_LEVEL = 1
 CXX = g++
 CC = gcc
 
-CXXFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -std=c++17
-CFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL)
+CXXFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -std=c++17 -g
+CFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -g
 
 LDFLAGS = -lSDL2 -lSDL2_image -lGLEW -lGL -lfluidsynth
 

@@ -67,7 +67,7 @@ protected:
     unsigned int mVertexArray;
     unsigned int mVertexBuffer;
     unsigned int mIndexBuffer;
-    unsigned int mInstanceBuffer;  // New: instance buffer
+    unsigned int mInstanceBuffer;
     
     // Mesh info
     unsigned int mNumVerts;
@@ -84,8 +84,19 @@ public:
     virtual ~CubeMesh() = default;
 
 private:
-    static const std::string CACHE_KEY;
-    static bool sDataGenerated;
+    static MeshData GenerateCubeData();
+};
+
+// Plane mesh class
+class PlaneMesh : public Mesh {
+public:
+    PlaneMesh();
+    virtual ~PlaneMesh() = default;
+
+private:
+    static MeshData GeneratePlaneData();
+private:
+    static MeshData GenerateCubeData();
 };
 
 // Pyramid mesh class
@@ -95,10 +106,17 @@ public:
     virtual ~PyramidMesh() = default;
 
 private:
-    static const std::string CACHE_KEY;
-    static bool sDataGenerated;
-    
-    void GeneratePyramidData();
+    static MeshData GeneratePyramidData();
+};
+
+// Sphere mesh class (icosahedron)
+class SphereMesh : public Mesh {
+public:
+    SphereMesh();
+    virtual ~SphereMesh() = default;
+
+private:
+    static MeshData GenerateIcosahedronData();
 };
 
 #endif // MESH_HPP

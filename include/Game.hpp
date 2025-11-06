@@ -50,6 +50,7 @@ private:
     void ProcessInput();
     void UpdateGame(float deltaTime);
     void GenerateOutput();
+    void CheckCollisions();
     
     // Track if we're updating actors right now
     bool mUpdatingActors;
