@@ -36,11 +36,15 @@ void main()
     // Calculate UV offset for the tile
     vec2 tileOffset = vec2(float(tileX), float(tileY)) * uAtlasTileSize;
 
-    // Scale the texture coordinates to fit within the tile
-    vec2 scaledTexCoord = fragTexCoord * uAtlasTileSize;
+    // Atlas texel size (in UV space)
+    vec2 atlasTexel = 1.0 / vec2(textureSize(uTextureAtlas, 0));
 
-    // Final UV coordinates in the atlas
-    vec2 atlasUV = tileOffset + scaledTexCoord;
+    // Compute inner tile UV size by removing a one-texel border on each side
+    vec2 innerTileSize = uAtlasTileSize - 2.0 * atlasTexel;
+
+    // Final atlas UV: tileOffset + one-texel inset + scaled coordinate into the inner area
+    vec2 atlasUV = tileOffset + atlasTexel + fragTexCoord * innerTileSize;
+
 
     // Sample from the texture atlas
     vec4 texColor = texture(uTextureAtlas, atlasUV);

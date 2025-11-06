@@ -52,6 +52,10 @@ void SpriteComponent::SetAnimation(const std::string& name)
     if (mAnimations.find(name) != mAnimations.end())
     {
         mAnimName = name;
+
+        while (mAnimTimer >= static_cast<float>(mAnimations[mAnimName].size())) {
+            mAnimTimer -= static_cast<float>(mAnimations[mAnimName].size());
+        }
     }
 }
 
