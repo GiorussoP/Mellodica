@@ -8,107 +8,6 @@
 #include <iostream>
 
 
-// CameraController implementation
-CameraController::CameraController(Game* game)
-: Actor(game)
-, mMoveForward(false)
-, mMoveBackward(false)
-, mMoveLeft(false)
-, mMoveRight(false)
-, mRotateLeft(false)
-, mRotateRight(false)
-, mRotateUp(false)
-, mRotateDown(false)
-{
-    // Register as always-active so camera works even when far from origin
-    game->AddAlwaysActive(this);
-
-    std::cout<<"\n============================================="<<std::endl;
-    std::cout << "CameraController created - WASD to move and ARROWS to look" << std::endl;
-    std::cout<<"============================================="<<std::endl;
-}
-
-void CameraController::OnProcessInput(const Uint8* keyState)
-{
-    // Just store the input state
-    mMoveForward = keyState[SDL_SCANCODE_W];
-    mMoveBackward = keyState[SDL_SCANCODE_S];
-    mMoveLeft = keyState[SDL_SCANCODE_A];
-    mMoveRight = keyState[SDL_SCANCODE_D];
-    mRotateLeft = keyState[SDL_SCANCODE_LEFT];
-    mRotateRight = keyState[SDL_SCANCODE_RIGHT];
-    mRotateUp = keyState[SDL_SCANCODE_UP];
-    mRotateDown = keyState[SDL_SCANCODE_DOWN];
-}
-
-void CameraController::OnUpdate(float deltaTime)
-{
-    Game* game = GetGame();
-    Vector3 cameraPos = game->GetCameraPos();
-    Vector3 cameraForward = game->GetCameraForward();
-    Vector3 cameraUp = game->GetCameraUp();
-    float yaw = game->GetCameraYaw();
-    float pitch = game->GetCameraPitch();
-    
-
-    // Movement (WASD)
-    if (mMoveForward)
-    {
-        cameraPos += cameraForward * CAMERA_MOVE_SPEED * deltaTime;
-    }
-    if (mMoveBackward)
-    {
-        cameraPos -= cameraForward * CAMERA_MOVE_SPEED * deltaTime;
-    }
-    if (mMoveLeft)
-    {
-        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
-        right.Normalize();
-        cameraPos += right * CAMERA_MOVE_SPEED * deltaTime;
-    }
-    if (mMoveRight)
-    {
-        Vector3 right = Vector3::Cross(cameraForward, cameraUp);
-        right.Normalize();
-        cameraPos -= right * CAMERA_MOVE_SPEED * deltaTime;
-    }
-    
-    // Rotation (Arrow keys)
-    if (mRotateLeft)
-    {
-        yaw += CAMERA_ROTATE_SPEED * deltaTime;
-    }
-    if (mRotateRight)
-    {
-        yaw -= CAMERA_ROTATE_SPEED * deltaTime;
-    }
-    if (mRotateUp)
-    {
-        pitch += CAMERA_ROTATE_SPEED * deltaTime;
-        if (pitch > 89.0f) pitch = 89.0f;
-    }
-    if (mRotateDown)
-    {
-        pitch -= CAMERA_ROTATE_SPEED * deltaTime;
-        if (pitch < -89.0f) pitch = -89.0f;
-    }
-    
-    // Update camera direction from yaw and pitch
-    float yawRad = Math::ToRadians(yaw);
-    float pitchRad = Math::ToRadians(pitch);
-    
-    cameraForward.x = Math::Sin(yawRad) * Math::Cos(pitchRad);
-    cameraForward.y = Math::Sin(pitchRad);
-    cameraForward.z = -Math::Cos(yawRad) * Math::Cos(pitchRad);  // Negative because -Z is forward
-    cameraForward.Normalize();
-    
-    // Update game camera
-    game->SetCameraPos(cameraPos);
-    game->SetCameraForward(cameraForward);
-    game->SetCameraYaw(yaw);
-    game->SetCameraPitch(pitch);
-}
-
 // CubeActor implementation
 CubeActor::CubeActor(Game* game, const Vector3& color,  int startingIndex)
 : Actor(game)
@@ -239,8 +138,18 @@ OBBTestActor::OBBTestActor(Game* game)
     game->AddAlwaysActive(this);
     
     // Create a tilted OBB collider (45 degrees around Y axis)
-    mColliderComponent = new OBBCollider(this, ColliderLayer::Player, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f), true);
+    mColliderComponent = new OBBCollider(this, ColliderLayer::Player, Vector3::Zero, Vector3(3.5f, 0.5f, 0.5f), true);
     
+
+
+       // Get texture from renderer cache
+    Texture* texture = game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+    TextureAtlas* atlas = game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+    Mesh* mesh = game->GetRenderer()->LoadMesh("cube");
+
+    mMeshComponent = new MeshComponent(this,*mesh,texture,atlas,0);
+    SetScale(Vector3(7.0f, 1.0f, 1.0f));
+
     // Rotate 45 degrees around Y axis
     Quaternion rotation = Quaternion(Vector3::UnitY, Math::ToRadians(45.0f));
     SetRotation(rotation);

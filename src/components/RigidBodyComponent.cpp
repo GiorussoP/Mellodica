@@ -55,12 +55,9 @@ void RigidBodyComponent::Update(float deltaTime) {
     }
 
     // Update owner actor's position
-    mOwner->SetPosition(mOwner->GetPosition() + mVelocity * deltaTime);
+    mOwner->SetPosition(mOwner->GetPosition() + mVelocity.ProjectedOnPlane(Vector3::UnitY) * deltaTime);
+    
 
-    auto collider = mOwner->GetComponent<ColliderComponent>();
-    if(collider) {
-        // TODO: Handle collision
-    }
 
     // Reset acceleration for next frame
     mAcceleration = Vector3::Zero;

@@ -6,7 +6,6 @@
 #include "components/ColliderComponent.hpp"
 #include "components/SpriteComponent.hpp"
 
-
 class Player : public Actor {
 public:
     Player(class Game* game);
@@ -15,10 +14,11 @@ public:
     void OnCollision(Vector3 penetration, ColliderComponent* other) override;
     
 private:
+    static constexpr float PLAYER_MOVE_SPEED = 10.0f;
+    static constexpr float CAMERA_TURN_SPEED = 90.0f;
+    
     float mMoveSpeed;
     float mTurnSpeed;
-    float mCameraSpeed;
-    float mCameraTurnSpeed;
 
     bool mMoveForward;
     bool mMoveBackward;
@@ -28,10 +28,6 @@ private:
     bool mRotateRight;
     bool mRotateUp;
     bool mRotateDown;
-
-    float mCameraYaw;
-    float mCameraPitch;
-
 
     RigidBodyComponent* mRigidBodyComponent;
     ColliderComponent* mColliderComponent;

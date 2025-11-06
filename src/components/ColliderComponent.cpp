@@ -168,7 +168,8 @@ Vector3 AABBCollider::DetectCollision(const ColliderComponent& other) const
         {
             direction.Normalize();
             float penetrationDepth = sphere.GetRadius() - dist;
-            return direction * penetrationDepth;
+            // Return penetration for AABB (negate to push AABB away from sphere)
+            return direction * penetrationDepth * -1.0f;
         }
         
         // Sphere center is inside the box - push out on smallest axis
@@ -184,19 +185,24 @@ Vector3 AABBCollider::DetectCollision(const ColliderComponent& other) const
         // Push out on the axis with smallest penetration
         if (dx < dy && dx < dz)
         {
-            // Push on X axis - use sign of diff.x to determine direction
-            return Vector3(diff.x >= 0.0f ? dx : -dx, 0.0f, 0.0f);
+            // Push on X axis - negate to push AABB away from sphere
+            return Vector3(diff.x >= 0.0f ? -dx : dx, 0.0f, 0.0f);
         }
         else if (dy < dz)
         {
-            // Push on Y axis - use sign of diff.y to determine direction
-            return Vector3(0.0f, diff.y >= 0.0f ? dy : -dy, 0.0f);
+            // Push on Y axis - negate to push AABB away from sphere
+            return Vector3(0.0f, diff.y >= 0.0f ? -dy : dy, 0.0f);
         }
         else
         {
-            // Push on Z axis - use sign of diff.z to determine direction
-            return Vector3(0.0f, 0.0f, diff.z >= 0.0f ? dz : -dz);
+            // Push on Z axis - negate to push AABB away from sphere
+            return Vector3(0.0f, 0.0f, diff.z >= 0.0f ? -dz : dz);
         }
+    }
+    else if (other.GetType() == ColliderType::OBB)
+    {
+        // OBB handles this, but we need to negate the result
+        return other.DetectCollision(*this) * -1.0f;
     }
     
     return Vector3::Zero;
@@ -246,52 +252,125 @@ bool OBBCollider::Intersect(const ColliderComponent& other) const
     if (other.GetType() == ColliderType::OBB)
     {
         // OBB vs OBB using Separating Axis Theorem (SAT)
-        // This is a simplified version - full SAT implementation would test all 15 axes
         const OBBCollider& otherOBB = static_cast<const OBBCollider&>(other);
         
-        // For simplicity, we'll use a conservative bounding sphere test
         Vector3 centerA = GetCenter();
         Vector3 centerB = otherOBB.GetCenter();
         
-        float radiusA = mSize.Length();
-        float radiusB = otherOBB.mSize.Length();
+        // Get rotation matrices
+        Matrix4 rotA = Matrix4::CreateFromQuaternion(mOwner->GetRotation());
+        Matrix4 rotB = Matrix4::CreateFromQuaternion(otherOBB.mOwner->GetRotation());
         
-        float distSq = (centerA - centerB).LengthSq();
-        float radiusSum = radiusA + radiusB;
+        // Get axes for both OBBs
+        Vector3 axesA[3] = {
+            Vector3(rotA.mat[0][0], rotA.mat[0][1], rotA.mat[0][2]), // X axis
+            Vector3(rotA.mat[1][0], rotA.mat[1][1], rotA.mat[1][2]), // Y axis
+            Vector3(rotA.mat[2][0], rotA.mat[2][1], rotA.mat[2][2])  // Z axis
+        };
         
-        return distSq <= (radiusSum * radiusSum);
+        Vector3 axesB[3] = {
+            Vector3(rotB.mat[0][0], rotB.mat[0][1], rotB.mat[0][2]),
+            Vector3(rotB.mat[1][0], rotB.mat[1][1], rotB.mat[1][2]),
+            Vector3(rotB.mat[2][0], rotB.mat[2][1], rotB.mat[2][2])
+        };
+        
+        Vector3 extentsA = mSize;
+        Vector3 extentsB = otherOBB.mSize;
+        Vector3 centerDiff = centerB - centerA;
+        
+        // Test 15 axes (3 from A, 3 from B, 9 cross products)
+        // For simplicity, we'll test the 6 main axes (good enough for most cases)
+        
+        // Test axes from OBB A
+        for (int i = 0; i < 3; i++)
+        {
+            float ra = (i == 0) ? extentsA.x : (i == 1) ? extentsA.y : extentsA.z;
+            float rb = Math::Abs(Vector3::Dot(axesB[0] * extentsB.x, axesA[i])) +
+                      Math::Abs(Vector3::Dot(axesB[1] * extentsB.y, axesA[i])) +
+                      Math::Abs(Vector3::Dot(axesB[2] * extentsB.z, axesA[i]));
+            
+            if (Math::Abs(Vector3::Dot(centerDiff, axesA[i])) > ra + rb)
+                return false;
+        }
+        
+        // Test axes from OBB B
+        for (int i = 0; i < 3; i++)
+        {
+            float rb = (i == 0) ? extentsB.x : (i == 1) ? extentsB.y : extentsB.z;
+            float ra = Math::Abs(Vector3::Dot(axesA[0] * extentsA.x, axesB[i])) +
+                      Math::Abs(Vector3::Dot(axesA[1] * extentsA.y, axesB[i])) +
+                      Math::Abs(Vector3::Dot(axesA[2] * extentsA.z, axesB[i]));
+            
+            if (Math::Abs(Vector3::Dot(centerDiff, axesB[i])) > ra + rb)
+                return false;
+        }
+        
+        return true;
     }
     else if (other.GetType() == ColliderType::AABB)
     {
-        // Convert AABB to OBB for testing (AABB is just an OBB with no rotation)
+        // OBB-AABB collision: transform AABB into OBB's local space
         const AABBCollider& aabb = static_cast<const AABBCollider&>(other);
         
-        Vector3 centerA = GetCenter();
-        Vector3 centerB = aabb.GetMin() + aabb.GetSize();
+        Vector3 obbCenter = GetCenter();
+        Vector3 aabbCenter = aabb.GetMin() + aabb.GetSize();
         
-        float radiusA = mSize.Length();
-        float radiusB = aabb.GetSize().Length();
+        // Vector from OBB center to AABB center in world space
+        Vector3 diff = aabbCenter - obbCenter;
         
-        float distSq = (centerA - centerB).LengthSq();
-        float radiusSum = radiusA + radiusB;
+        // Transform diff into OBB's local space (inverse rotation)
+        Quaternion invRot = mOwner->GetRotation();
+        invRot.Conjugate(); // Conjugate of unit quaternion is its inverse
+        Vector3 localDiff = Vector3::Transform(diff, invRot);
         
-        return distSq <= (radiusSum * radiusSum);
+        // In OBB's local space, this becomes an AABB-AABB test
+        // OBB's local AABB: [-mSize, mSize]
+        // Find closest point on OBB to AABB center in local space
+        Vector3 closestLocal;
+        closestLocal.x = Math::Max(-mSize.x, Math::Min(localDiff.x, mSize.x));
+        closestLocal.y = Math::Max(-mSize.y, Math::Min(localDiff.y, mSize.y));
+        closestLocal.z = Math::Max(-mSize.z, Math::Min(localDiff.z, mSize.z));
+        
+        // Check if this closest point is within the AABB's extents
+        Vector3 closestWorld = Vector3::Transform(closestLocal, mOwner->GetRotation()) + obbCenter;
+        
+        Vector3 aabbMin = aabb.GetMin();
+        Vector3 aabbMax = aabb.GetMax();
+        
+        // Check if closest point on OBB is inside or near the AABB
+        if (closestWorld.x < aabbMin.x - 0.001f || closestWorld.x > aabbMax.x + 0.001f ||
+            closestWorld.y < aabbMin.y - 0.001f || closestWorld.y > aabbMax.y + 0.001f ||
+            closestWorld.z < aabbMin.z - 0.001f || closestWorld.z > aabbMax.z + 0.001f)
+        {
+            return false;
+        }
+        
+        return true;
     }
     else if (other.GetType() == ColliderType::Sphere)
     {
         const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
         
-        // Simplified: treat OBB as a bounding sphere
-        Vector3 centerA = GetCenter();
-        Vector3 centerB = sphere.GetCenter();
+        Vector3 obbCenter = GetCenter();
+        Vector3 sphereCenter = sphere.GetCenter();
         
-        float radiusA = mSize.Length();
-        float radiusB = sphere.GetRadius();
+        // Transform sphere center into OBB's local space
+        Vector3 diff = sphereCenter - obbCenter;
+        Quaternion invRot = mOwner->GetRotation();
+        invRot.Conjugate();
+        Vector3 localSphereCenter = Vector3::Transform(diff, invRot);
         
-        float distSq = (centerA - centerB).LengthSq();
-        float radiusSum = radiusA + radiusB;
+        // Find closest point on OBB (in local space) to sphere center
+        Vector3 closestLocal;
+        closestLocal.x = Math::Max(-mSize.x, Math::Min(localSphereCenter.x, mSize.x));
+        closestLocal.y = Math::Max(-mSize.y, Math::Min(localSphereCenter.y, mSize.y));
+        closestLocal.z = Math::Max(-mSize.z, Math::Min(localSphereCenter.z, mSize.z));
         
-        return distSq <= (radiusSum * radiusSum);
+        // Distance from sphere center to closest point on OBB
+        float distSq = (localSphereCenter - closestLocal).LengthSq();
+        float radius = sphere.GetRadius();
+        
+        return distSq <= (radius * radius);
     }
     
     return false;
@@ -304,52 +383,190 @@ Vector3 OBBCollider::DetectCollision(const ColliderComponent& other) const
         return Vector3::Zero;
     }
     
-    // Simplified collision response - push apart based on center distance
-    Vector3 centerA = GetCenter();
-    Vector3 centerB;
+    Vector3 obbCenter = GetCenter();
+    Quaternion rotation = mOwner->GetRotation();
+    Quaternion invRot = rotation;
+    invRot.Conjugate();
     
     if (other.GetType() == ColliderType::OBB)
     {
+        // OBB-OBB: find minimum penetration axis using SAT
         const OBBCollider& otherOBB = static_cast<const OBBCollider&>(other);
-        centerB = otherOBB.GetCenter();
+        Vector3 centerB = otherOBB.GetCenter();
+        
+        // Get rotation matrices
+        Matrix4 rotA = Matrix4::CreateFromQuaternion(mOwner->GetRotation());
+        Matrix4 rotB = Matrix4::CreateFromQuaternion(otherOBB.mOwner->GetRotation());
+        
+        // Get axes for both OBBs
+        Vector3 axesA[3] = {
+            Vector3(rotA.mat[0][0], rotA.mat[0][1], rotA.mat[0][2]),
+            Vector3(rotA.mat[1][0], rotA.mat[1][1], rotA.mat[1][2]),
+            Vector3(rotA.mat[2][0], rotA.mat[2][1], rotA.mat[2][2])
+        };
+        
+        Vector3 axesB[3] = {
+            Vector3(rotB.mat[0][0], rotB.mat[0][1], rotB.mat[0][2]),
+            Vector3(rotB.mat[1][0], rotB.mat[1][1], rotB.mat[1][2]),
+            Vector3(rotB.mat[2][0], rotB.mat[2][1], rotB.mat[2][2])
+        };
+        
+        Vector3 extentsA = mSize;
+        Vector3 extentsB = otherOBB.mSize;
+        Vector3 centerDiff = centerB - obbCenter;
+        
+        float minPenetration = FLT_MAX;
+        Vector3 minAxis;
+        
+        // Test axes from OBB A
+        for (int i = 0; i < 3; i++)
+        {
+            float ra = (i == 0) ? extentsA.x : (i == 1) ? extentsA.y : extentsA.z;
+            float rb = Math::Abs(Vector3::Dot(axesB[0] * extentsB.x, axesA[i])) +
+                      Math::Abs(Vector3::Dot(axesB[1] * extentsB.y, axesA[i])) +
+                      Math::Abs(Vector3::Dot(axesB[2] * extentsB.z, axesA[i]));
+            
+            float separation = Math::Abs(Vector3::Dot(centerDiff, axesA[i])) - (ra + rb);
+            float penetration = -(separation);
+            
+            if (penetration < minPenetration && penetration > 0.0f)
+            {
+                minPenetration = penetration;
+                minAxis = axesA[i];
+                // Make sure axis points from B to A (push A away from B)
+                if (Vector3::Dot(centerDiff, minAxis) > 0.0f)
+                    minAxis = minAxis * -1.0f;
+            }
+        }
+        
+        // Test axes from OBB B
+        for (int i = 0; i < 3; i++)
+        {
+            float rb = (i == 0) ? extentsB.x : (i == 1) ? extentsB.y : extentsB.z;
+            float ra = Math::Abs(Vector3::Dot(axesA[0] * extentsA.x, axesB[i])) +
+                      Math::Abs(Vector3::Dot(axesA[1] * extentsA.y, axesB[i])) +
+                      Math::Abs(Vector3::Dot(axesA[2] * extentsA.z, axesB[i]));
+            
+            float separation = Math::Abs(Vector3::Dot(centerDiff, axesB[i])) - (ra + rb);
+            float penetration = -(separation);
+            
+            if (penetration < minPenetration && penetration > 0.0f)
+            {
+                minPenetration = penetration;
+                minAxis = axesB[i];
+                // Make sure axis points from B to A (push A away from B)
+                if (Vector3::Dot(centerDiff, minAxis) > 0.0f)
+                    minAxis = minAxis * -1.0f;
+            }
+        }
+        
+        if (minPenetration < FLT_MAX)
+        {
+            // Return penetration for OBB A (pointing away from B, pushing A out)
+            return minAxis * minPenetration;
+        }
+        
+        return Vector3(0.0f, mSize.y + otherOBB.mSize.y, 0.0f);
     }
     else if (other.GetType() == ColliderType::AABB)
     {
+        // OBB-AABB: transform AABB into OBB's local space
         const AABBCollider& aabb = static_cast<const AABBCollider&>(other);
-        centerB = aabb.GetMin() + aabb.GetSize();
+        Vector3 aabbCenter = aabb.GetMin() + aabb.GetSize();
+        
+        // Transform AABB center into OBB's local space
+        Vector3 diff = aabbCenter - obbCenter;
+        Vector3 localAABBCenter = Vector3::Transform(diff, invRot);
+        
+        // Find closest point on OBB to AABB center (in local space)
+        Vector3 closestLocal;
+        closestLocal.x = Math::Max(-mSize.x, Math::Min(localAABBCenter.x, mSize.x));
+        closestLocal.y = Math::Max(-mSize.y, Math::Min(localAABBCenter.y, mSize.y));
+        closestLocal.z = Math::Max(-mSize.z, Math::Min(localAABBCenter.z, mSize.z));
+        
+        // Calculate penetration in local space (from OBB toward AABB - then negate for OBB's perspective)
+        Vector3 localDirection = localAABBCenter - closestLocal;
+        float dist = localDirection.Length();
+        
+        // If AABB center is inside OBB, push OBB out on smallest axis
+        bool insideX = Math::Abs(localAABBCenter.x) < mSize.x;
+        bool insideY = Math::Abs(localAABBCenter.y) < mSize.y;
+        bool insideZ = Math::Abs(localAABBCenter.z) < mSize.z;
+        
+        Vector3 localPenetration;
+        
+        if (insideX && insideY && insideZ)
+        {
+            // AABB center is inside OBB - push OBB out on smallest penetration axis
+            float dx = mSize.x - Math::Abs(localAABBCenter.x);
+            float dy = mSize.y - Math::Abs(localAABBCenter.y);
+            float dz = mSize.z - Math::Abs(localAABBCenter.z);
+            
+            if (dx < dy && dx < dz)
+            {
+                // Push OBB away from AABB center (negate the sign)
+                localPenetration = Vector3(localAABBCenter.x >= 0.0f ? -dx : dx, 0.0f, 0.0f);
+            }
+            else if (dy < dz)
+            {
+                localPenetration = Vector3(0.0f, localAABBCenter.y >= 0.0f ? -dy : dy, 0.0f);
+            }
+            else
+            {
+                localPenetration = Vector3(0.0f, 0.0f, localAABBCenter.z >= 0.0f ? -dz : dz);
+            }
+        }
+        else if (dist > 0.0f)
+        {
+            // AABB center is outside OBB
+            localDirection.Normalize();
+            // For simplicity, use a small penetration depth
+            // This case should rarely happen if Intersect is working correctly
+            localPenetration = localDirection * -0.01f;
+        }
+        else
+        {
+            // Default case
+            localPenetration = Vector3(0.0f, -0.01f, 0.0f);
+        }
+        
+        // Transform penetration back to world space
+        Vector3 worldPenetration = Vector3::Transform(localPenetration, rotation);
+        return worldPenetration;
     }
     else if (other.GetType() == ColliderType::Sphere)
     {
+        // OBB-Sphere: find closest point on OBB to sphere center
         const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
-        centerB = sphere.GetCenter();
-    }
-    
-    Vector3 direction = centerA - centerB;
-    float dist = direction.Length();
-    
-    if (dist > 0.0f)
-    {
-        direction.Normalize();
+        Vector3 sphereCenter = sphere.GetCenter();
         
-        // Estimate penetration depth
-        float radiusA = mSize.Length();
-        float radiusB = 0.0f;
+        // Transform sphere center into OBB's local space
+        Vector3 diff = sphereCenter - obbCenter;
+        Vector3 localSphereCenter = Vector3::Transform(diff, invRot);
         
-        if (other.GetType() == ColliderType::OBB)
+        // Find closest point on OBB to sphere center (in local space)
+        Vector3 closestLocal;
+        closestLocal.x = Math::Max(-mSize.x, Math::Min(localSphereCenter.x, mSize.x));
+        closestLocal.y = Math::Max(-mSize.y, Math::Min(localSphereCenter.y, mSize.y));
+        closestLocal.z = Math::Max(-mSize.z, Math::Min(localSphereCenter.z, mSize.z));
+        
+        // Calculate penetration in local space (negate to push OBB away from sphere)
+        Vector3 localDirection = localSphereCenter - closestLocal;
+        float dist = localDirection.Length();
+        
+        if (dist > 0.0f)
         {
-            radiusB = static_cast<const OBBCollider&>(other).mSize.Length();
-        }
-        else if (other.GetType() == ColliderType::AABB)
-        {
-            radiusB = static_cast<const AABBCollider&>(other).GetSize().Length();
-        }
-        else if (other.GetType() == ColliderType::Sphere)
-        {
-            radiusB = static_cast<const SphereCollider&>(other).GetRadius();
+            localDirection.Normalize();
+            float penetrationDepth = sphere.GetRadius() - dist;
+            // Negate direction to push OBB away from sphere
+            Vector3 localPenetration = localDirection * penetrationDepth * -1.0f;
+            
+            // Transform back to world space
+            return Vector3::Transform(localPenetration, rotation);
         }
         
-        float penetrationDepth = radiusA + radiusB - dist;
-        return direction * penetrationDepth;
+        // Sphere center is exactly on OBB surface - push OBB away along negative Y
+        return Vector3::Transform(Vector3(0.0f, -sphere.GetRadius(), 0.0f), rotation);
     }
     
     return Vector3::Zero;
@@ -450,8 +667,9 @@ Vector3 SphereCollider::DetectCollision(const ColliderComponent& other) const
     }
     else if (other.GetType() == ColliderType::AABB)
     {
-        // AABB returns penetration from sphere's perspective, so use it directly
-        return other.DetectCollision(*this);
+        // AABB returns penetration for itself (to push AABB away from sphere)
+        // Negate it to get penetration for sphere (to push sphere away from AABB)
+        return other.DetectCollision(*this) * -1.0f;
     }
     else if (other.GetType() == ColliderType::OBB)
     {

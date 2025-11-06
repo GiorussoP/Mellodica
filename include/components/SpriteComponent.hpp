@@ -22,10 +22,9 @@ public:
     
     // Tile/texture index (for non-animated sprites, set the tile to display)
     void SetTileIndex(int index) { mTextureIndex = index; }
-    
-    // Size controls
-    void SetSize(const Vector2& size) { mSize = size; }
-    Vector2 GetSize() const { return mSize; }
+
+    void SetAnimationTimer(float time) { mAnimTimer = time; }
+    float GetAnimationTimer() const { return mAnimTimer; }
     
     // Atlas controls
     void SetTextureAtlas(class TextureAtlas* atlas) { mTextureAtlas = atlas; }
@@ -54,16 +53,6 @@ private:
     float mAnimTimer;
     float mAnimFPS;
     bool mIsPaused;
-    
-    // Atlas parameters
-    int mAtlasColumns;
-    float mAtlasTileSizeX;
-    float mAtlasTileSizeY;
-    
-    // Sprite size
-    Vector2 mSize;
-    int mWidth;
-    int mHeight;
     
     // Texture atlas (not owned, just a reference)
     class TextureAtlas* mTextureAtlas;

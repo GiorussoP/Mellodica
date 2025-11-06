@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_set>
 #include "Math.hpp"
+#include "Player.hpp"
 
 class Game
 {
@@ -34,17 +35,14 @@ public:
     Vector3& GetCameraPos() { return mCameraPos; }
     void SetCameraPos(Vector3 position);
 
+    // Player getter
+    Player* GetPlayer() { return mPlayer; }
+
     Vector3& GetCameraForward() { return mCameraForward; }
     void SetCameraForward(const Vector3 forward) { mCameraForward = forward; }
     
     Vector3& GetCameraUp() { return mCameraUp; }
     void SetCameraUp(const Vector3 up) { mCameraUp = up; }
-    
-    float GetCameraYaw() const { return mCameraYaw; }
-    void SetCameraYaw(float yaw) { mCameraYaw = yaw; }
-    
-    float GetCameraPitch() const { return mCameraPitch; }
-    void SetCameraPitch(float pitch) { mCameraPitch = pitch; }
 
 private:
     void ProcessInput();
@@ -83,8 +81,9 @@ private:
     Vector3 mCameraPos;
     Vector3 mCameraForward;
     Vector3 mCameraUp;
-    float mCameraYaw;
-    float mCameraPitch;
+
+    // Player
+    Player* mPlayer;
     
     // Game state
     Uint32 mTicksCount;

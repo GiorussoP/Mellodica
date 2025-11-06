@@ -33,19 +33,10 @@ Game::Game()
 , mCameraPos(Vector3::Zero) 
 , mCameraForward(0.0f, 0.0f, -1.0f)  // Looking toward negative Z
 , mCameraUp(0.0f, 1.0f, 0.0f)
-, mCameraYaw(0.0f)
-, mCameraPitch(-45.0f)  // Looking down more to see the grid
 , mTicksCount(0)
 , mIsRunning(true)
 , mIsDebugging(false)
 {
-    // Update forward vector based on pitch
-    float pitchRad = Math::ToRadians(mCameraPitch);
-    mCameraForward.y = Math::Sin(pitchRad);
-    float horizontalLength = Math::Cos(pitchRad);
-    mCameraForward.x = 0.0f;
-    mCameraForward.z = -horizontalLength;  // Negative Z is forward
-    mCameraForward.Normalize();
 }
 
 bool Game::Initialize()
@@ -204,8 +195,11 @@ void Game::InitializeActors()
     auto obbTest = new OBBTestActor(this);
     obbTest->SetPosition(Vector3(5.0f, 1.0f, 0.0f));  // Place it to the right of spawn
 
-    auto p = new Player(this);
-    p->SetPosition(Vector3(10.0f,1.0f,0.0f));
+    mPlayer = new Player(this);
+    mPlayer->SetPosition(Vector3(10.0f,1.0f,0.0f));
+
+    SetCameraPos(mPlayer->GetPosition());
+    SetCameraForward(Vector3::Normalize(Vector3(0.0f,-1.0f,-1.0f)));
 }
     
 

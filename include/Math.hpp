@@ -1226,6 +1226,111 @@ namespace Math
 		return NearlyEqual(a.x, b.x, epsilon) && NearlyEqual(a.y, b.y, epsilon) &&
 			   NearlyEqual(a.z, b.z, epsilon) && NearlyEqual(a.w, b.w, epsilon);
 	}
+	
+	// Build a quaternion that rotates the object's local +Z to the given world-space
+	// forward direction while trying to align the object's up with upHint.
+	// forwardInput: desired forward (world space). upHint: preferred world up.
+	// localFront: the object's forward in local space (default +Z). If your model uses -Z, pass (0,0,-1).
+	[[nodiscard]] inline Quaternion LookRotation(const Vector3& forwardInput,
+												const Vector3& upHint = Vector3(0.0f, 1.0f, 0.0f),
+												const Vector3& localFront = Vector3(0.0f, 0.0f, 1.0f))
+	{
+		Vector3 f = forwardInput;
+		if (f.LengthSq() <= 1e-8f)
+			return Quaternion::Identity;
+		f.Normalize();
+
+		Vector3 up = upHint;
+		Vector3 right = Vector3::Cross(up, f);
+		if (right.LengthSq() <= 1e-8f)
+		{
+			// forward nearly parallel to upHint — pick another up
+			up = Math::Abs(f.y) < 0.999f ? Vector3(0.0f, 1.0f, 0.0f) : Vector3(1.0f, 0.0f, 0.0f);
+			right = Vector3::Cross(up, f);
+			if (right.LengthSq() <= 1e-8f)
+				return Quaternion::Identity;
+		}
+		right.Normalize();
+		Vector3 up2 = Vector3::Cross(f, right);
+
+		float matArr[4][4] = {{0}};
+		// Column 0 = right
+		matArr[0][0] = right.x; matArr[0][1] = right.y; matArr[0][2] = right.z; matArr[0][3] = 0.0f;
+		// Column 1 = up2
+		matArr[1][0] = up2.x;   matArr[1][1] = up2.y;   matArr[1][2] = up2.z;   matArr[1][3] = 0.0f;
+		// Column 2 = forward
+		matArr[2][0] = f.x;     matArr[2][1] = f.y;     matArr[2][2] = f.z;     matArr[2][3] = 0.0f;
+		// Column 3 = translation/identity
+		matArr[3][0] = 0.0f;    matArr[3][1] = 0.0f;    matArr[3][2] = 0.0f;    matArr[3][3] = 1.0f;
+		Matrix4 rotMat(matArr);
+
+		// Convert rotation matrix to quaternion. Note Matrix4 stores columns in mat[col][row].
+		float r00 = rotMat.mat[0][0], r01 = rotMat.mat[1][0], r02 = rotMat.mat[2][0];
+		float r10 = rotMat.mat[0][1], r11 = rotMat.mat[1][1], r12 = rotMat.mat[2][1];
+		float r20 = rotMat.mat[0][2], r21 = rotMat.mat[1][2], r22 = rotMat.mat[2][2];
+
+		Quaternion q;
+		float trace = r00 + r11 + r22;
+		if (trace > 0.0f)
+		{
+			float s = 0.5f / Math::Sqrt(trace + 1.0f);
+			q.w = 0.25f / s;
+			q.x = (r21 - r12) * s;
+			q.y = (r02 - r20) * s;
+			q.z = (r10 - r01) * s;
+		}
+		else if (r00 > r11 && r00 > r22)
+		{
+			float s = 2.0f * Math::Sqrt(1.0f + r00 - r11 - r22);
+			q.w = (r21 - r12) / s;
+			q.x = 0.25f * s;
+			q.y = (r01 + r10) / s;
+			q.z = (r02 + r20) / s;
+		}
+		else if (r11 > r22)
+		{
+			float s = 2.0f * Math::Sqrt(1.0f + r11 - r00 - r22);
+			q.w = (r02 - r20) / s;
+			q.x = (r01 + r10) / s;
+			q.y = 0.25f * s;
+			q.z = (r12 + r21) / s;
+		}
+		else
+		{
+			float s = 2.0f * Math::Sqrt(1.0f + r22 - r00 - r11);
+			q.w = (r10 - r01) / s;
+			q.x = (r02 + r20) / s;
+			q.y = (r12 + r21) / s;
+			q.z = 0.25f * s;
+		}
+
+		q.Normalize();
+
+		// If object's local front isn't +Z, rotate localFront to +Z first and concatenate
+		if (!(Math::NearlyEqual(localFront.x, 0.0f) && Math::NearlyEqual(localFront.y, 0.0f) && Math::NearlyEqual(localFront.z, 1.0f)))
+		{
+			Vector3 lf = localFront;
+			lf.Normalize();
+			Vector3 targetLocalFront = Vector3(0.0f, 0.0f, 1.0f);
+			float dot = Math::Clamp(Vector3::Dot(lf, targetLocalFront), -1.0f, 1.0f);
+			float angle = Math::Acos(dot);
+			if (Math::Abs(angle) > 1e-4f)
+			{
+				Vector3 axis = Vector3::Cross(lf, targetLocalFront);
+				if (axis.LengthSq() > 1e-8f)
+				{
+					axis.Normalize();
+					Quaternion qLocal(axis, angle);
+					// Rotate by qLocal THEN by q
+					q = Quaternion::Concatenate(qLocal, q);
+				}
+			}
+		}
+
+		q.Normalize();
+		return q;
+	}
+
 } // namespace Math
 
 namespace Color

@@ -694,6 +694,9 @@ void Renderer::DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites
         // Activate sprite quad VAO
         mSpriteQuad->SetActive();
         
+        // Disable backface culling for sprites (allows flipping with negative scale)
+        glDisable(GL_CULL_FACE);
+        
         // Draw all sprite instances
         if (mode == RendererMode::LINES) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -702,6 +705,9 @@ void Renderer::DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites
         } else {
             glDrawElementsInstanced(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr, group.components.size());
         }
+        
+        // Re-enable backface culling for other geometry
+        glEnable(GL_CULL_FACE);
     }
 }
 

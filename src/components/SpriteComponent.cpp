@@ -14,12 +14,6 @@ SpriteComponent::SpriteComponent(Actor* owner, int textureIndex, TextureAtlas* a
 , mAnimTimer(0.0f)
 , mAnimFPS(10.0f)
 , mIsPaused(false)
-, mAtlasColumns(atlas ? atlas->GetColumns() : 1)
-, mAtlasTileSizeX(atlas ? atlas->GetUVTileSizeX() : 1.0f)
-, mAtlasTileSizeY(atlas ? atlas->GetUVTileSizeY() : 1.0f)
-, mSize(1.0f, 1.0f)  // Default to 1x1 world units
-, mWidth(atlas ? atlas->GetTileWidth() : 32)
-, mHeight(atlas ? atlas->GetTileHeight() : 32)
 , mTextureAtlas(atlas)
 {
 }
@@ -58,7 +52,6 @@ void SpriteComponent::SetAnimation(const std::string& name)
     if (mAnimations.find(name) != mAnimations.end())
     {
         mAnimName = name;
-        mAnimTimer = 0.0f;
     }
 }
 

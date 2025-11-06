@@ -7,31 +7,6 @@
 #include "components/RigidBodyComponent.hpp"
 #include "Math.hpp"
 
-
-// Camera movement speed constants
-const float CAMERA_MOVE_SPEED = 5.0f;
-const float CAMERA_ROTATE_SPEED = 90.0f;
-
-// Camera control class
-class CameraController : public Actor
-{
-public:
-    CameraController(Game* game);
-    void OnProcessInput(const Uint8* keyState) override;
-    void OnUpdate(float deltaTime) override;
-    
-private:
-    // Store input state to apply in Update with deltaTime
-    bool mMoveForward;
-    bool mMoveBackward;
-    bool mMoveLeft;
-    bool mMoveRight;
-    bool mRotateLeft;
-    bool mRotateRight;
-    bool mRotateUp;
-    bool mRotateDown;
-};
-
 // Simple cube actor with MeshComponent
 class CubeActor : public Actor
 {
@@ -112,6 +87,7 @@ public:
     
 private:
     ColliderComponent* mColliderComponent;
+    MeshComponent* mMeshComponent;
 };
 
 
