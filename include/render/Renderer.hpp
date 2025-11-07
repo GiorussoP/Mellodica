@@ -47,6 +47,9 @@ public:
     
     // Instanced sprite drawing - draw multiple sprites
     void DrawSpritesInstanced(const std::vector<SpriteComponent*>& sprites, RendererMode mode);
+    
+    // HUD sprite drawing - draw sprites in screen space (after framebuffer)
+    void DrawHUDSprites(const std::vector<SpriteComponent*>& hudSprites);
 
     // Batch rendering - set frame-level uniforms once before drawing multiple objects
     void ActivateMeshShader();
@@ -84,6 +87,7 @@ private:
 	Shader* mMeshShader;
 	Shader* mSpriteShader;
 	Shader* mFramebufferShader;
+	Shader* mHUDShader;
     
     // Textures
     std::vector<Texture*> mTextures;

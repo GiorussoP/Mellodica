@@ -45,7 +45,6 @@ void main()
     // Final atlas UV: tileOffset + one-texel inset + scaled coordinate into the inner area
     vec2 atlasUV = tileOffset + atlasTexel + fragTexCoord * innerTileSize;
 
-
     // Sample from the texture atlas
     vec4 texColor = texture(uTextureAtlas, atlasUV);
 

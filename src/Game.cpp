@@ -12,10 +12,12 @@
 #include "MIDI/SynthEngine.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "Player.hpp"
+#include "HUDElement.hpp"
 
 #include <GL/glew.h>
 #include <iostream>
 #include <algorithm>
+#include <unordered_set>
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -29,7 +31,6 @@ Game::Game()
 , mGLContext(nullptr)
 , mRenderer(nullptr)
 , mChunkGrid(nullptr)
-, mCurrentChunk(-1)
 , mCameraPos(Vector3::Zero) 
 , mCameraForward(0.0f, 0.0f, -1.0f)  // Looking toward negative Z
 , mCameraUp(0.0f, 1.0f, 0.0f)
@@ -141,7 +142,7 @@ void Game::InitializeActors()
 
     
     // Some actors for testing
-    const int gridSize = 3;
+    const int gridSize = 300;
     const float spacing = 1.0f;
     const float gridOffset = (gridSize - 1) * spacing * 0.5f;
     int actorCount = 0;
@@ -195,66 +196,26 @@ void Game::InitializeActors()
     auto obbTest = new OBBTestActor(this);
     obbTest->SetPosition(Vector3(5.0f, 1.0f, 0.0f));  // Place it to the right of spawn
 
+    // Creating the Player actor
     mPlayer = new Player(this);
     mPlayer->SetPosition(Vector3(10.0f,1.0f,0.0f));
 
+    // Creating a test HUD element
+    auto hudElement = new HUDElement(this, "assets/textures/hud/hud.png", "assets/textures/hud/hud.json");
+    hudElement->SetPosition(Vector3(-0.4f, 0.4f, 0.0f));
+    hudElement->GetSpriteComponent().AddAnimation("default",{"hud1.png","hud2.png"});
+    hudElement->GetSpriteComponent().SetAnimFPS(2.0f);
+    hudElement->GetSpriteComponent().SetAnimation("default");
+
+    // Setting camera
     SetCameraPos(mPlayer->GetPosition());
     SetCameraForward(Vector3::Normalize(Vector3(0.0f,-1.0f,-1.0f)));
 }
     
 
-void Game::SetCameraPos(Vector3 position){
+void Game::SetCameraPos(Vector3 position)
+{
     mCameraPos = position;
-    
-    int newChunk = mChunkGrid->GetCellIndex(mCameraPos);
-    if(newChunk != mCurrentChunk){
-        mCurrentChunk = newChunk;
-
-        mVisibleActors = mChunkGrid->GetVisibleActors(mCameraPos);
-
-        mVisibleMeshes.clear();
-        mVisibleSprites.clear();
-    
-        // First, collect from always-active actors
-        for (auto actor : mAlwaysActiveActors)
-        {
-            auto& components = actor->GetComponents();
-            for (auto component : components)
-            {
-                if (auto mesh = dynamic_cast<MeshComponent*>(component))
-                {
-                    if (mesh->IsVisible())
-                    {
-                        mVisibleMeshes.push_back(mesh);
-                    }
-                }
-                else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
-                {
-                    if (sprite->IsVisible())
-                    {
-                        mVisibleSprites.push_back(sprite);
-                    }
-                }
-            }
-        }
-    
-        // Then, collect from Chunk visible actors
-        for (auto actor : mVisibleActors){
-            auto& components = actor->GetComponents();
-            for (auto component : components) {
-                if (auto mesh = dynamic_cast<MeshComponent*>(component)) {
-                    if (mesh->IsVisible()) {
-                        mVisibleMeshes.push_back(mesh);
-                    }
-                }
-                else if (auto sprite = dynamic_cast<SpriteComponent*>(component)) {
-                    if (sprite->IsVisible()) {
-                        mVisibleSprites.push_back(sprite);
-                    }
-                }
-            }
-        }
-    }
 }
 
 void Game::RunLoop()
@@ -272,6 +233,9 @@ void Game::RunLoop()
             deltaTime = 0.05f;
         }
         
+        // Get active actors
+        UpdateActiveActors();
+
         // Update game with actual deltaTime
         ProcessInput();
         UpdateGame(deltaTime);
@@ -303,9 +267,6 @@ void Game::Shutdown()
     }
     
     mAlwaysActiveActors.clear();
-    mVisibleActors.clear();
-    mVisibleMeshes.clear();
-    mVisibleSprites.clear();
     
     // Delete Chunk grid first
     std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
@@ -355,7 +316,7 @@ void Game::AddActor(Actor* actor)
 
 void Game::RemoveActor(Actor* actor)
 {
-    // Normal removal: unregister from Chunk grid
+    // Normal removal: unregister from Chunk grid (if it still exists)
     if (mChunkGrid)
     {
         mChunkGrid->UnregisterActor(actor);
@@ -451,20 +412,14 @@ void Game::ProcessInput()
     // Get keyboard state for continuous input
     const Uint8* keyState = SDL_GetKeyboardState(nullptr);
     
-    // Always process always-active actors first (like camera controller)
-    for (auto actor : mAlwaysActiveActors)
-    {
-        actor->ProcessInput(keyState);
-    }
+    // Get visible actors from chunk grid
+    //std::vector<Actor*> mActiveActors = mChunkGrid->GetVisibleActors(mCameraPos);
     
-    // Only process input for visible actors (skip if already processed as always-active)
-    for (auto actor : mVisibleActors)
+
+    
+    // Process input for all active actors
+    for (auto actor : mActiveActors)
     {
-        // Skip if this actor is always-active (already processed above)
-        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
-        {
-            continue;
-        }
         actor->ProcessInput(keyState);
     }
 }
@@ -473,20 +428,14 @@ void Game::UpdateActors(float deltaTime)
 {
     mUpdatingActors = true;
     
-    // Always update always-active actors first (like camera controller)
-    for (auto actor : mAlwaysActiveActors)
-    {
-        actor->Update(deltaTime);
-    }
+    // Get visible actors from chunk grid
+    //std::vector<Actor*> mActiveActors = mChunkGrid->GetVisibleActors(mCameraPos);
     
-    // Only update visible actors (skip if already updated as always-active)
-    for (auto actor : mVisibleActors)
+
+    
+    // Update all active actors
+    for (auto actor : mActiveActors)
     {
-        // Skip if this actor is always-active (already updated above)
-        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
-        {
-            continue;
-        }
         actor->Update(deltaTime);
     }
     mUpdatingActors = false;
@@ -515,6 +464,21 @@ void Game::UpdateActors(float deltaTime)
     }
 }
 
+void Game::UpdateActiveActors()
+{
+    mActiveActors = mChunkGrid->GetVisibleActors(mCameraPos);
+    
+    // Add always-active actors (but avoid duplicates if they're already visible)
+    std::unordered_set<Actor*> actorSet(mActiveActors.begin(), mActiveActors.end());
+    for (auto actor : mAlwaysActiveActors)
+    {
+        if (actorSet.insert(actor).second)
+        {
+            mActiveActors.push_back(actor);
+        }
+    }
+}
+
 void Game::UpdateGame(float deltaTime)
 {
     // MIDI is updated in its own thread now, just update actors
@@ -526,28 +490,12 @@ void Game::UpdateGame(float deltaTime)
 
 void Game::CheckCollisions()
 {
+    // Get visible actors from chunk grid
+    
     // Collect all colliders from active actors
     std::vector<ColliderComponent*> colliders;
-    
-    // Collect from always-active actors
-    for (auto actor : mAlwaysActiveActors)
+    for (auto actor : mActiveActors)
     {
-        auto collider = actor->GetComponent<ColliderComponent>();
-        if (collider)
-        {
-            colliders.push_back(collider);
-        }
-    }
-    
-    // Collect from visible actors
-    for (auto actor : mVisibleActors)
-    {
-        // Skip if already added from always-active
-        if (mAlwaysActiveActors.find(actor) != mAlwaysActiveActors.end())
-        {
-            continue;
-        }
-        
         auto collider = actor->GetComponent<ColliderComponent>();
         if (collider)
         {
@@ -609,15 +557,48 @@ void Game::GenerateOutput()
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
 
     RendererMode mode = mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;
+    
+    // Get visible actors from chunk grid
+    //std::vector<Actor*> mActiveActors = mChunkGrid->GetVisibleActors(mCameraPos);
+    
+
+    
+    // Collect meshes and sprites from active actors
+    std::vector<MeshComponent*> activeMeshes;
+    std::vector<SpriteComponent*> activeSprites;
+    for (auto actor : mActiveActors)
+    {
+        auto& components = actor->GetComponents();
+        for (auto component : components)
+        {
+            if (auto mesh = dynamic_cast<MeshComponent*>(component))
+            {
+                if (mesh->IsVisible())
+                {
+                    activeMeshes.push_back(mesh);
+                }
+            }
+            else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
+            {
+                if (sprite->IsVisible())
+                {
+                    activeSprites.push_back(sprite);
+                }
+            }
+        }
+    }
    
     // Render meshes with instancing (batch draw)
     mRenderer->ActivateMeshShader();
-    mRenderer->DrawMeshesInstanced(mVisibleMeshes, mode);
+    mRenderer->DrawMeshesInstanced(activeMeshes, mode);
 
-    if (mIsDebugging) {
-        for (auto actor : mVisibleActors) {
+    if (mIsDebugging)
+    {
+        for (auto actor : mActiveActors)
+        {
             auto& components = actor->GetComponents();
-            for (auto component : components) {
+            for (auto component : components)
+            {
                 component->DebugDraw(mRenderer);
             }
         }
@@ -625,10 +606,32 @@ void Game::GenerateOutput()
     
     // Render sprites with instancing (batch draw)
     mRenderer->ActivateSpriteShader();
-    mRenderer->DrawSpritesInstanced(mVisibleSprites, mode);
     
+    // Separate world sprites from HUD sprites
+    std::vector<SpriteComponent*> worldSprites;
+    std::vector<SpriteComponent*> hudSprites;
+    for (auto* sprite : activeSprites)
+    {
+        if (sprite->IsHUD())
+        {
+            hudSprites.push_back(sprite);
+        }
+        else
+        {
+            worldSprites.push_back(sprite);
+        }
+    }
+    
+    // Draw world sprites in 3D space
+    mRenderer->DrawSpritesInstanced(worldSprites, mode);
+    
+    // Draw HUD sprites in screen space (after framebuffer)
+    mRenderer->DrawHUDSprites(hudSprites);
+
     // End framebuffer rendering and display to screen
     mRenderer->EndFramebuffer();
+    
+   
     
     SDL_GL_SwapWindow(mWindow);
 }

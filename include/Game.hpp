@@ -18,6 +18,7 @@ public:
     // Actor functions
     void InitializeActors();
     void UpdateActors(float deltaTime);
+    void UpdateActiveActors();
     void AddActor(class Actor* actor);
     void RemoveActor(class Actor* actor);
     
@@ -59,11 +60,8 @@ private:
     
     // Always-active actors (updated/processed even when not visible)
     std::unordered_set<class Actor*> mAlwaysActiveActors;
-    std::vector<class Actor*> mVisibleActors;
-    std::vector<class MeshComponent*  > mVisibleMeshes;
-    std::vector<class SpriteComponent* > mVisibleSprites;
-    
-    
+    std::vector<Actor*> mActiveActors;
+
     // SDL window
     SDL_Window* mWindow;
     
@@ -75,7 +73,6 @@ private:
     
     // Chunk grid for efficient queries
     class ChunkGrid* mChunkGrid;
-    int mCurrentChunk;
     
     // Camera state
     Vector3 mCameraPos;

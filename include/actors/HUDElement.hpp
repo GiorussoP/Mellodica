@@ -1,0 +1,15 @@
+#ifndef HUD_ELEMENT_HPP
+#define HUD_ELEMENT_HPP
+
+#include "Actor.hpp"
+#include "SpriteComponent.hpp"
+
+class HUDElement : public Actor {
+public:
+    HUDElement(Game* game, const std::string& hudTexturePath, const std::string& hudAtlasPath);
+    SpriteComponent& GetSpriteComponent() { return *mSpriteComponent; }
+private:
+    SpriteComponent* mSpriteComponent;
+};
+
+#endif

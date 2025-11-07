@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <iostream>
+#include <algorithm>
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "Mesh.hpp"
@@ -14,6 +15,7 @@ Renderer::Renderer()
 , mMeshShader(nullptr)
 , mSpriteShader(nullptr)
 , mFramebufferShader(nullptr)
+, mHUDShader(nullptr)
 , mSpriteQuad(nullptr)
 , mScreenQuad(nullptr)
 , mFramebuffer(0)
@@ -49,6 +51,10 @@ Renderer::~Renderer()
     if (mFramebufferShader) {
         delete mFramebufferShader;
         mFramebufferShader = nullptr;
+    }
+    if (mHUDShader) {
+        delete mHUDShader;
+        mHUDShader = nullptr;
     }
     
     // Delete sprite quad
@@ -382,11 +388,19 @@ bool Renderer::LoadShaders()
 		return false;
 	}
 	
-	// Create framebuffer shader (Screenspace.vert -> Framebuffer.frag)
+	// Create framebuffer shader (Framebuffer.vert -> Framebuffer.frag)
 	mFramebufferShader = new Shader();
-	if (!mFramebufferShader->Load("./assets/shaders/Screenspace.vert", "./assets/shaders/Framebuffer.frag")) {
+	if (!mFramebufferShader->Load("./assets/shaders/Framebuffer.vert", "./assets/shaders/Framebuffer.frag")) {
 		delete mFramebufferShader;
 		mFramebufferShader = nullptr;
+		return false;
+	}
+	
+	// Create HUD shader (HUD.vert -> HUD.frag)
+	mHUDShader = new Shader();
+	if (!mHUDShader->Load("./assets/shaders/HUD.vert", "./assets/shaders/HUD.frag")) {
+		delete mHUDShader;
+		mHUDShader = nullptr;
 		return false;
 	}
 
@@ -943,7 +957,11 @@ void Renderer::BeginFramebuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
     glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
     
-    // Clear framebuffer
+    // Ensure depth test is enabled for 3D rendering
+    glEnable(GL_DEPTH_TEST);
+    
+    // Clear framebuffer with the game's clear color
+    glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -967,9 +985,9 @@ void Renderer::EndFramebuffer()
     // Set viewport to full window
     glViewport(0, 0, windowWidth, windowHeight);
     
-    // Clear screen to black
+    // Clear screen to black (only color buffer, preserve depth)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     
     // Disable depth test for screen quad
     glDisable(GL_DEPTH_TEST);
@@ -992,9 +1010,117 @@ void Renderer::EndFramebuffer()
         SDL_Log("OpenGL error after drawing screen quad: %d", err);
     }
     
+    // NOTE: Keep depth test disabled for HUD rendering
+    // HUD sprites will be drawn next, then depth will be re-enabled
+    
+    // Restore clear color (but keep depth test disabled for HUD)
+    glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
+}
+
+void Renderer::DrawHUDSprites(const std::vector<SpriteComponent*>& hudSprites)
+{
+    if (hudSprites.empty() || !mHUDShader || !mSpriteQuad) {
+        return;
+    }
+    
+    // Sort HUD sprites by Z position (draw order)
+    // Lower Z values are drawn first (background), higher Z values drawn last (foreground)
+    std::vector<SpriteComponent*> sortedHudSprites = hudSprites;
+    std::sort(sortedHudSprites.begin(), sortedHudSprites.end(),
+        [](const SpriteComponent* a, const SpriteComponent* b) {
+            return a->GetOwner()->GetPosition().z < b->GetOwner()->GetPosition().z;
+        });
+    
+    // Ensure depth test is disabled (HUD always draws on top)
+    glDisable(GL_DEPTH_TEST);
+    
+    // Disable backface culling for HUD sprites (allows flipping)
+    glDisable(GL_CULL_FACE);
+    
+    // Activate HUD shader
+    mHUDShader->SetActive();
+    
+    // Group HUD sprites by texture atlas while maintaining draw order
+    struct HUDGroup {
+        TextureAtlas* atlas;
+        int textureIndex;
+        std::vector<SpriteComponent*> components;
+    };
+    
+    std::vector<HUDGroup> groups;
+    
+    // Group HUD sprites by atlas (already sorted by Z)
+    for (auto* spriteComp : sortedHudSprites) {
+        if (!spriteComp->IsVisible()) continue;
+        
+        TextureAtlas* atlas = spriteComp->GetTextureAtlas();
+        int texIndex = spriteComp->GetTextureIndex();
+        
+        // Find or create group
+        bool found = false;
+        for (auto& group : groups) {
+            if (group.atlas == atlas && group.textureIndex == texIndex) {
+                group.components.push_back(spriteComp);
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            groups.push_back({atlas, texIndex, {spriteComp}});
+        }
+    }
+    
+    // Draw each HUD sprite group
+    for (auto& group : groups) {
+        if (group.components.empty()) continue;
+        
+        // Bind texture atlas
+        if (group.atlas && group.textureIndex >= 0 && group.textureIndex < static_cast<int>(mTextures.size())) {
+            mTextures[group.textureIndex]->Bind(0);
+            mHUDShader->SetIntegerUniform("uHUDTexture", 0);
+            mHUDShader->SetIntegerUniform("uAtlasColumns", group.atlas->GetColumns());
+            mHUDShader->SetVectorUniform("uAtlasTileSize", 
+                Vector2(group.atlas->GetUVTileSizeX(), group.atlas->GetUVTileSizeY()));
+        }
+        
+        // Draw each HUD sprite individually
+        // (Using simple non-instanced drawing for HUD simplicity)
+        for (auto* spriteComp : group.components) {
+            // Get sprite properties
+            Vector3 screenPos = spriteComp->GetOwner()->GetPosition();
+            Vector3 scale = spriteComp->GetOwner()->GetScale();
+            Vector3 color = spriteComp->GetColor();
+            int tileIndex = spriteComp->GetCurrentTileIndex();
+            
+            // Position is already in normalized screen coordinates
+            // X: -1 (left) to 1 (right), 0 = center
+            // Y: -1 (bottom) to 1 (top), 0 = center
+            // Z: used for draw order (not position)
+            float ndcX = screenPos.x;
+            float ndcY = screenPos.y;
+            
+            // Scale is also in normalized coordinates
+            // 1.0 = full screen width/height
+            // 0.1 = 10% of screen
+            float ndcScaleX = scale.x;
+            float ndcScaleY = scale.y;
+            
+            // Set uniforms for this HUD sprite
+            mHUDShader->SetVectorUniform("uNDCPosition", Vector2(ndcX, ndcY));
+            mHUDShader->SetVectorUniform("uNDCScale", Vector2(ndcScaleX, ndcScaleY));
+            mHUDShader->SetIntegerUniform("uTileIndex", tileIndex);
+            mHUDShader->SetVectorUniform("uTintColor", Vector4(color.x, color.y, color.z, 1.0f));
+            
+            // Draw the sprite quad
+            mSpriteQuad->SetActive();
+            glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+        }
+    }
+    
+    // Re-enable backface culling
+    glEnable(GL_CULL_FACE);
+    
     // Re-enable depth test
     glEnable(GL_DEPTH_TEST);
-    
-    // Restore clear color for next frame
-    glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
 }
