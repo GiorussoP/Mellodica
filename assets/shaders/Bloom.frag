@@ -14,14 +14,14 @@ void main()
     vec2 texelSize = 1.0 / vec2(textureSize(uTexture, 0));
     
     // Blur radius in pixels (increase for wider bloom)
-    float blurRadius = 20.0;
+    float blurRadius = 50.0;
     
     // Number of samples (higher = smoother, more expensive)
-    const int samples = 9;
+    const int samples = 15;
     
     // Current fragment color with center weight
     vec3 result = texture(uTexture, fragTexCoord).rgb * 0.2;
-    float totalWeight = 0.2;
+    float totalWeight = 0.1;
     
     if (uHorizontal)
     {

@@ -1,113 +1,103 @@
 #pragma once
-#include "actors/Actor.hpp"
 #include "Game.hpp"
-#include "components/MeshComponent.hpp"
-#include "components/SpriteComponent.hpp"
-#include "components/ColliderComponent.hpp"
-#include "components/RigidBodyComponent.hpp"
 #include "Math.hpp"
+#include "actors/Actor.hpp"
+#include "components/ColliderComponent.hpp"
+#include "components/MeshComponent.hpp"
+#include "components/RigidBodyComponent.hpp"
+#include "components/SpriteComponent.hpp"
 
 // Simple cube actor with MeshComponent
-class CubeActor : public Actor
-{
+class CubeActor : public Actor {
 public:
-    CubeActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
-    void OnUpdate(float deltaTime) override;
-    
+  CubeActor(Game *game, const Vector3 &color = Color::White,
+            int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
+
 private:
-    MeshComponent* mMeshComponent;
-    //ColliderComponent* mColliderComponent;
+  MeshComponent *mMeshComponent;
+  // ColliderComponent* mColliderComponent;
 };
 
 class GroundActor : public Actor {
 public:
-    GroundActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
-    void OnUpdate(float deltaTime) override;
+  GroundActor(Game *game, const Vector3 &color = Color::White,
+              int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
 
 private:
-        MeshComponent* mMeshComponent;
+  MeshComponent *mMeshComponent;
 };
 
 // Simple pyramid actor with MeshComponent
-class PyramidActor : public Actor
-{
+class PyramidActor : public Actor {
 public:
-    PyramidActor(Game* game, const Vector3& color = Color::White, int startingIndex = -1);
-    void OnUpdate(float deltaTime) override;
+  PyramidActor(Game *game, const Vector3 &color = Color::White,
+               int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
 
 private:
-    MeshComponent* mMeshComponent;
+  MeshComponent *mMeshComponent;
 };
 
-
-class GrassCubeActor : public CubeActor
-{
+class GrassCubeActor : public CubeActor {
 public:
-    GrassCubeActor(Game* game, const Vector3& color = Color::White) 
-        : CubeActor(game, color, 0) {}
+  GrassCubeActor(Game *game, const Vector3 &color = Color::White)
+      : CubeActor(game, color, 0) {}
 };
 
-class RockCubeActor : public CubeActor
-{
+class RockCubeActor : public CubeActor {
 public:
-    RockCubeActor(Game* game, const Vector3& color = Color::White)
-        : CubeActor(game, color, 4) {}
+  RockCubeActor(Game *game, const Vector3 &color = Color::White)
+      : CubeActor(game, color, 4) {}
 };
 
-
-class MarioActor : public Actor
-{
+class MarioActor : public Actor {
 public:
-    MarioActor(Game* game);
-    void OnUpdate(float deltaTime) override;
-    
+  MarioActor(Game *game);
+  void OnUpdate(float deltaTime) override;
+
 private:
-    SpriteComponent* mSpriteComponent;
-    ColliderComponent* mColliderComponent;
-    RigidBodyComponent* mRigidBodyComponent;
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+  RigidBodyComponent *mRigidBodyComponent;
 };
 
-class GoombaActor : public Actor
-{
+class GoombaActor : public Actor {
 public:
-    GoombaActor(Game* game);
-    void OnUpdate(float deltaTime) override;
-    
+  GoombaActor(Game *game);
+  void OnUpdate(float deltaTime) override;
+
 private:
-    SpriteComponent* mSpriteComponent;
-    ColliderComponent* mColliderComponent;
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
 };
 
 // Test actor with tilted OBB collider
-class OBBTestActor : public Actor
-{
+class OBBTestActor : public Actor {
 public:
-    OBBTestActor(Game* game);
-    void OnUpdate(float deltaTime) override;
-    
-private:
-    ColliderComponent* mColliderComponent;
-    MeshComponent* mMeshComponent;
-};
+  OBBTestActor(Game *game);
+  void OnUpdate(float deltaTime) override;
 
+private:
+  ColliderComponent *mColliderComponent;
+  MeshComponent *mMeshComponent;
+};
 
 // Actor that demonstrates thread-safe MIDI control from keyboard input
-class MIDIControlActor : public Actor
-{
+class MIDIControlActor : public Actor {
 public:
-    MIDIControlActor(Game* game);
-    void OnProcessInput(const Uint8* keyState) override;
-    
+  MIDIControlActor(Game *game);
+  void OnProcessInput() override;
+
 private:
-    // Debounce flags to prevent repeated key presses
-    bool mPrevSpacePressed;
-    bool mPrevRPressed;
-    bool mPrevJPressed;
-    bool mPrevMPressed;
-    bool mPrevUPressed;
-    bool mPrevPlusPressed;
-    bool mPrevMinusPressed;
-    bool mPrevPPressed;
+  // Debounce flags to prevent repeated key presses
+  bool mPrevSpacePressed;
+  bool mPrevRPressed;
+  bool mPrevJPressed;
+  bool mPrevMPressed;
+  bool mPrevUPressed;
+  bool mPrevPlusPressed;
+  bool mPrevMinusPressed;
+  bool mPrevPPressed;
 };
-
-
