@@ -16,6 +16,7 @@ Renderer::Renderer()
 , mSpriteShader(nullptr)
 , mFramebufferShader(nullptr)
 , mHUDShader(nullptr)
+, mBloomBlurShader(nullptr)
 , mSpriteQuad(nullptr)
 , mScreenQuad(nullptr)
 , mFramebuffer(0)
@@ -23,6 +24,14 @@ Renderer::Renderer()
 , mFramebufferDepthStencil(0)
 , mFramebufferWidth(320)
 , mFramebufferHeight(240)
+, mBloomFramebuffer(0)
+, mBloomTexture(0)
+, mBloomDepthStencil(0)
+, mBlurTexture1(0)
+, mBlurTexture2(0)
+, mBlurFramebuffer1(0)
+, mBlurFramebuffer2(0)
+, mIsDark(true)
 {
 }
 
@@ -37,6 +46,31 @@ Renderer::~Renderer()
     }
     if (mFramebufferDepthStencil) {
         glDeleteRenderbuffers(1, &mFramebufferDepthStencil);
+    }
+    
+    // Delete bloom framebuffer objects
+    if (mBloomFramebuffer) {
+        glDeleteFramebuffers(1, &mBloomFramebuffer);
+    }
+    if (mBloomTexture) {
+        glDeleteTextures(1, &mBloomTexture);
+    }
+    if (mBloomDepthStencil) {
+        glDeleteRenderbuffers(1, &mBloomDepthStencil);
+    }
+    
+    // Delete blur framebuffer objects
+    if (mBlurFramebuffer1) {
+        glDeleteFramebuffers(1, &mBlurFramebuffer1);
+    }
+    if (mBlurFramebuffer2) {
+        glDeleteFramebuffers(1, &mBlurFramebuffer2);
+    }
+    if (mBlurTexture1) {
+        glDeleteTextures(1, &mBlurTexture1);
+    }
+    if (mBlurTexture2) {
+        glDeleteTextures(1, &mBlurTexture2);
     }
     
     // Delete shaders
@@ -55,6 +89,10 @@ Renderer::~Renderer()
     if (mHUDShader) {
         delete mHUDShader;
         mHUDShader = nullptr;
+    }
+    if (mBloomBlurShader) {
+        delete mBloomBlurShader;
+        mBloomBlurShader = nullptr;
     }
     
     // Delete sprite quad
@@ -92,6 +130,12 @@ bool Renderer::Initialize(float width, float height)
 	
 	// Create framebuffer for render-to-texture
 	CreateFramebuffer();
+	
+	// Create bloom framebuffer for bright objects
+	CreateBloomFramebuffer();
+	
+	// Create blur textures for ping-pong blur
+	CreateBlurTextures();
 
     // Set the clear color to light grey
     glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
@@ -401,6 +445,14 @@ bool Renderer::LoadShaders()
 	if (!mHUDShader->Load("./assets/shaders/HUD.vert", "./assets/shaders/HUD.frag")) {
 		delete mHUDShader;
 		mHUDShader = nullptr;
+		return false;
+	}
+	
+	// Create bloom blur shader (Framebuffer.vert -> Bloom.frag)
+	mBloomBlurShader = new Shader();
+	if (!mBloomBlurShader->Load("./assets/shaders/Framebuffer.vert", "./assets/shaders/Bloom.frag")) {
+		delete mBloomBlurShader;
+		mBloomBlurShader = nullptr;
 		return false;
 	}
 
@@ -807,6 +859,7 @@ void Renderer::ActivateMeshShader()
     mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
     mMeshShader->SetVectorUniform("uDirectionalLightColor", Vector3(1.0f, 1.0f, 1.0f));
     mMeshShader->SetVectorUniform("uAmbientLightColor", Vector3(0.2f, 0.2f, 0.2f));
+    mMeshShader->SetIntegerUniform("uBloomPass", 0);  // Default: not bloom pass
 }
 
 void Renderer::ActivateSpriteShader()
@@ -820,6 +873,40 @@ void Renderer::ActivateSpriteShader()
     mSpriteShader->SetActive();
     
     // Set frame-level uniforms (uniforms that don't change per sprite)
+    mSpriteShader->SetIntegerUniform("uBloomPass", 0);  // Default: not bloom pass
+}
+
+void Renderer::ActivateMeshShaderForBloom()
+{
+    if (!mMeshShader) {
+        std::cerr << "Mesh shader not loaded" << std::endl;
+        return;
+    }
+    
+    // Activate mesh shader program
+    mMeshShader->SetActive();
+    
+    // Set frame-level uniforms (uniforms that don't change per mesh)
+    Vector3 lightdir = Vector3(1.0f, -1.0f, 1.0f);
+    lightdir.Normalize();
+    mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
+    mMeshShader->SetVectorUniform("uDirectionalLightColor", Vector3(1.0f, 1.0f, 1.0f));
+    mMeshShader->SetVectorUniform("uAmbientLightColor", Vector3(0.2f, 0.2f, 0.2f));
+    mMeshShader->SetIntegerUniform("uBloomPass", 1);  // We're in bloom pass
+}
+
+void Renderer::ActivateSpriteShaderForBloom()
+{
+    if (!mSpriteShader) {
+        std::cerr << "Sprite shader not loaded" << std::endl;
+        return;
+    }
+    
+    // Activate sprite shader program
+    mSpriteShader->SetActive();
+    
+    // Set frame-level uniforms (uniforms that don't change per sprite)
+    mSpriteShader->SetIntegerUniform("uBloomPass", 1);  // We're in bloom pass
 }
 
 void Renderer::DrawSingleMesh(Mesh* mesh, const Vector3& position, const Vector3& scale, const Quaternion& rotation)
@@ -999,6 +1086,13 @@ void Renderer::EndFramebuffer()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
     mFramebufferShader->SetIntegerUniform("uFramebufferTexture", 0);
+
+    mFramebufferShader->SetIntegerUniform("uIsDark", mIsDark);
+    
+    // Bind bloom texture (final blurred result is in mBlurTexture1 or mBlurTexture2 depending on odd/even passes)
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mBlurTexture1);  // Final blur result is always in texture1 after odd number of passes
+    mFramebufferShader->SetIntegerUniform("uBloomTexture", 1);
     
     // Draw fullscreen quad directly without transformation
     mScreenQuad->SetActive();
@@ -1120,6 +1214,159 @@ void Renderer::DrawHUDSprites(const std::vector<SpriteComponent*>& hudSprites)
     
     // Re-enable backface culling
     glEnable(GL_CULL_FACE);
+    
+    // Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::CreateBloomFramebuffer()
+{
+    // Generate bloom framebuffer
+    glGenFramebuffers(1, &mBloomFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, mBloomFramebuffer);
+    
+    // Create bloom color texture (same size as main framebuffer)
+    glGenTextures(1, &mBloomTexture);
+    glBindTexture(GL_TEXTURE_2D, mBloomTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mFramebufferWidth, mFramebufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  // Linear for smooth blur
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mBloomTexture, 0);
+    
+    // Create depth and stencil renderbuffer (same as main framebuffer)
+    glGenRenderbuffers(1, &mBloomDepthStencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, mBloomDepthStencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mFramebufferWidth, mFramebufferHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mBloomDepthStencil);
+    
+    // Check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "ERROR: Bloom framebuffer is not complete!" << std::endl;
+    }
+    
+    // Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    std::cout << "Bloom framebuffer created: " << mFramebufferWidth << "x" << mFramebufferHeight << std::endl;
+}
+
+void Renderer::CreateBlurTextures()
+{
+    // Create two textures for ping-pong blur
+    glGenTextures(1, &mBlurTexture1);
+    glBindTexture(GL_TEXTURE_2D, mBlurTexture1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mFramebufferWidth, mFramebufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glGenTextures(1, &mBlurTexture2);
+    glBindTexture(GL_TEXTURE_2D, mBlurTexture2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mFramebufferWidth, mFramebufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    // Create framebuffers for the blur textures
+    glGenFramebuffers(1, &mBlurFramebuffer1);
+    glBindFramebuffer(GL_FRAMEBUFFER, mBlurFramebuffer1);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mBlurTexture1, 0);
+    
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "ERROR: Blur framebuffer 1 is not complete!" << std::endl;
+    }
+    
+    glGenFramebuffers(1, &mBlurFramebuffer2);
+    glBindFramebuffer(GL_FRAMEBUFFER, mBlurFramebuffer2);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mBlurTexture2, 0);
+    
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "ERROR: Blur framebuffer 2 is not complete!" << std::endl;
+    }
+    
+    // Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    std::cout << "Blur textures created: " << mFramebufferWidth << "x" << mFramebufferHeight << std::endl;
+}
+
+void Renderer::BeginBloomPass()
+{
+    // Bind to bloom framebuffer for rendering
+    glBindFramebuffer(GL_FRAMEBUFFER, mBloomFramebuffer);
+    glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
+    
+    // Ensure depth test is enabled for 3D rendering
+    glEnable(GL_DEPTH_TEST);
+    
+    // Clear bloom framebuffer to BLACK (important for bloom effect)
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::EndBloomPass()
+{
+    // Nothing special needed here - just unbind will happen in EndFramebuffer
+    // We keep the bloom framebuffer active until we're ready to blur
+}
+
+void Renderer::ApplyBloomBlur()
+{
+    if (!mBloomBlurShader || !mScreenQuad) {
+        return;
+    }
+    
+    // Disable depth test for fullscreen blur passes
+    glDisable(GL_DEPTH_TEST);
+    
+    // Activate blur shader
+    mBloomBlurShader->SetActive();
+    
+    // Set Gaussian blur weights (5-tap)
+    // These weights should sum to 1.0
+    float weights[5] = {0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f};
+    mBloomBlurShader->SetFloatUniform("uWeights[0]", weights[0]);
+    mBloomBlurShader->SetFloatUniform("uWeights[1]", weights[1]);
+    mBloomBlurShader->SetFloatUniform("uWeights[2]", weights[2]);
+    mBloomBlurShader->SetFloatUniform("uWeights[3]", weights[3]);
+    mBloomBlurShader->SetFloatUniform("uWeights[4]", weights[4]);
+    
+    // Perform multiple blur passes (ping-pong between textures)
+    // More passes = smoother blur, especially with large radius
+    int blurPasses = 10;  // Increased from 5 to 10 for smoother wide bloom
+    bool horizontal = true;
+    
+    for (int i = 0; i < blurPasses; ++i) {
+        // Bind appropriate framebuffer for output
+        glBindFramebuffer(GL_FRAMEBUFFER, horizontal ? mBlurFramebuffer1 : mBlurFramebuffer2);
+        glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
+        
+        // Set horizontal/vertical uniform
+        mBloomBlurShader->SetIntegerUniform("uHorizontal", horizontal ? 1 : 0);
+        
+        // Bind input texture (first pass uses bloom texture, subsequent passes use previous output)
+        glActiveTexture(GL_TEXTURE0);
+        if (i == 0) {
+            glBindTexture(GL_TEXTURE_2D, mBloomTexture);
+        } else {
+            glBindTexture(GL_TEXTURE_2D, horizontal ? mBlurTexture2 : mBlurTexture1);
+        }
+        mBloomBlurShader->SetIntegerUniform("uTexture", 0);
+        
+        // Draw fullscreen quad
+        mScreenQuad->SetActive();
+        glDrawElements(GL_TRIANGLES, mScreenQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+        
+        // Switch direction for next pass
+        horizontal = !horizontal;
+    }
+    
+    // Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     // Re-enable depth test
     glEnable(GL_DEPTH_TEST);

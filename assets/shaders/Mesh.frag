@@ -9,6 +9,7 @@ flat in float fragTileIndex;        // Per instance tile index
 
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
+uniform int uBloomPass;                 // 1 if rendering bloom pass, 0 otherwise
 
 // Texture atlas uniforms
 uniform sampler2D uTextureAtlas;
@@ -53,7 +54,15 @@ void main()
     vec3 baseColor = texColor.rgb * fragColor;
     
     // Flat shading: check if face is pointing toward light
-    // TODO: Add lighting calculations here if needed
+    // TODO: Add lighting calculations here
+    
+    // If rendering bloom pass and object is not bloomed (indicated by fragColor.r < 0)
+    // render as black to provide occlusion
+    if (uBloomPass == 1 && fragColor.r < 0.0)
+    {
+        outColor = vec4(0.0, 0.0, 0.0, texColor.a);
+        return;
+    }
     
     outColor = vec4(baseColor, texColor.a);
 }

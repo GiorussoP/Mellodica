@@ -22,6 +22,7 @@ CubeActor::CubeActor(Game* game, const Vector3& color,  int startingIndex)
 
     mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, startingIndex);
     mMeshComponent->SetColor(color);
+    //mColliderComponent = new AABBCollider(this,ColliderLayer::Ground,Vector3::Zero,Vector3(0.5f,0.5f,0.5f));
 }
 
 GroundActor::GroundActor(Game* game, const Vector3& color,  int startingIndex)
@@ -45,6 +46,7 @@ void GroundActor::OnUpdate(float deltaTime)
 }
 
 
+
 PyramidActor::PyramidActor(Game* game, const Vector3& color,  int startingIndex)
 : Actor(game)
 , mMeshComponent(nullptr)
@@ -62,6 +64,7 @@ PyramidActor::PyramidActor(Game* game, const Vector3& color,  int startingIndex)
     // Create mesh component with shared mesh and atlas
     mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, startingIndex);
     mMeshComponent->SetColor(color);
+    mMeshComponent->SetBloomed(true);
 }
 
 void PyramidActor::OnUpdate(float deltaTime) {

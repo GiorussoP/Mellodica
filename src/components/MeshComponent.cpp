@@ -17,6 +17,6 @@ MeshComponent::MeshComponent(Actor* owner, Mesh& mesh, Texture* texture, Texture
 
 MeshComponent::~MeshComponent()
 {
-    // Don't delete the mesh - it's owned by someone else or cached
+    
 }
 

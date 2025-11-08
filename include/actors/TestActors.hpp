@@ -16,6 +16,7 @@ public:
     
 private:
     MeshComponent* mMeshComponent;
+    //ColliderComponent* mColliderComponent;
 };
 
 class GroundActor : public Actor {
@@ -38,7 +39,7 @@ private:
     MeshComponent* mMeshComponent;
 };
 
-// Grass cube - all faces use tile 0
+
 class GrassCubeActor : public CubeActor
 {
 public:
@@ -46,7 +47,6 @@ public:
         : CubeActor(game, color, 0) {}
 };
 
-// Rock cube - all faces use tile 1
 class RockCubeActor : public CubeActor
 {
 public:

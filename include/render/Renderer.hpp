@@ -54,6 +54,8 @@ public:
     // Batch rendering - set frame-level uniforms once before drawing multiple objects
     void ActivateMeshShader();
     void ActivateSpriteShader();
+    void ActivateMeshShaderForBloom();    // Activate mesh shader for bloom pass
+    void ActivateSpriteShaderForBloom();  // Activate sprite shader for bloom pass
 
     
     // Draw a single mesh without instancing (for debug drawing)
@@ -69,15 +71,25 @@ public:
     void BeginFramebuffer();  // Start rendering to framebuffer
     void EndFramebuffer();    // Render framebuffer to screen
     
+    // Bloom rendering
+    void BeginBloomPass();    // Start rendering bloomed objects to bloom framebuffer
+    void EndBloomPass();      // Finish rendering to bloom framebuffer
+    void ApplyBloomBlur();    // Apply Gaussian blur to bloom texture
+    
     // Get framebuffer dimensions
     int GetFramebufferWidth() const { return mFramebufferWidth; }
     int GetFramebufferHeight() const { return mFramebufferHeight; }
+
+    bool IsDark() const { return mIsDark; }
+    void SetIsDark(bool isDark) { mIsDark = isDark; }
 
 private:
 	bool LoadShaders();
     void CreateSpriteQuad();  // Create a simple quad for sprite rendering
     void CreateFramebuffer(); // Create framebuffer for render-to-texture
     void CreateScreenQuad();  // Create fullscreen quad for framebuffer display
+    void CreateBloomFramebuffer(); // Create bloom framebuffer for bright objects
+    void CreateBlurTextures();     // Create textures for ping-pong blur
 
 	// Projection and view matrices
 	Matrix4 mViewMatrix;
@@ -88,6 +100,7 @@ private:
 	Shader* mSpriteShader;
 	Shader* mFramebufferShader;
 	Shader* mHUDShader;
+	Shader* mBloomBlurShader;
     
     // Textures
     std::vector<Texture*> mTextures;
@@ -109,6 +122,20 @@ private:
     int mFramebufferWidth;
     int mFramebufferHeight;
     
+    // Bloom framebuffer objects
+    GLuint mBloomFramebuffer;
+    GLuint mBloomTexture;
+    GLuint mBloomDepthStencil;
+    
+    // Blur textures for ping-pong blur
+    GLuint mBlurTexture1;
+    GLuint mBlurTexture2;
+    GLuint mBlurFramebuffer1;
+    GLuint mBlurFramebuffer2;
+    
+
+    bool mIsDark;
+
     // Atlases
     std::unordered_map<std::string, TextureAtlas*> mAtlasCache;
 };

@@ -46,6 +46,8 @@ Player::Player(Game* game)
 
     mSpriteComponent->SetAnimation("idle");
     mSpriteComponent->SetAnimFPS(8.0f);
+
+    mSpriteComponent->SetBloomed(true);
 }
 
 void Player::OnUpdate(float deltaTime)

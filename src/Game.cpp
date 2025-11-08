@@ -135,7 +135,7 @@ void Game::InitializeActors()
     });
 
     // Initializing MIDI Player
-    MIDIPlayer::loadSong("assets/songs/1.mid",true);
+    MIDIPlayer::loadSong("assets/songs/7.mid",true);
     MIDIPlayer::startMIDIThread();
     MIDIPlayer::play();
     
@@ -146,55 +146,46 @@ void Game::InitializeActors()
     const float spacing = 1.0f;
     const float gridOffset = (gridSize - 1) * spacing * 0.5f;
     int actorCount = 0;
-    for (int x = 0; x < gridSize; x++)
-    {   
-        for (int z = 0; z < gridSize; z++)
-        {
-            Actor* mesh = nullptr;
-            Actor* sprite = nullptr;
-            int pattern = (x + z) % 5;
-
-        
-            switch (pattern) {
-                case 0:
-                    mesh = new GrassCubeActor(this);
-                    sprite = new MarioActor(this);
-                    sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
-                    break;
-                case 1:
-                    mesh = new RockCubeActor(this);
-                    sprite = new GoombaActor(this);
-                    sprite->SetPosition(Vector3(x * spacing - gridOffset,1.0f,z * spacing - gridOffset));
-                    break;
-                case 2:
-                    mesh = new PyramidActor(this, Color::Magenta);
-                    break;
-                case 3:
-                    mesh = new CubeActor(this, Color::Cyan,4);
-                    mesh->SetScale(Vector3(0.25f,1.5f,0.25f));
-                    break;
-                case 4:
-                    mesh = new CubeActor(this, Color::Yellow);
-                    mesh->SetScale(Vector3(1.0f,0.5f,1.0f));
-                    break;
-                default:
-                    break;
-            }
-            
+    for (int x = 0; x < gridSize; x++) {   
+        for (int z = 0; z < gridSize; z++) {
+            auto mesh = new GrassCubeActor(this);
             mesh->SetPosition(Vector3( x * spacing - gridOffset,0.0f,z * spacing - gridOffset));
             actorCount += 2;
         }
     }
-    
-    // Create camera controller
-    //new CameraController(this);
+
+
+
+    auto pyramid = new PyramidActor(this, Color::Red);
+    pyramid->SetPosition(Vector3(6.0f, 1.0f, 0.0f));
+    pyramid->SetScale(Vector3(2.0f,1.0f,2.0f));
+
+    auto cube1 = new CubeActor(this, Color::Green);
+    cube1->SetPosition(Vector3(12.0f, 1.0f, 5.0f));
+    cube1->SetScale(Vector3(5.0f,0.5f,1.0f));
+    cube1->GetComponent<MeshComponent>()->SetBloomed(true);
+
+    auto cube2 = new CubeActor(this, Color::Yellow);
+    cube2->SetPosition(Vector3(7.5f, 1.0f, -2.5f));
+    cube2->SetScale(Vector3(0.5f,2.5f,0.5f));
+    cube2->GetComponent<MeshComponent>()->SetBloomed(true);
+
+    auto cube3 = new CubeActor(this, Color::Blue);
+    cube3->SetPosition(Vector3(5.5f, 0.5f, -7.5f));
+    cube3->SetScale(Vector3(3.5f,2.5f,0.5f));
+    cube3->SetRotation(Quaternion(0.7071f,0.0f,0.0f,0.7071f));
+    cube3->GetComponent<MeshComponent>()->SetBloomed(true);
     
     // Create MIDI control actor for testing operations
     new MIDIControlActor(this);
 
     // Create test OBB actor (tilted 45 degrees)
-    auto obbTest = new OBBTestActor(this);
-    obbTest->SetPosition(Vector3(5.0f, 1.0f, 0.0f));  // Place it to the right of spawn
+    auto obbTest1 = new OBBTestActor(this);
+    obbTest1->SetPosition(Vector3(5.0f, 1.0f, 0.0f)); 
+
+
+    auto obbTest2 = new OBBTestActor(this);
+    obbTest2->SetPosition(Vector3(6.0f, 1.0f,-4.0f));  // Place it to the right of spawn
 
     // Creating the Player actor
     mPlayer = new Player(this);
@@ -256,7 +247,9 @@ void Game::Shutdown()
     
     // Stop MIDI thread first
     std::cout << "Shutdown: Stopping MIDI thread..." << std::endl;
+    MIDIPlayer::pause();
     MIDIPlayer::stopMIDIThread();
+    SynthEngine::clean();
     
     // Close the window
     if (mWindow) {
@@ -403,6 +396,7 @@ void Game::ProcessInput()
                 else if (event.key.keysym.sym == SDLK_F1)
                 {
                     mIsDebugging = !mIsDebugging;
+                    
                     std::cout << "=== DEBUG MODE " << (mIsDebugging ? "ENABLED" : "DISABLED") << " ===" << std::endl;
                 }
                 break;
@@ -549,9 +543,6 @@ void Game::GenerateOutput()
     static int frameCount = 0;
     Uint32 startFrame = SDL_GetTicks();
     
-    // Begin rendering to framebuffer
-    mRenderer->BeginFramebuffer();
-    
     // Update camera
     Vector3 targetPos = mCameraPos + mCameraForward;
     mRenderer->SetViewMatrix(Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
@@ -566,6 +557,8 @@ void Game::GenerateOutput()
     // Collect meshes and sprites from active actors
     std::vector<MeshComponent*> activeMeshes;
     std::vector<SpriteComponent*> activeSprites;
+    bool hasBloom = false;
+    
     for (auto actor : mActiveActors)
     {
         auto& components = actor->GetComponents();
@@ -576,6 +569,10 @@ void Game::GenerateOutput()
                 if (mesh->IsVisible())
                 {
                     activeMeshes.push_back(mesh);
+                    if (mesh->IsBloomed())
+                    {
+                        hasBloom = true;
+                    }
                 }
             }
             else if (auto sprite = dynamic_cast<SpriteComponent*>(component))
@@ -583,22 +580,92 @@ void Game::GenerateOutput()
                 if (sprite->IsVisible())
                 {
                     activeSprites.push_back(sprite);
+                    if (sprite->IsBloomed() && !sprite->IsHUD())
+                    {
+                        hasBloom = true;
+                    }
                 }
             }
         }
     }
+    
+    // BLOOM PASS: Render ALL objects to bloom framebuffer
+    // Bloomed objects render normally, non-bloomed objects render as black for occlusion
+    if (hasBloom)
+    {
+        mRenderer->BeginBloomPass();
+        
+        // Temporarily mark non-bloomed objects with negative color to render them black
+        std::vector<Vector3> originalMeshColors;
+        std::vector<Vector3> originalSpriteColors;
+        
+        // Save original colors and mark non-bloomed meshes
+        for (auto* mesh : activeMeshes)
+        {
+            originalMeshColors.push_back(mesh->GetColor());
+            if (!mesh->IsBloomed())
+            {
+                mesh->SetColor(Vector3(-1.0f, -1.0f, -1.0f));  // Negative = black in bloom pass
+            }
+        }
+        
+        // Separate world sprites and save colors
+        std::vector<SpriteComponent*> worldSprites;
+        for (auto* sprite : activeSprites)
+        {
+            if (!sprite->IsHUD())
+            {
+                worldSprites.push_back(sprite);
+                originalSpriteColors.push_back(sprite->GetColor());
+                if (!sprite->IsBloomed())
+                {
+                    sprite->SetColor(Vector3(-1.0f, -1.0f, -1.0f));  // Negative = black in bloom pass
+                }
+            }
+        }
+        
+        // Render ALL meshes (bloomed and non-bloomed for occlusion)
+        if (!activeMeshes.empty())
+        {
+            mRenderer->ActivateMeshShaderForBloom();
+            mRenderer->DrawMeshesInstanced(activeMeshes, mode);
+        }
+        
+        // Render ALL world sprites (bloomed and non-bloomed for occlusion)
+        if (!worldSprites.empty())
+        {
+            mRenderer->ActivateSpriteShaderForBloom();
+            mRenderer->DrawSpritesInstanced(worldSprites, mode);
+        }
+        
+        // Restore original colors
+        for (size_t i = 0; i < activeMeshes.size(); ++i)
+        {
+            activeMeshes[i]->SetColor(originalMeshColors[i]);
+        }
+        
+        for (size_t i = 0; i < worldSprites.size(); ++i)
+        {
+            worldSprites[i]->SetColor(originalSpriteColors[i]);
+        }
+        
+        mRenderer->EndBloomPass();
+        
+        // Apply Gaussian blur to bloom texture
+        mRenderer->ApplyBloomBlur();
+    }
+    
+    // Begin rendering to main framebuffer
+    mRenderer->BeginFramebuffer();
    
     // Render meshes with instancing (batch draw)
     mRenderer->ActivateMeshShader();
     mRenderer->DrawMeshesInstanced(activeMeshes, mode);
 
-    if (mIsDebugging)
-    {
-        for (auto actor : mActiveActors)
-        {
+    if (mIsDebugging) {
+        for (auto actor : mActiveActors) {
             auto& components = actor->GetComponents();
-            for (auto component : components)
-            {
+            for (auto component : components) {
                 component->DebugDraw(mRenderer);
             }
         }
@@ -610,14 +677,11 @@ void Game::GenerateOutput()
     // Separate world sprites from HUD sprites
     std::vector<SpriteComponent*> worldSprites;
     std::vector<SpriteComponent*> hudSprites;
-    for (auto* sprite : activeSprites)
-    {
-        if (sprite->IsHUD())
-        {
+    for (auto* sprite : activeSprites) {
+        if (sprite->IsHUD()) {
             hudSprites.push_back(sprite);
         }
-        else
-        {
+        else {
             worldSprites.push_back(sprite);
         }
     }
@@ -625,11 +689,11 @@ void Game::GenerateOutput()
     // Draw world sprites in 3D space
     mRenderer->DrawSpritesInstanced(worldSprites, mode);
     
-    // Draw HUD sprites in screen space (after framebuffer)
-    mRenderer->DrawHUDSprites(hudSprites);
-
     // End framebuffer rendering and display to screen
     mRenderer->EndFramebuffer();
+
+    // Draw HUD sprites in screen space (after framebuffer)
+    mRenderer->DrawHUDSprites(hudSprites);
     
    
     
