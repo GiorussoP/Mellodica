@@ -1,7 +1,9 @@
 #include "Player.hpp"
 #include "Game.hpp"
+#include "MIDIPlayer.hpp"
 #include "Renderer.hpp"
 #include "SpriteComponent.hpp"
+#include "SynthEngine.hpp"
 #include "TestActors.hpp"
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
@@ -162,6 +164,9 @@ void Player::OnProcessInput() {
     mTestCube->SetPosition(mPosition - Vector3(1.0f, 0.0f, 0.0f));
     mTestCube->SetScale(Vector3(0.5f, 0.5f, 0.5f));
     mTestCube->GetComponent<MeshComponent>()->SetBloomed(true);
+
+    SynthEngine::startNote(12, 60, 72); // Middle C
+    MIDIPlayer::unmuteChannel(11);
   }
 
   if (Input::WasKeyReleased(SDL_SCANCODE_V)) {
@@ -169,6 +174,8 @@ void Player::OnProcessInput() {
       mTestCube->SetState(ActorState::Destroy);
       mTestCube = nullptr;
     }
+    SynthEngine::stopNote(12, 60); // Middle C
+    MIDIPlayer::muteChannel(11);
   }
 }
 

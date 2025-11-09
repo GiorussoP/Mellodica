@@ -157,15 +157,20 @@ void MIDIPlayer::update(float dt) {
     while (channel.pos < channel.notes.size() &&
            time >= channel.notes.at(channel.pos).start) {
       if (!paused && channel.active) {
-        // std::cout<<"Time:"<<time<<", event:
-        // "<<channel.notes.at(channel.pos).start<<'
-        // '<<channel.notes.at(channel.pos).note<<"
-        // "<<channel.notes.at(channel.pos).on<<'\n';
+        // Apply transpose to the note
+        int transposed_note =
+            channel.notes.at(channel.pos).note + channel.transpose;
+        // Clamp to valid MIDI range (0-127)
+        if (transposed_note < 0)
+          transposed_note = 0;
+        if (transposed_note > 127)
+          transposed_note = 127;
+
         if (channel.notes.at(channel.pos).on)
-          SynthEngine::startNote(i, channel.notes.at(channel.pos).note,
+          SynthEngine::startNote(i, transposed_note,
                                  channel.notes.at(channel.pos).velocity);
         else
-          SynthEngine::stopNote(i, channel.notes.at(channel.pos).note);
+          SynthEngine::stopNote(i, transposed_note);
       }
 
       channel.pos++;
@@ -245,6 +250,26 @@ void MIDIPlayer::unmuteChannel(unsigned int channel) {
   std::lock_guard<std::mutex> lock(midiMutex);
   if (channels[channel].notes.size() > 0)
     channels[channel].active = true;
+}
+
+void MIDIPlayer::setChannelTranspose(unsigned int channel, int semitones) {
+  std::lock_guard<std::mutex> lock(midiMutex);
+  if (channel < 16) {
+    channels[channel].transpose = semitones;
+  }
+}
+
+void MIDIPlayer::setChannelVolume(unsigned int channel, int volume) {
+  std::lock_guard<std::mutex> lock(midiMutex);
+  if (channel < 16) {
+    // Clamp volume to valid range (0-127)
+    if (volume < 0)
+      volume = 0;
+    if (volume > 127)
+      volume = 127;
+    fluid_synth_cc(SynthEngine::synth, channel, 7, volume);
+    fluid_synth_cc(SynthEngine::synth, channel, 11, volume); // expression too
+  }
 }
 
 void MIDIPlayer::startMIDIThread() {

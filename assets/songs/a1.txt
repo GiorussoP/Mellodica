@@ -1,0 +1,37 @@
+Instructions for playing a1 correctly:
+
+
+SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
+                            {0, 40},  // Violin
+                            {0, 21},  // Accordion
+                            {0, 43},  // Contrabass
+                            {0, 73},  // Flute
+                            {0, 71},  // Clarinet
+                            {0, 56},  // Trumpet
+                            {0, 46},  // Harp
+                            {0, 0},   // Always active: Piano
+                            {128, 0}, // Battle drums
+                            {0, 1},   // ?? - disabled - Piano too?
+                            {128, 1}, // Always Active: drums
+                            {0, 0},   // Player Channel: Piano
+                            {0, 42},  // SFX1
+                            {0, 11},  // SFX2
+                            {0, 0}}); // SFX3
+
+
+  MIDIPlayer::setChannelVolume(0, 127);
+  MIDIPlayer::setChannelVolume(1, 127);
+  MIDIPlayer::setChannelVolume(2, 127);
+  MIDIPlayer::setChannelVolume(3, 127);
+  MIDIPlayer::setChannelVolume(4, 127);
+  MIDIPlayer::setChannelVolume(5, 127);
+  MIDIPlayer::setChannelVolume(6, 127);
+  MIDIPlayer::setChannelVolume(7, 127);
+
+  MIDIPlayer::setChannelVolume(8, 127);
+  MIDIPlayer::setChannelVolume(9, 127);
+  // MIDIPlayer::setChannelVolume(10, 127);
+  MIDIPlayer::setChannelVolume(11, 127);
+
+  MIDIPlayer::setChannelTranspose(11, -60); // <<< PAY ATTENTION
+  

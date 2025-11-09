@@ -12,13 +12,12 @@ class Scene {
 
 public:
   Scene(Game *game) : mGame(game) {}
+  virtual ~Scene() {}
 
   virtual void Initialize() = 0;
   virtual void Cleanup();
   void RegisterActor(Actor *actor) { mActors.insert(actor); }
   void UnregisterActor(Actor *actor) { mActors.erase(actor); }
-
-  virtual ~Scene() {};
 
   void LoadLevel(const std::string &levelPath, unsigned int width = 1000,
                  unsigned int height = 1000);

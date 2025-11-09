@@ -32,7 +32,7 @@ const float MIDI_UPDATE_INTERVAL = 0.001f; // Update MIDI every 1ms
 Game::Game()
     : mUpdatingActors(false), mWindow(nullptr), mGLContext(nullptr),
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
-      mCameraPos(Vector3::Zero),
+      mPendingScene(nullptr), mCameraPos(Vector3::Zero),
       mCameraForward(0.0f, 0.0f, -1.0f) // Looking toward negative Z
       ,
       mCameraUp(0.0f, 1.0f, 0.0f), mTicksCount(0), mIsRunning(true),
@@ -110,20 +110,29 @@ bool Game::Initialize() {
 }
 
 void Game::LoadScene(Scene *scene) {
-  // Cleanup current scene if present
-  if (mCurrentScene) {
+  if (mUpdatingActors) {
+    // Defer the scene change if we're currently updating actors
+    if (mPendingScene) {
+      delete mPendingScene; // Clean up any previous pending scene
+    }
+    mPendingScene = scene;
+  } else {
+    // Load immediately if it's safe
+    // Cleanup current scene if present
     mPlayer = nullptr;
-    mCurrentScene->Cleanup();
-    delete mCurrentScene;
+    if (mCurrentScene) {
+      mCurrentScene->Cleanup();
+      delete mCurrentScene;
+    }
+
+    MIDIPlayer::pause();
+
+    mCurrentScene = scene;
+    mCurrentScene->Initialize();
+
+    // Rebuild active actors from new scene
+    FindActiveActors();
   }
-
-  MIDIPlayer::pause();
-
-  mCurrentScene = scene;
-  mCurrentScene->Initialize();
-
-  // Rebuild active actors from new scene
-  FindActiveActors();
 }
 
 void Game::SetCameraPos(Vector3 position) { mCameraPos = position; }
@@ -334,7 +343,9 @@ void Game::UpdateActors(float deltaTime) {
 
     // Register with chunk grid now that we're not iterating
     mChunkGrid->RegisterActor(pending);
-    mCurrentScene->RegisterActor(pending);
+    if (mCurrentScene) {
+      mCurrentScene->RegisterActor(pending);
+    }
   }
   mPendingActors.clear();
 
@@ -367,6 +378,26 @@ void Game::FindActiveActors() {
 }
 
 void Game::UpdateGame(float deltaTime) {
+  // Handle pending scene change at the start of update (safe point)
+  if (mPendingScene) {
+    // Cleanup current scene if present
+    if (mCurrentScene) {
+      mPlayer = nullptr;
+      mCurrentScene->Cleanup();
+      delete mCurrentScene;
+    }
+
+    MIDIPlayer::pause();
+
+    mCurrentScene = mPendingScene;
+    mPendingScene = nullptr;
+
+    mCurrentScene->Initialize();
+
+    // Rebuild active actors from new scene
+    FindActiveActors();
+  }
+
   UpdateActors(deltaTime);
 
   // Check collisions after all actors have been updated

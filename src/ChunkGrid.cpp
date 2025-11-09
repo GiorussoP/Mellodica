@@ -70,13 +70,6 @@ void ChunkGrid::UnregisterActor(Actor *actor) {
 
   int cellIndex = it->second;
 
-  // CRITICAL FIX: Verify cellIndex is valid before accessing
-  if (cellIndex < 0 || cellIndex >= static_cast<int>(mCells.size())) {
-    // Cell index is invalid, but actor is in map - remove from map only
-    mActorCellMap.erase(it);
-    return;
-  }
-
   // Remove from cell
   auto &cellActors = mCells[cellIndex].actors;
   auto actorIt = std::find(cellActors.begin(), cellActors.end(), actor);
@@ -175,15 +168,8 @@ std::vector<Actor *> ChunkGrid::GetVisibleActors(const Vector3 &cameraPos) {
 
       // Add all actors from this cell
       const auto &cellActors = mCells[cellIndex].actors;
-
-      // CRITICAL FIX: Only add actors that are not marked for destruction
-      // This prevents use-after-free if an actor was marked for deletion
-      // but not yet removed from the grid
-      for (Actor *actor : cellActors) {
-        if (actor && actor->GetState() != ActorState::Destroy) {
-          visibleActors.push_back(actor);
-        }
-      }
+      visibleActors.insert(visibleActors.end(), cellActors.begin(),
+                           cellActors.end());
     }
   }
 

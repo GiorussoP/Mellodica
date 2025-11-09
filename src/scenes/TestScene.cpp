@@ -107,22 +107,22 @@ void TestSceneA::Initialize() {
 void TestSceneB::Initialize() {
   std::cout << "Initializing TestSceneB..." << std::endl;
 
-  SynthEngine::setChannels({{8, 39},
-                            {0, 2},
-                            {0, 32},
-                            {0, 24},
-                            {0, 25},
-                            {0, 40},
-                            {0, 48},
-                            {0, 56},
-                            {0, 66},
-                            {128, 0},
-                            {0, 89},
-                            {0, 73},
-                            {0, 57},
-                            {0, 42},
-                            {0, 11},
-                            {0, 52}});
+  SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
+                            {0, 40},  // Violin
+                            {0, 21},  // Accordion
+                            {0, 43},  // Contrabass
+                            {0, 73},  // Flute
+                            {0, 71},  // Clarinet
+                            {0, 56},  // Trumpet
+                            {0, 46},  // Harp
+                            {0, 0},   // Always active: Piano
+                            {128, 0}, // Battle drums
+                            {0, 1},   // ?? - disabled - Piano too?
+                            {128, 1}, // Always Active: drums
+                            {0, 0},   // Player Channel: Piano
+                            {0, 42},  // SFX1
+                            {0, 11},  // SFX2
+                            {0, 0}}); // SFX3
 
   // Creating the Player actor
   mGame->SetPlayer(new Player(mGame));
@@ -130,7 +130,43 @@ void TestSceneB::Initialize() {
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
   mGame->GetRenderer()->SetIsDark(false);
 
-  MIDIPlayer::loadSong("assets/songs/3.mid", true);
+  MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+  // MIDIPlayer::muteChannel(0);
+  // MIDIPlayer::muteChannel(1);
+  // MIDIPlayer::muteChannel(2);
+  // MIDIPlayer::muteChannel(3);
+  // MIDIPlayer::muteChannel(4);
+  // MIDIPlayer::muteChannel(5);
+  // MIDIPlayer::muteChannel(6);
+  //  MIDIPlayer::muteChannel(7);
+
+  // MIDIPlayer::muteChannel(8);
+  //  MIDIPlayer::muteChannel(9);
+  MIDIPlayer::muteChannel(11);
+
+  MIDIPlayer::setChannelVolume(0, 127);
+  MIDIPlayer::setChannelVolume(1, 127);
+  MIDIPlayer::setChannelVolume(2, 127);
+  MIDIPlayer::setChannelVolume(3, 127);
+  MIDIPlayer::setChannelVolume(4, 127);
+  MIDIPlayer::setChannelVolume(5, 127);
+  MIDIPlayer::setChannelVolume(6, 127);
+  MIDIPlayer::setChannelVolume(7, 127);
+
+  MIDIPlayer::setChannelVolume(8, 127);
+  MIDIPlayer::setChannelVolume(9, 127);
+  // MIDIPlayer::setChannelVolume(10, 127);
+  MIDIPlayer::setChannelVolume(11, 127);
+
+  // MIDIPlayer::muteChannel(10); ----- IGNORE -----
+  // MIDIPlayer::setChannelVolume(10, 127);
+
+  MIDIPlayer::setChannelTranspose(11, -60);
+
+  new MIDIControlActor(mGame);
+
+  std::cout << MIDIPlayer::getChannels()[10].notes.size() << std::endl;
+
   MIDIPlayer::play();
 
   auto testMario = new MarioActor(mGame);

@@ -77,6 +77,7 @@ private:
   class ChunkGrid *mChunkGrid;
 
   Scene *mCurrentScene;
+  Scene *mPendingScene;
 
   // Camera state
   Vector3 mCameraPos;
@@ -90,5 +91,4 @@ private:
   Uint32 mTicksCount;
   bool mIsRunning;
   bool mIsDebugging;
-  bool mSceneJustLoaded; // Skip rendering on frame where scene was loaded
 };

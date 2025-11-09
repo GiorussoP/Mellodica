@@ -10,12 +10,11 @@ void Scene::Cleanup() {
   // Iterate over a copy since deletion modifies the set
   std::vector<Actor *> actorsToDelete(mActors.begin(), mActors.end());
 
-  // Clear the set BEFORE deleting to prevent any re-entrant calls
-  mActors.clear();
-
   for (auto actor : actorsToDelete) {
     delete actor; // Actor destructor will call mGame->RemoveActor(this)
   }
+
+  mActors.clear(); // Clear the set (should already be empty)
 }
 
 void Scene::LoadLevel(const std::string &levelPath, unsigned int width,
