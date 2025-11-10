@@ -19,10 +19,10 @@ void main()
     // Additive blending of bloom
     vec3 result;
     if (uIsDark){
-        result = (bloomColor == vec3(0.0)) ?  vec3(0.0) : (sceneColor * bloomColor) + bloomColor;
+        result = (bloomColor == vec3(0.0)) ?  vec3(0.0) : (sceneColor * bloomColor) + 0.5 * bloomColor;
     }
     else {
-        result = sceneColor + bloomColor;
+        result = sceneColor + 0.5 * bloomColor;
     }
     outColor = vec4(result, 1.0);
 }

@@ -21,6 +21,12 @@ std::thread MIDIPlayer::midiThread;
 std::atomic<bool> MIDIPlayer::threadRunning(false);
 std::mutex MIDIPlayer::midiMutex;
 
+std::queue<NoteCallbackEvent> MIDIPlayer::eventQueue;
+std::mutex MIDIPlayer::eventQueueMutex;
+
+std::vector<int> MIDIPlayer::registeredChannels;
+std::mutex MIDIPlayer::registeredChannelsMutex;
+
 void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
   std::lock_guard<std::mutex> lock(midiMutex);
 
@@ -166,11 +172,38 @@ void MIDIPlayer::update(float dt) {
         if (transposed_note > 127)
           transposed_note = 127;
 
-        if (channel.notes.at(channel.pos).on)
-          SynthEngine::startNote(i, transposed_note,
-                                 channel.notes.at(channel.pos).velocity);
+        bool noteOn = channel.notes.at(channel.pos).on;
+        int velocity = channel.notes.at(channel.pos).velocity;
+
+        if (noteOn)
+          SynthEngine::startNote(i, transposed_note, velocity);
         else
           SynthEngine::stopNote(i, transposed_note);
+
+        // Look ahead for the next noteOn event in this channel
+        bool hasNextNote = false;
+        int nextNote = -1;
+        double nextNoteTime = -1.0;
+
+        for (unsigned int lookAhead = channel.pos + 1;
+             lookAhead < channel.notes.size(); ++lookAhead) {
+          if (channel.notes[lookAhead].on) {
+            // Found the next noteOn event
+            hasNextNote = true;
+            nextNote = channel.notes[lookAhead].note + channel.transpose;
+            // Clamp next note to valid MIDI range
+            if (nextNote < 0)
+              nextNote = 0;
+            if (nextNote > 127)
+              nextNote = 127;
+            nextNoteTime = channel.notes[lookAhead].start;
+            break;
+          }
+        }
+
+        // Push event to queue for game loop consumption
+        pushNoteEvent(i, transposed_note, velocity, noteOn, hasNextNote,
+                      nextNote, nextNoteTime);
       }
 
       channel.pos++;
@@ -310,4 +343,71 @@ void MIDIPlayer::midiThreadFunction() {
     nextUpdate += interval;
     std::this_thread::sleep_until(nextUpdate);
   }
+}
+
+void MIDIPlayer::pushNoteEvent(int channel, int note, int velocity, bool noteOn,
+                               bool hasNextNote, int nextNote,
+                               double nextNoteTime) {
+  // Check if we should filter this channel
+  {
+    std::lock_guard<std::mutex> lock(registeredChannelsMutex);
+    if (!registeredChannels.empty()) {
+      bool shouldPush = false;
+      for (int registeredChannel : registeredChannels) {
+        if (registeredChannel == channel) {
+          shouldPush = true;
+          break;
+        }
+      }
+      if (!shouldPush) {
+        return; // Skip this event
+      }
+    }
+  }
+
+  // Push to event queue
+  std::lock_guard<std::mutex> lock(eventQueueMutex);
+  eventQueue.push({channel, note, velocity, noteOn, time, hasNextNote, nextNote,
+                   nextNoteTime});
+}
+
+std::vector<NoteCallbackEvent> MIDIPlayer::pollNoteEvents() {
+  std::vector<NoteCallbackEvent> events;
+  std::lock_guard<std::mutex> lock(eventQueueMutex);
+
+  // Move all events from queue to vector
+  while (!eventQueue.empty()) {
+    events.push_back(eventQueue.front());
+    eventQueue.pop();
+  }
+
+  return events;
+}
+
+void MIDIPlayer::registerChannelForEvents(int channel) {
+  std::lock_guard<std::mutex> lock(registeredChannelsMutex);
+
+  // Check if already registered
+  for (int ch : registeredChannels) {
+    if (ch == channel) {
+      return;
+    }
+  }
+
+  registeredChannels.push_back(channel);
+}
+
+void MIDIPlayer::unregisterChannelForEvents(int channel) {
+  std::lock_guard<std::mutex> lock(registeredChannelsMutex);
+
+  auto it =
+      std::find(registeredChannels.begin(), registeredChannels.end(), channel);
+  if (it != registeredChannels.end()) {
+    registeredChannels.erase(it);
+  }
+}
+
+void MIDIPlayer::clearRegisteredChannels() {
+  std::lock_guard<std::mutex> lock(registeredChannelsMutex);
+  registeredChannels.clear();
 }

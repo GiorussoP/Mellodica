@@ -133,18 +133,6 @@ void SynthEngine::setPan(unsigned int ch, unsigned int pan) {
   fluid_synth_cc(synth, ch, 10, pan);
 }
 
-void SynthEngine::setChannelTypeMelodic(unsigned int ch) {
-  if (ch < 16) {
-    fluid_synth_set_channel_type(synth, ch, CHANNEL_TYPE_MELODIC);
-  }
-}
-
-void SynthEngine::setChannelTypeDrum(unsigned int ch) {
-  if (ch < 16) {
-    fluid_synth_set_channel_type(synth, ch, CHANNEL_TYPE_DRUM);
-  }
-}
-
 void SynthEngine::testSoundFont() {
 
   auto presets = getSoundPresets();

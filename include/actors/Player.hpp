@@ -2,9 +2,11 @@
 #define PLAYER_HPP
 
 #include "Actor.hpp"
+#include "actors/NoteActor.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/RigidBodyComponent.hpp"
 #include "components/SpriteComponent.hpp"
+#include <array>
 
 class Player : public Actor {
 public:
@@ -27,8 +29,11 @@ private:
   ColliderComponent *mColliderComponent;
   SpriteComponent *mSpriteComponent;
 
-  // For debugging
-  Actor *mTestCube;
+  std::array<NoteActor *, 12> mActiveNotes;
+
+  Vector3 mFront;
+
+  unsigned int mCameraDirection;
 };
 
 #endif

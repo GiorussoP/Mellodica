@@ -47,6 +47,15 @@ public:
   Vector3 &GetCameraUp() { return mCameraUp; }
   void SetCameraUp(const Vector3 up) { mCameraUp = up; }
 
+  Quaternion GetCameraRotation() const {
+    return Math::LookRotation(mCameraForward, mCameraUp);
+  }
+
+  void SetCameraRotation(const Quaternion rotation) {
+    mCameraForward = Vector3::Transform(Vector3::UnitZ, rotation);
+    mCameraUp = Vector3::Transform(Vector3::UnitY, rotation);
+  }
+
 private:
   void ProcessInput();
   void UpdateGame(float deltaTime);

@@ -130,10 +130,12 @@ OBBTestActor::OBBTestActor(Game *game)
   // Register as always-active so it's included in collision detection
   game->AddAlwaysActive(this);
 
-  // Create a tilted OBB collider (45 degrees around Y axis)
+  // Create a tilted OBB collider with base size matching the cube mesh
+  // The cube mesh is 1.0 unit, so half-extents are 0.5
+  // The scale will be applied automatically to both mesh and collider
   mColliderComponent =
-      new OBBCollider(this, ColliderLayer::Player, Vector3::Zero,
-                      Vector3(3.5f, 0.5f, 0.5f), true);
+      new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
+                      Vector3(0.5f, 0.5f, 0.5f), true);
 
   // Get texture from renderer cache
   Texture *texture =

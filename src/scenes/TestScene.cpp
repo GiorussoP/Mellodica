@@ -117,8 +117,8 @@ void TestSceneB::Initialize() {
                             {0, 46},  // Harp
                             {0, 0},   // Always active: Piano
                             {128, 0}, // Battle drums
-                            {0, 1},   // ?? - disabled - Piano too?
-                            {128, 1}, // Always Active: drums
+                            {0, 49},  // Always active: Slow strings
+                            {128, 1}, // Always Active: song drums
                             {0, 0},   // Player Channel: Piano
                             {0, 42},  // SFX1
                             {0, 11},  // SFX2
@@ -131,18 +131,18 @@ void TestSceneB::Initialize() {
   mGame->GetRenderer()->SetIsDark(false);
 
   MIDIPlayer::loadSong("assets/songs/a1.mid", true);
-  // MIDIPlayer::muteChannel(0);
-  // MIDIPlayer::muteChannel(1);
-  // MIDIPlayer::muteChannel(2);
-  // MIDIPlayer::muteChannel(3);
-  // MIDIPlayer::muteChannel(4);
-  // MIDIPlayer::muteChannel(5);
-  // MIDIPlayer::muteChannel(6);
-  //  MIDIPlayer::muteChannel(7);
-
-  // MIDIPlayer::muteChannel(8);
-  //  MIDIPlayer::muteChannel(9);
-  MIDIPlayer::muteChannel(11);
+  MIDIPlayer::muteChannel(0);
+  MIDIPlayer::muteChannel(1);
+  MIDIPlayer::muteChannel(2);
+  MIDIPlayer::muteChannel(3);
+  MIDIPlayer::muteChannel(4);
+  MIDIPlayer::muteChannel(5);
+  MIDIPlayer::muteChannel(6);
+  MIDIPlayer::muteChannel(7);
+  //   MIDIPlayer::muteChannel(8);
+  MIDIPlayer::muteChannel(9);
+  //  MIDIPlayer::muteChannel(10);
+  // MIDIPlayer::muteChannel(11);
 
   MIDIPlayer::setChannelVolume(0, 127);
   MIDIPlayer::setChannelVolume(1, 127);
@@ -155,15 +155,13 @@ void TestSceneB::Initialize() {
 
   MIDIPlayer::setChannelVolume(8, 127);
   MIDIPlayer::setChannelVolume(9, 127);
-  // MIDIPlayer::setChannelVolume(10, 127);
-  MIDIPlayer::setChannelVolume(11, 127);
+  MIDIPlayer::setChannelVolume(10, 127);
+  MIDIPlayer::setChannelVolume(11, 100);
 
   // MIDIPlayer::muteChannel(10); ----- IGNORE -----
   // MIDIPlayer::setChannelVolume(10, 127);
 
   MIDIPlayer::setChannelTranspose(11, -60);
-
-  new MIDIControlActor(mGame);
 
   std::cout << MIDIPlayer::getChannels()[10].notes.size() << std::endl;
 
@@ -173,7 +171,7 @@ void TestSceneB::Initialize() {
   testMario->SetPosition(Vector3(-5.0f, 1.0f, 0.0f));
 
   auto testGoomba = new GoombaActor(mGame);
-  testGoomba->SetPosition(Vector3(-5.0f, 1.0f, 5.0f));
+  testGoomba->SetPosition(Vector3(2.0f, 1.0f, 0.0f));
 
   auto obbTest1 = new OBBTestActor(mGame);
   obbTest1->SetPosition(Vector3(5.0f, 1.0f, 0.0f));
