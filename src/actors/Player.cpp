@@ -55,7 +55,7 @@ Player::Player(Game *game)
   game->AddAlwaysActive(this);
 
   // Initialize all note pointers to nullptr
-  mActiveNotes.fill(nullptr);
+  // mActiveNotes.fill(nullptr);
 
   mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, PLAYER_FRICTION,
                                                false); // Disable gravity
@@ -87,7 +87,7 @@ Player::Player(Game *game)
   mSpriteComponent->SetAnimation("idle");
   mSpriteComponent->SetAnimFPS(8.0f);
 
-  // mSpriteComponent->SetBloomed(true);
+  mNotePlayerComponent = new NotePlayerComponent(this, false);
 }
 
 void Player::OnUpdate(float deltaTime) {
@@ -117,7 +117,7 @@ void Player::OnUpdate(float deltaTime) {
   }
 
   bool playing = false;
-  for (auto note : mActiveNotes) {
+  for (auto note : mNotePlayerComponent->GetActiveNotes()) {
     if (note != nullptr) {
       playing = true;
       break;
@@ -174,15 +174,13 @@ void Player::OnProcessInput() {
 
   for (int i = 0; i < 12; ++i) {
     if (Input::WasKeyPressed(notebuttons[i])) {
-      mActiveNotes[i] = new NoteActor(mGame, 12, 60 + i, mFront);
-      mActiveNotes[i]->SetPosition(GetPosition() + (-2.75f + i * 0.5f) * right +
-                                   0.5f * mFront);
-      mActiveNotes[i]->Start();
-      SynthEngine::startNote(12, 60 + i, 127);
+      if (mNotePlayerComponent->PlayNote(60 + i, 12)) {
+        SynthEngine::startNote(12, 60 + i);
+      };
     } else if (Input::WasKeyReleased(notebuttons[i])) {
-      if (mActiveNotes[i]) {
-        mActiveNotes[i]->End();
-        mActiveNotes[i] = nullptr;
+      if (mNotePlayerComponent->EndNote(60 + i)) {
+        // mActiveNotes[i]->End();
+        // mActiveNotes[i] = nullptr;
         SynthEngine::stopNote(12, 60 + i);
       }
     }

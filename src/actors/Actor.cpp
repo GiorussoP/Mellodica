@@ -38,7 +38,7 @@ void Actor::Update(float deltaTime) {
 void Actor::ProcessInput() {
   if (mState == ActorState::Active) {
     // Process components input
-    for (auto comp : mComponents) {
+    for (auto &comp : mComponents) {
       if (comp->IsEnabled()) {
         comp->ProcessInput();
       }

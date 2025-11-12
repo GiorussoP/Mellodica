@@ -149,6 +149,13 @@ void MIDIPlayer::setSpeed(double speed) {
   song_speed = speed;
 }
 
+void MIDIPlayer::clearEventQueue() {
+  std::lock_guard<std::mutex> lock(eventQueueMutex);
+  while (!eventQueue.empty()) {
+    eventQueue.pop();
+  }
+}
+
 void MIDIPlayer::update(float dt) {
   std::lock_guard<std::mutex> lock(midiMutex);
 

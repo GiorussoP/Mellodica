@@ -97,7 +97,11 @@ MarioActor::MarioActor(Game *game) : Actor(game), mSpriteComponent(nullptr) {
 
 void MarioActor::OnUpdate(float deltaTime) {}
 
-GoombaActor::GoombaActor(Game *game) : Actor(game), mSpriteComponent(nullptr) {
+GoombaActor::GoombaActor(Game *game)
+    : Actor(game), mSpriteComponent(nullptr), mColliderComponent(nullptr),
+      mNotePlayerComponent(nullptr) {
+
+  mGame->AddAlwaysActive(this);
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/Goomba.json");
@@ -117,11 +121,21 @@ GoombaActor::GoombaActor(Game *game) : Actor(game), mSpriteComponent(nullptr) {
 
   mColliderComponent = new AABBCollider(
       this, ColliderLayer::Player, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f));
+
+  mNotePlayerComponent = new NotePlayerComponent(this, true, Vector3::UnitZ);
 }
 
 void GoombaActor::OnUpdate(float deltaTime) {
-  // Update the sprite component
-  mSpriteComponent->Update(deltaTime);
+  auto notes = MIDIPlayer::pollNoteEvents();
+  for (auto note : notes) {
+    if (note.channel == 0 || note.channel == 2) {
+      if (note.noteOn)
+        // mPosition += Vector3::UnitY;
+        mNotePlayerComponent->PlayNote(note.note, note.channel);
+      else
+        mNotePlayerComponent->EndNote(note.note);
+    }
+  }
 }
 
 // OBBTestActor implementation

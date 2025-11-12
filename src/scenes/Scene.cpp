@@ -11,7 +11,8 @@ void Scene::Cleanup() {
   std::vector<Actor *> actorsToDelete(mActors.begin(), mActors.end());
 
   for (auto actor : actorsToDelete) {
-    delete actor; // Actor destructor will call mGame->RemoveActor(this)
+    actor->SetState(ActorState::Destroy);
+    // delete actor; // Actor destructor will call mGame->RemoveActor(this)
   }
 
   mActors.clear(); // Clear the set (should already be empty)

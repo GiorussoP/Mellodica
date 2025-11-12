@@ -30,8 +30,38 @@ void TestSceneA::Initialize() {
                             {0, 52}});
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/8.mid", true);
+  MIDIPlayer::loadSong("assets/songs/a2.mid", true);
+  MIDIPlayer::setSpeed(0.75);
   MIDIPlayer::play();
+
+  // MIDIPlayer::muteChannel(0);
+  MIDIPlayer::muteChannel(1);
+  // MIDIPlayer::muteChannel(2);
+  MIDIPlayer::muteChannel(3);
+  MIDIPlayer::muteChannel(4);
+  MIDIPlayer::muteChannel(5);
+  MIDIPlayer::muteChannel(6);
+  // MIDIPlayer::muteChannel(7);
+  // MIDIPlayer::muteChannel(8);
+  MIDIPlayer::muteChannel(9);
+  //   MIDIPlayer::muteChannel(10);
+  //  MIDIPlayer::muteChannel(11);
+
+  MIDIPlayer::setChannelVolume(0, 127);
+  MIDIPlayer::setChannelVolume(1, 127);
+  MIDIPlayer::setChannelVolume(2, 127);
+  MIDIPlayer::setChannelVolume(3, 127);
+  MIDIPlayer::setChannelVolume(4, 127);
+  MIDIPlayer::setChannelVolume(5, 127);
+  MIDIPlayer::setChannelVolume(6, 127);
+  MIDIPlayer::setChannelVolume(7, 127);
+
+  MIDIPlayer::setChannelVolume(8, 100);
+  MIDIPlayer::setChannelVolume(9, 100);
+  MIDIPlayer::setChannelVolume(10, 127);
+  MIDIPlayer::setChannelVolume(11, 100);
+
+  MIDIPlayer::setChannelTranspose(11, -60);
 
   // Some actors for testing
   const int gridSize = 300;
@@ -48,7 +78,7 @@ void TestSceneA::Initialize() {
   }
 
   auto pyramid = new PyramidActor(mGame, Color::Red);
-  pyramid->SetPosition(Vector3(6.0f, 1.0f, 0.0f));
+  pyramid->SetPosition(Vector3(-3.0f, 1.0f, 0.0f));
   pyramid->SetScale(Vector3(2.0f, 1.0f, 2.0f));
 
   auto cube1 = new CubeActor(mGame, Color::Green);
@@ -56,8 +86,8 @@ void TestSceneA::Initialize() {
   cube1->SetScale(Vector3(5.0f, 0.5f, 1.0f));
   cube1->GetComponent<MeshComponent>()->SetBloomed(true);
 
-  auto cube2 = new CubeActor(mGame, Color::Yellow);
-  cube2->SetPosition(Vector3(7.5f, 1.0f, -2.5f));
+  auto cube2 = new CubeActor(mGame, Color::Cyan);
+  cube2->SetPosition(Vector3(12.5f, 1.0f, -2.5f));
   cube2->SetScale(Vector3(0.5f, 2.5f, 0.5f));
   cube2->GetComponent<MeshComponent>()->SetBloomed(true);
 
@@ -67,13 +97,12 @@ void TestSceneA::Initialize() {
   cube3->SetRotation(Quaternion(0.7071f, 0.0f, 0.0f, 0.7071f));
   cube3->GetComponent<MeshComponent>()->SetBloomed(true);
 
-  // Create test OBB actor (tilted 45 degrees)
   auto obbTest1 = new OBBTestActor(mGame);
-  obbTest1->SetPosition(Vector3(5.0f, 1.0f, 0.0f));
+  obbTest1->SetPosition(Vector3(5.0f, 1.0f, 5.0f));
 
   auto obbTest2 = new OBBTestActor(mGame);
   obbTest2->SetPosition(
-      Vector3(6.0f, 1.0f, -4.0f)); // Place it to the right of spawn
+      Vector3(6.0f, 1.0f, 7.0f)); // Place it to the right of spawn
 
   // Creating the Player actor
   mGame->SetPlayer(new Player(mGame));
@@ -102,6 +131,9 @@ void TestSceneA::Initialize() {
       mGame->AddAlwaysActive(cube4);
     }
   }
+
+  auto testGoomba = new GoombaActor(mGame);
+  testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
 }
 
 void TestSceneB::Initialize() {
@@ -126,23 +158,23 @@ void TestSceneB::Initialize() {
 
   // Creating the Player actor
   mGame->SetPlayer(new Player(mGame));
-  mGame->GetPlayer()->SetPosition(Vector3(12.0f, 1.0f, 12.0f));
+  mGame->GetPlayer()->SetPosition(Vector3(0.0f, 1.0f, 0.0f));
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
   mGame->GetRenderer()->SetIsDark(false);
 
   MIDIPlayer::loadSong("assets/songs/a1.mid", true);
-  MIDIPlayer::muteChannel(0);
+  // MIDIPlayer::muteChannel(0);
   MIDIPlayer::muteChannel(1);
-  MIDIPlayer::muteChannel(2);
+  // MIDIPlayer::muteChannel(2);
   MIDIPlayer::muteChannel(3);
   MIDIPlayer::muteChannel(4);
   MIDIPlayer::muteChannel(5);
   MIDIPlayer::muteChannel(6);
-  MIDIPlayer::muteChannel(7);
-  //   MIDIPlayer::muteChannel(8);
+  // MIDIPlayer::muteChannel(7);
+  // MIDIPlayer::muteChannel(8);
   MIDIPlayer::muteChannel(9);
-  //  MIDIPlayer::muteChannel(10);
-  // MIDIPlayer::muteChannel(11);
+  //   MIDIPlayer::muteChannel(10);
+  //  MIDIPlayer::muteChannel(11);
 
   MIDIPlayer::setChannelVolume(0, 127);
   MIDIPlayer::setChannelVolume(1, 127);
@@ -171,10 +203,10 @@ void TestSceneB::Initialize() {
   testMario->SetPosition(Vector3(-5.0f, 1.0f, 0.0f));
 
   auto testGoomba = new GoombaActor(mGame);
-  testGoomba->SetPosition(Vector3(2.0f, 1.0f, 0.0f));
+  testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
 
   auto obbTest1 = new OBBTestActor(mGame);
-  obbTest1->SetPosition(Vector3(5.0f, 1.0f, 0.0f));
+  obbTest1->SetPosition(Vector3(5.0f, 1.0f, 12.0f));
   obbTest1->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
 
   auto cube2 = new CubeActor(mGame, Color::Cyan, 0);

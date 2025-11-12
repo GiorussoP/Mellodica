@@ -65,6 +65,9 @@ public:
   // Event system - call this from game loop
   static std::vector<NoteCallbackEvent> pollNoteEvents();
 
+  // Clear the event queue
+  static void clearEventQueue();
+
   // Optional: Register channels you want to receive events from
   // If no channels registered, all channels will trigger events
   static void registerChannelForEvents(int channel);

@@ -8,7 +8,7 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
                      Vector3 direction, Vector3 color, float speed)
     : Actor(game), mMidiChannel(midChannel), mMidiNote(midiNote),
       mIsPlaying(false), mDirection(direction), mSpeed(speed),
-      mLastStepMovement(0.0f) {
+      mLastStepMovement(0.0f), mNotePlayerComponent(nullptr) {
 
   mGame->AddAlwaysActive(this);
 
@@ -35,25 +35,30 @@ void NoteActor::Start() {
 void NoteActor::OnUpdate(float deltaTime) {
 
   mLastStepMovement = mSpeed * deltaTime;
-  if (mIsPlaying)
-    SetScale(mScale + Vector3(0.0f, 0.0f, 2.0f * mLastStepMovement));
+  if (mIsPlaying) {
+    SetScale(mScale + Vector3(0.0f, 0.0f, mLastStepMovement));
+    SetPosition(mPosition - 0.5f * mDirection * mLastStepMovement);
+  }
 
-  if (mScale.z <= 0.1f ||
-      Vector3::Distance(mPosition, Vector3::Zero) > 100.0f) {
+  if (mScale.z < 0.1f) {
+    mIsPlaying = false;
     SetState(ActorState::Destroy);
+    if (mNotePlayerComponent)
+      mNotePlayerComponent->MarkNoteDead(this);
   }
 }
 
 void NoteActor::End() { mIsPlaying = false; }
 
 void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
-  if (other->GetLayer() != ColliderLayer::Ground) {
+  if (other->GetLayer() != ColliderLayer::Ground &&
+      other->GetLayer() != ColliderLayer::Note) {
     return;
   }
 
   if (mIsPlaying) {
-    SetScale(mScale - Vector3(0.0f, 0.0f, 2.0 * mLastStepMovement));
-    SetPosition(mPosition - mDirection * mLastStepMovement);
+    SetScale(mScale - Vector3(0.0f, 0.0f, mLastStepMovement));
+    SetPosition(mPosition - 0.5f * mDirection * mLastStepMovement);
   } else {
     SetScale(mScale - Vector3(0.0f, 0.0f, mLastStepMovement));
     SetPosition(mPosition - mDirection * mLastStepMovement * 0.5f);

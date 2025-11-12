@@ -48,6 +48,7 @@ public:
   // Returns component of type T, or null if doesn't exist
   template <typename T> T *GetComponent() const {
     for (auto c : mComponents) {
+
       T *t = dynamic_cast<T *>(c);
       if (t != nullptr) {
         return t;

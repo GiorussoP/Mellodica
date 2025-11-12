@@ -46,6 +46,11 @@ void ChunkGrid::RegisterActor(Actor *actor) {
   if (!actor)
     return;
 
+  // Check if already registered
+  if (mActorCellMap.find(actor) != mActorCellMap.end()) {
+    return;
+  }
+
   int cellIndex = GetCellIndex(actor->GetPosition());
 
   // Check if valid cell
@@ -81,6 +86,8 @@ void ChunkGrid::UnregisterActor(Actor *actor) {
 
   // Remove from map
   mActorCellMap.erase(it);
+
+  // std::cout << "Unregistered actor from cell " << cellIndex << std::endl;
 }
 
 void ChunkGrid::UpdateActor(Actor *actor) {
@@ -99,8 +106,8 @@ void ChunkGrid::UpdateActor(Actor *actor) {
 
   // Check if actor moved to invalid cell
   if (newCellIndex < 0 || newCellIndex >= static_cast<int>(mCells.size())) {
-    // Actor moved outside grid - unregister it
-    UnregisterActor(actor);
+    // Actor moved outside grid - Destroy it
+    actor->SetState(ActorState::Destroy);
     return;
   }
 

@@ -94,8 +94,8 @@ bool Game::Initialize() {
   mTicksCount = SDL_GetTicks();
 
   // Create Chunk grid
-  mChunkGrid = new ChunkGrid(Vector3(-100.0f, -10.0f, -1000.0f),
-                             Vector3(100.0f, 10.0f, 1000.0f), 10.0f);
+  mChunkGrid = new ChunkGrid(Vector3(-100.0f, -100.0f, -100.0f),
+                             Vector3(100.0f, 100.0f, 100.0f), 10.0f);
 
   // Setting up SynthEngine
   SynthEngine::init();
@@ -122,10 +122,23 @@ void Game::LoadScene(Scene *scene) {
     mPlayer = nullptr;
     if (mCurrentScene) {
       mCurrentScene->Cleanup();
+      UpdateActors(0.0f);
       delete mCurrentScene;
+
+      std::cout << "mActors size after scene cleanup: " << mActors.size()
+                << std::endl;
+      std::cout << "mPendingActors size after scene cleanup: "
+                << mPendingActors.size() << std::endl;
+      std::cout << "mAlwaysActiveActors size after scene cleanup: "
+                << mAlwaysActiveActors.size() << std::endl;
+      std::cout << "Chunkgrid actor count after scene cleanup: "
+                << mChunkGrid->GetTotalActorCount() << std::endl;
+      std::cout << "mVisibleActors size after scene cleanup: "
+                << mActiveActors.size() << std::endl;
     }
 
     MIDIPlayer::pause();
+    MIDIPlayer::clearEventQueue();
 
     mCurrentScene = scene;
     mCurrentScene->Initialize();
@@ -256,8 +269,6 @@ void Game::RemoveActor(Actor *actor) {
     std::iter_swap(iter, mActors.end() - 1);
     mActors.pop_back();
   }
-
-  // NOTE: This does NOT delete the actor - that's the scene's responsibility
 }
 
 void Game::AddAlwaysActive(Actor *actor) { mAlwaysActiveActors.insert(actor); }
@@ -307,9 +318,8 @@ void Game::ProcessInput() {
       }
     }
   }
-
-  for (auto &actor : mActiveActors) {
-    actor->ProcessInput();
+  if (Input::WasKeyPressed(SDL_SCANCODE_F2)) {
+    LoadScene(new TestSceneB(this));
   }
 
   if (Input::WasKeyPressed(SDL_SCANCODE_F1)) {
@@ -319,8 +329,8 @@ void Game::ProcessInput() {
               << " ===" << std::endl;
   }
 
-  if (Input::WasKeyPressed(SDL_SCANCODE_F2)) {
-    LoadScene(new TestSceneB(this));
+  for (auto &actor : mActiveActors) {
+    actor->ProcessInput();
   }
 }
 
@@ -343,9 +353,7 @@ void Game::UpdateActors(float deltaTime) {
 
     // Register with chunk grid now that we're not iterating
     mChunkGrid->RegisterActor(pending);
-    if (mCurrentScene) {
-      mCurrentScene->RegisterActor(pending);
-    }
+    mCurrentScene->RegisterActor(pending);
   }
   mPendingActors.clear();
 
