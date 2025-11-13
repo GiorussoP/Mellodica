@@ -30,8 +30,8 @@ bool NotePlayerComponent::PlayNote(unsigned int note, unsigned int channel,
       position + right * (-2.75f + (noteIndex) * 0.5f) + front * 0.5f);
 
   mActiveNotes[noteIndex]->Start();
-  std::cout << "Playing note " << noteIndex << " on channel " << channel
-            << std::endl;
+  //std::cout << "Playing note " << noteIndex << " on channel " << channel
+   //         << std::endl;
 
   return true;
 }

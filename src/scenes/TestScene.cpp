@@ -112,7 +112,8 @@ void TestSceneA::Initialize() {
   // Creating a test HUD element
   auto hudElement = new HUDElement(mGame, "assets/textures/hud/hud.png",
                                    "assets/textures/hud/hud.json");
-  hudElement->SetPosition(Vector3(-0.4f, 0.4f, 0.0f));
+  hudElement->SetPosition(Vector3(-0.8, -0.8f, 0.0f));
+  hudElement->SetScale(Vector3(0.2f, 0.2f, 1.0f));
   hudElement->GetSpriteComponent().AddAnimation("default",
                                                 {"hud1.png", "hud2.png"});
   hudElement->GetSpriteComponent().SetAnimFPS(2.0f);

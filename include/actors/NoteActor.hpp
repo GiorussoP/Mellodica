@@ -12,7 +12,7 @@ class NoteActor : public Actor {
 public:
   NoteActor(class Game *game, unsigned int midChannel, unsigned int midiNote,
             Vector3 direction = Vector3::UnitZ, Vector3 color = Color::White,
-            float speed = 10.0f);
+            float speed = 5.0f);
 
   NoteActor(NotePlayerComponent *NotePlayerComponent, class Game *game,
             unsigned int midChannel, unsigned int midiNote,
@@ -37,6 +37,8 @@ private:
   Vector3 mDirection;
   float mSpeed;
   float mLastStepMovement;
+
+  class ShineActor *mShineActor;
 
   RigidBodyComponent *mRigidBodyComponent;
   ColliderComponent *mColliderComponent;

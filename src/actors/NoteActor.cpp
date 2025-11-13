@@ -4,6 +4,10 @@
 #include "SynthEngine.hpp"
 #include "components/ColliderComponent.hpp"
 
+#include "actors/ShineActor.hpp"
+
+const float SHINE_TIME = 0.5f;
+
 NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
                      Vector3 direction, Vector3 color, float speed)
     : Actor(game), mMidiChannel(midChannel), mMidiNote(midiNote),
@@ -30,6 +34,10 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
 void NoteActor::Start() {
   mIsPlaying = true;
   mRigidBodyComponent->SetVelocity(Vector3::Normalize(mDirection) * mSpeed);
+
+  mShineActor = new ShineActor(mGame, mMeshComponent->GetColor());
+  mShineActor->SetPosition(mPosition - mDirection * mScale.z * 0.5f);
+  mShineActor->Start(SHINE_TIME);
 }
 
 void NoteActor::OnUpdate(float deltaTime) {
@@ -55,6 +63,9 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
       other->GetLayer() != ColliderLayer::Note) {
     return;
   }
+
+  mShineActor->Start(SHINE_TIME);
+  mShineActor->SetPosition(mPosition + mDirection * mScale.z * 0.5f);
 
   if (mIsPlaying) {
     SetScale(mScale - Vector3(0.0f, 0.0f, mLastStepMovement));
