@@ -54,6 +54,7 @@ public:
     }
 
     unsigned int GetTextureIndex() const { return mTextureIndex; }
+    void SetTextureIndex(unsigned int index) { mTextureIndex = index; }
 
 private:
     std::map<std::string, AtlasTile> mTiles;
@@ -65,5 +66,5 @@ private:
     int mTileHeight;
     int mColumns;
     int mRows;
-    const unsigned int mTextureIndex;
+    unsigned int mTextureIndex;
 };

@@ -16,6 +16,7 @@
 
 #include "Input.hpp"
 
+#include "scenes/MainMenu.hpp"
 #include "scenes/TestScene.hpp"
 
 #include <GL/glew.h>
@@ -104,7 +105,7 @@ bool Game::Initialize() {
   MIDIPlayer::startMIDIThread();
 
   // Initialize game actors
-  LoadScene(new TestSceneA(this));
+  LoadScene(new MainMenu(this));
 
   return true;
 }
@@ -319,6 +320,9 @@ void Game::ProcessInput() {
     }
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_F2)) {
+    LoadScene(new TestSceneA(this));
+  }
+  if (Input::WasKeyPressed(SDL_SCANCODE_F3)) {
     LoadScene(new TestSceneB(this));
   }
 

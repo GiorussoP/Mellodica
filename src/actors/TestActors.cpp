@@ -15,6 +15,7 @@ CubeActor::CubeActor(Game *game, const Vector3 &color, int startingIndex)
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
   Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
@@ -33,6 +34,7 @@ GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
   Mesh *mesh = game->GetRenderer()->LoadMesh("plane");
@@ -56,6 +58,7 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
   Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
@@ -81,6 +84,7 @@ MarioActor::MarioActor(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   Texture *texture =
       game->GetRenderer()->LoadTexture("./assets/textures/Mario.png");
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
+  atlas->SetTextureIndex(textureIndex);
 
   // Create sprite component with atlas
   mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
@@ -110,6 +114,7 @@ GoombaActor::GoombaActor(Game *game)
   Texture *texture =
       game->GetRenderer()->LoadTexture("./assets/textures/Goomba.png");
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
+  atlas->SetTextureIndex(textureIndex);
 
   // Create sprite component with atlas
   mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
@@ -122,7 +127,7 @@ GoombaActor::GoombaActor(Game *game)
   mColliderComponent = new AABBCollider(
       this, ColliderLayer::Player, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f));
 
-  mNotePlayerComponent = new NotePlayerComponent(this, true, Vector3::UnitZ);
+  mNotePlayerComponent = new NotePlayerComponent(this, true, Vector3::Zero);
 }
 
 void GoombaActor::OnUpdate(float deltaTime) {
@@ -156,6 +161,7 @@ OBBTestActor::OBBTestActor(Game *game)
       game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
   Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
 
   mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, 0);

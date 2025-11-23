@@ -10,6 +10,7 @@
 void TestSceneA::Initialize() {
 
   std::cout << "Initializing TestSceneA..." << std::endl;
+  mGame->GetRenderer()->SetIsDark(true);
 
   // Setting scene instruments
   SynthEngine::setChannels({{0, 0},
@@ -163,7 +164,7 @@ void TestSceneB::Initialize() {
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
   mGame->GetRenderer()->SetIsDark(false);
 
-  MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
   // MIDIPlayer::muteChannel(0);
   MIDIPlayer::muteChannel(1);
   // MIDIPlayer::muteChannel(2);
@@ -171,7 +172,7 @@ void TestSceneB::Initialize() {
   MIDIPlayer::muteChannel(4);
   MIDIPlayer::muteChannel(5);
   MIDIPlayer::muteChannel(6);
-  // MIDIPlayer::muteChannel(7);
+  MIDIPlayer::muteChannel(7);
   // MIDIPlayer::muteChannel(8);
   MIDIPlayer::muteChannel(9);
   //   MIDIPlayer::muteChannel(10);

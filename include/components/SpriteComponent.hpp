@@ -9,7 +9,7 @@ public:
   // Constructor for sprite with atlas (animated or static)
   // isHUD: if true, sprite is drawn in screen space after framebuffer rendering
   SpriteComponent(class Actor *owner, int textureIndex,
-                  class TextureAtlas *atlas, bool isHUD = false);
+                  class TextureAtlas *atlas = nullptr, bool isHUD = false);
 
   ~SpriteComponent() override;
 

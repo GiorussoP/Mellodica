@@ -6,10 +6,13 @@
 
 class HUDElement : public Actor {
 public:
-    HUDElement(Game* game, const std::string& hudTexturePath, const std::string& hudAtlasPath);
-    SpriteComponent& GetSpriteComponent() { return *mSpriteComponent; }
+  HUDElement(Game *game, const std::string &hudTexturePath,
+             const std::string &hudAtlasPath);
+  HUDElement(Game *game, const std::string &singleImagePath);
+  SpriteComponent &GetSpriteComponent() { return *mSpriteComponent; }
+
 private:
-    SpriteComponent* mSpriteComponent;
+  SpriteComponent *mSpriteComponent;
 };
 
 #endif

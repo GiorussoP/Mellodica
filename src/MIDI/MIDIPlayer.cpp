@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <map>
 
 std::vector<Channel> MIDIPlayer::channels = std::vector<Channel>(16);
 
@@ -110,6 +111,12 @@ void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
             // Other control changes
             fluid_synth_cc(SynthEngine::synth, channel, controller, value);
           }
+        } else if (status == MidiType::MidiMessageStatus::PitchBend) {
+          int data = midiEvent->getData();
+          int lsb = data >> 8;
+          int msb = data & 0xFF;
+          int value = (msb << 7) | lsb;
+          channels.at(channel).pitchBends.push_back({current_seconds, value});
         }
       } else if (event->getType() == MidiType::EventType::MetaEvent) {
         MetaEvent *metaEvent = (MetaEvent *)event;
@@ -131,11 +138,16 @@ void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
                      [](const NoteEvent &a, const NoteEvent &b) {
                        return a.start < b.start;
                      });
+    std::stable_sort(channel.pitchBends.begin(), channel.pitchBends.end(),
+                     [](const PitchBendEvent &a, const PitchBendEvent &b) {
+                       return a.time < b.time;
+                     });
   }
 
   std::cout << "Active channels: ";
   for (int i = 0; i < 16; ++i) {
     channels[i].pos = 0;
+    channels[i].pitchBendPos = 0;
     channels[i].active = !channels[i].notes.empty();
     if (channels[i].active)
       std::cout << i << " ";
@@ -219,6 +231,14 @@ void MIDIPlayer::update(float dt) {
         break;
       }
     }
+
+    // Send pitch bend events
+    while (channel.pitchBendPos < channel.pitchBends.size() &&
+           time >= channel.pitchBends[channel.pitchBendPos].time) {
+      fluid_synth_pitch_bend(SynthEngine::synth, i,
+                             channel.pitchBends[channel.pitchBendPos].value);
+      channel.pitchBendPos++;
+    }
   }
 
   if (time >= song_length) {
@@ -229,6 +249,7 @@ void MIDIPlayer::update(float dt) {
         if (!channels[i].notes.empty()) {
           fluid_synth_all_notes_off(SynthEngine::synth, i);
           channels[i].pos = 0;
+          channels[i].pitchBendPos = 0;
         }
       }
     }
@@ -242,6 +263,7 @@ void MIDIPlayer::play() {
     time = fmod(time, song_length);
     for (int i = 0; i < 16; ++i) {
       channels[i].pos = 0;
+      channels[i].pitchBendPos = 0;
       if (channels[i].active) {
       }
     }
@@ -270,10 +292,15 @@ void MIDIPlayer::jumpTo(float seconds) {
     if (!channels[i].notes.empty()) {
       fluid_synth_all_notes_off(SynthEngine::synth, i);
       channels[i].pos = 0;
+      channels[i].pitchBendPos = 0;
       // Find the correct position for this time
       while (channels[i].pos < channels[i].notes.size() &&
              channels[i].notes[channels[i].pos].start < time) {
         channels[i].pos++;
+      }
+      while (channels[i].pitchBendPos < channels[i].pitchBends.size() &&
+             channels[i].pitchBends[channels[i].pitchBendPos].time < time) {
+        channels[i].pitchBendPos++;
       }
     }
   }

@@ -3,6 +3,7 @@
 #include "Game.hpp"
 #include "Renderer.hpp"
 #include "components/SpriteComponent.hpp"
+#include <random>
 
 ShineActor::ShineActor(Game *game, Vector3 color)
     : Actor(game), mLifetime(0.0f) {
@@ -15,6 +16,7 @@ ShineActor::ShineActor(Game *game, Vector3 color)
       game->GetRenderer()->LoadTexture("./assets/textures/shine.png");
 
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
+  atlas->SetTextureIndex(textureIndex);
 
   mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
 

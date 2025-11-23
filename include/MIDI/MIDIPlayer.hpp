@@ -36,11 +36,18 @@ struct NoteCallbackEvent {
   double nextNoteTime; // timestamp of next noteOn (-1.0 if no next note)
 };
 
+struct PitchBendEvent {
+  double time;
+  int value;
+};
+
 struct Channel {
   bool active = false;
   unsigned int pos = 0;
   int transpose = 0; // Semitones to transpose notes (+/-)
   std::vector<NoteEvent> notes;
+  std::vector<PitchBendEvent> pitchBends;
+  int pitchBendPos = 0;
 };
 
 class MIDIPlayer {

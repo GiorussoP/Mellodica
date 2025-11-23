@@ -787,15 +787,21 @@ void Renderer::DrawSpritesInstanced(
     mSpriteShader->SetMatrixUniform("uViewProjection", mProjectionMatrix);
 
     // Bind texture atlas
-    if (group.atlas && group.textureIndex >= 0 &&
+    if (group.textureIndex >= 0 &&
         group.textureIndex < static_cast<int>(mTextures.size())) {
       mTextures[group.textureIndex]->Bind(0);
       mSpriteShader->SetIntegerUniform("uTextureAtlas", 0);
-      mSpriteShader->SetIntegerUniform("uAtlasColumns",
-                                       group.atlas->GetColumns());
-      mSpriteShader->SetVectorUniform("uAtlasTileSize",
-                                      Vector2(group.atlas->GetUVTileSizeX(),
-                                              group.atlas->GetUVTileSizeY()));
+      if (group.atlas) {
+        mSpriteShader->SetIntegerUniform("uAtlasColumns",
+                                         group.atlas->GetColumns());
+        mSpriteShader->SetVectorUniform("uAtlasTileSize",
+                                        Vector2(group.atlas->GetUVTileSizeX(),
+                                                group.atlas->GetUVTileSizeY()));
+      } else {
+        mSpriteShader->SetIntegerUniform("uAtlasColumns", 1);
+        mSpriteShader->SetVectorUniform("uAtlasTileSize",
+                                        Vector2(1.0f, 1.0f));
+      }
     }
 
     // Activate sprite quad VAO
@@ -1202,7 +1208,7 @@ void Renderer::DrawHUDSprites(
     if (group.components.empty())
       continue;
 
-    // Bind texture atlas
+    // Bind texture atlas or single texture
     if (group.atlas && group.textureIndex >= 0 &&
         group.textureIndex < static_cast<int>(mTextures.size())) {
       mTextures[group.textureIndex]->Bind(0);
@@ -1211,6 +1217,12 @@ void Renderer::DrawHUDSprites(
       mHUDShader->SetVectorUniform("uAtlasTileSize",
                                    Vector2(group.atlas->GetUVTileSizeX(),
                                            group.atlas->GetUVTileSizeY()));
+    } else if (!group.atlas && group.textureIndex >= 0 &&
+               group.textureIndex < static_cast<int>(mTextures.size())) {
+      // Bind single texture (no atlas)
+      mTextures[group.textureIndex]->Bind(0);
+      mHUDShader->SetIntegerUniform("uHUDTexture", 0);
+      // No atlas uniforms needed
     }
 
     // Draw each HUD sprite individually
@@ -1220,7 +1232,9 @@ void Renderer::DrawHUDSprites(
       Vector3 screenPos = spriteComp->GetOwner()->GetPosition();
       Vector3 scale = spriteComp->GetOwner()->GetScale();
       Vector3 color = spriteComp->GetColor();
-      int tileIndex = spriteComp->GetCurrentTileIndex();
+      int tileIndex = spriteComp->GetTextureAtlas()
+                          ? spriteComp->GetCurrentTileIndex()
+                          : -1;
 
       // Position is already in normalized screen coordinates
       // X: -1 (left) to 1 (right), 0 = center
