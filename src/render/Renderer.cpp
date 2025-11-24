@@ -799,8 +799,7 @@ void Renderer::DrawSpritesInstanced(
                                                 group.atlas->GetUVTileSizeY()));
       } else {
         mSpriteShader->SetIntegerUniform("uAtlasColumns", 1);
-        mSpriteShader->SetVectorUniform("uAtlasTileSize",
-                                        Vector2(1.0f, 1.0f));
+        mSpriteShader->SetVectorUniform("uAtlasTileSize", Vector2(1.0f, 1.0f));
       }
     }
 

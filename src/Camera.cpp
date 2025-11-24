@@ -3,18 +3,16 @@
 #include "Game.hpp"
 #include "Renderer.hpp"
 
-Camera::Camera(class Game *game, const Vector3 &eye, const Quaternion rotation, float moveSpeed, float turnSpeed)
-    : mGame(game)
-      , mPosition(eye)
-      , mRotation(rotation)
-      , mMode(CameraMode::Fixed)
-      , mMoveSpeed(moveSpeed)
-      , mTurnSpeed(turnSpeed)
-      , mIsometricDirection(IsometricDirections::North) {}
+Camera::Camera(class Game *game, const Vector3 &eye, const Quaternion rotation,
+               float moveSpeed, float turnSpeed)
+    : mGame(game), mPosition(eye), mRotation(rotation),
+      mMode(CameraMode::Fixed), mMoveSpeed(moveSpeed), mTurnSpeed(turnSpeed),
+      mIsometricDirection(IsometricDirections::North) {}
 
 // All directions normalized with the same Y component for consistent tilt
 // Y = -0.42262 gives approximately 25-degree downward angle
-// NOTE: This must be in the same order as the IsometricDirections enum class in the header file
+// NOTE: This must be in the same order as the IsometricDirections enum class in
+// the header file
 Quaternion Camera::ISOMETRIC_DIRECTIONS[8] = {
     Math::LookRotation(Vector3::Normalize(Vector3(0.0f, -0.42262f, 0.90631f)),
                        Vector3::UnitY), // N
@@ -39,35 +37,40 @@ Quaternion Camera::ISOMETRIC_DIRECTIONS[8] = {
 };
 
 Matrix4 Camera::GetCameraMatrix() const {
-    const auto mCameraForward = Vector3::Transform(Vector3::UnitZ, mRotation);
-    const auto mCameraUp = Vector3::Transform(Vector3::UnitY, mRotation);
-    return Matrix4::CreateLookAt(mPosition, mPosition + mCameraForward, mCameraUp);
+  const auto mCameraForward = Vector3::Transform(Vector3::UnitZ, mRotation);
+  const auto mCameraUp = Vector3::Transform(Vector3::UnitY, mRotation);
+  return Matrix4::CreateLookAt(mPosition, mPosition + mCameraForward,
+                               mCameraUp);
 }
 
 void Camera::SetCameraForward(const Vector3 &forward) {
-    const auto cameraUp = Vector3::Transform(Vector3::UnitY, mRotation);
-    mRotation = Math::LookRotation(forward, cameraUp);
+  const auto cameraUp = Vector3::Transform(Vector3::UnitY, mRotation);
+  mRotation = Math::LookRotation(forward, cameraUp);
 }
 
 void Camera::SetCameraUp(const Vector3 &up) {
-    const auto cameraForward = Vector3::Transform(Vector3::UnitZ, mRotation);
-    mRotation = Math::LookRotation(up, cameraForward);
+  const auto cameraForward = Vector3::Transform(Vector3::UnitZ, mRotation);
+  mRotation = Math::LookRotation(up, cameraForward);
 }
 
-
-
 void Camera::Update(float deltaTime) {
-    switch (mMode) {
-        case CameraMode::Fixed:
-            break;
-        case CameraMode::Isometric:
-            SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
-            SetRotation(Quaternion::Lerp(GetRotation(), ISOMETRIC_DIRECTIONS[static_cast<int>(mIsometricDirection)], mMoveSpeed * deltaTime));
-            break;
-        case CameraMode::Following:
-            SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
-            SetRotation(Quaternion::Lerp(GetRotation(), mTargetRotation, mMoveSpeed * deltaTime));
-            break;
-    }
-    mGame->GetRenderer()->SetViewMatrix(GetCameraMatrix());
+  switch (mMode) {
+  case CameraMode::Fixed:
+    break;
+  case CameraMode::Isometric:
+    SetPosition(
+        Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
+    SetRotation(Quaternion::Slerp(
+        GetRotation(),
+        ISOMETRIC_DIRECTIONS[static_cast<int>(mIsometricDirection)],
+        mMoveSpeed * deltaTime));
+    break;
+  case CameraMode::Following:
+    SetPosition(
+        Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
+    SetRotation(Quaternion::Lerp(GetRotation(), mTargetRotation,
+                                 mMoveSpeed * deltaTime));
+    break;
+  }
+  mGame->GetRenderer()->SetViewMatrix(GetCameraMatrix());
 }
