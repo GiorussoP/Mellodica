@@ -10,10 +10,11 @@ Camera::Camera(class Game *game, const Vector3 &eye, const Quaternion rotation, 
       , mMode(CameraMode::Fixed)
       , mMoveSpeed(moveSpeed)
       , mTurnSpeed(turnSpeed)
-      , isometricIndex(0) {}
+      , mIsometricDirection(IsometricDirections::North) {}
 
 // All directions normalized with the same Y component for consistent tilt
 // Y = -0.42262 gives approximately 25-degree downward angle
+// NOTE: This must be in the same order as the IsometricDirections enum class in the header file
 Quaternion Camera::ISOMETRIC_DIRECTIONS[8] = {
     Math::LookRotation(Vector3::Normalize(Vector3(0.0f, -0.42262f, 0.90631f)),
                        Vector3::UnitY), // N
@@ -36,36 +37,6 @@ Quaternion Camera::ISOMETRIC_DIRECTIONS[8] = {
         Vector3::Normalize(Vector3(-0.64085f, -0.42262f, 0.64085f)),
         Vector3::UnitY) // NW
 };
-
-void Camera::SetIsometricDirection(const IsometricDirections direction) {
-    switch (direction) {
-        case IsometricDirections::North:
-            isometricIndex = 0;
-            break;
-        case IsometricDirections::NorthEast:
-            isometricIndex = 1;
-            break;
-        case IsometricDirections::East:
-            isometricIndex = 2;
-            break;
-        case IsometricDirections::SouthEast:
-            isometricIndex = 3;
-            break;
-        case IsometricDirections::South:
-            isometricIndex = 4;
-            break;
-        case IsometricDirections::SouthWest:
-            isometricIndex = 5;
-            break;
-        case IsometricDirections::West:
-            isometricIndex = 6;
-            break;
-        case IsometricDirections::NorthWest:
-            isometricIndex = 7;
-            break;
-    }
-}
-
 
 Matrix4 Camera::GetCameraMatrix() const {
     const auto mCameraForward = Vector3::Transform(Vector3::UnitZ, mRotation);
@@ -91,7 +62,7 @@ void Camera::Update(float deltaTime) {
             break;
         case CameraMode::Isometric:
             SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
-            SetRotation(Quaternion::Lerp(GetRotation(), ISOMETRIC_DIRECTIONS[isometricIndex], mMoveSpeed * deltaTime));
+            SetRotation(Quaternion::Lerp(GetRotation(), ISOMETRIC_DIRECTIONS[static_cast<int>(mIsometricDirection)], mMoveSpeed * deltaTime));
             break;
         case CameraMode::Following:
             SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));

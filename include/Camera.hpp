@@ -46,8 +46,9 @@ public:
     Quaternion GetTargetRotation() const { return mTargetRotation; }
     void SetTargetRotation(const Quaternion& rotation) { mTargetRotation = rotation; }
 
-    // Set isometric direction, intended for Isometric mode
-    void SetIsometricDirection(const IsometricDirections direction);
+    // Get/set isometric direction, intended for Isometric mode
+    IsometricDirections GetIsometricDirection() const { return mIsometricDirection; }
+    void SetIsometricDirection(const IsometricDirections direction) { mIsometricDirection = direction; }
 
     // Get mode
     CameraMode GetMode() const { return mMode; }
@@ -80,7 +81,7 @@ private:
     float mTurnSpeed;
 
     static Quaternion ISOMETRIC_DIRECTIONS[8];
-    int isometricIndex;
+    IsometricDirections mIsometricDirection;
 
     Matrix4 GetCameraMatrix() const;
 };
