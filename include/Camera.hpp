@@ -20,27 +20,33 @@ enum class IsometricDirections {
     NorthWest
 };
 
-constexpr float CAMERA_MOVE_SPEED = 2.0f;
-constexpr float CAMERA_TURN_SPEED = 2.0f;
+constexpr float CAMERA_MOVE_SPEED = 2.0f; // speed of changing camera position
+constexpr float CAMERA_TURN_SPEED = 2.0f; // speed of changing camera rotation
 
 class Camera {
 public:
     Camera(class Game *game, const Vector3 &eye, const Quaternion rotation = Quaternion::Identity, float moveSpeed = CAMERA_MOVE_SPEED, float turnSpeed = CAMERA_TURN_SPEED);
+
+    // Sets the Renderer ViewMatrix to current Position and Rotation of Camera
     void Update(float deltaTime);
 
-    // Get/set position
+    // Get/set position instantly
     Vector3 GetPosition() const { return mPosition; }
     void SetPosition(const Vector3& pos) { mPosition = pos; }
 
+    // Get/set rotation instantly
     Quaternion GetRotation() const { return mRotation; }
     void SetRotation (const Quaternion& rotation) { mRotation = rotation; }
 
+    // Get/set target position, for smooth transition from current to target
     void SetTargetPosition(const Vector3& pos) {mTargetPosition = pos; }
     Vector3 GetTargetPosition() const { return mTargetPosition; }
 
+    // Get/set target rotation, for smooth transition from current to target
     Quaternion GetTargetRotation() const { return mTargetRotation; }
     void SetTargetRotation(const Quaternion& rotation) { mTargetRotation = rotation; }
 
+    // Set isometric direction, intended for Isometric mode
     void SetIsometricDirection(const IsometricDirections direction);
 
     // Get mode
