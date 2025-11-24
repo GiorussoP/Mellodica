@@ -5,6 +5,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Camera.hpp"
+
 class Scene;
 
 class Game {
@@ -33,28 +35,12 @@ public:
   // Chunk grid getter (for automatic actor tracking)
   class ChunkGrid *GetChunkGrid() { return mChunkGrid; }
 
-  // Camera functions
-  Vector3 &GetCameraPos() { return mCameraPos; }
-  void SetCameraPos(Vector3 position);
+  // Camera
+  Camera *GetCamera() const { return mCamera; }
 
   // Player getter
   Player *GetPlayer() { return mPlayer; }
   void SetPlayer(Player *player) { mPlayer = player; }
-
-  Vector3 &GetCameraForward() { return mCameraForward; }
-  void SetCameraForward(const Vector3 forward) { mCameraForward = forward; }
-
-  Vector3 &GetCameraUp() { return mCameraUp; }
-  void SetCameraUp(const Vector3 up) { mCameraUp = up; }
-
-  Quaternion GetCameraRotation() const {
-    return Math::LookRotation(mCameraForward, mCameraUp);
-  }
-
-  void SetCameraRotation(const Quaternion rotation) {
-    mCameraForward = Vector3::Transform(Vector3::UnitZ, rotation);
-    mCameraUp = Vector3::Transform(Vector3::UnitY, rotation);
-  }
 
 private:
   void ProcessInput();
@@ -85,13 +71,11 @@ private:
   // Chunk grid for efficient queries
   class ChunkGrid *mChunkGrid;
 
+  // Game Camera
+  class Camera *mCamera;
+
   Scene *mCurrentScene;
   Scene *mPendingScene;
-
-  // Camera state
-  Vector3 mCameraPos;
-  Vector3 mCameraForward;
-  Vector3 mCameraUp;
 
   // Player
   Player *mPlayer;

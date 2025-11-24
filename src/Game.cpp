@@ -33,11 +33,11 @@ const float MIDI_UPDATE_INTERVAL = 0.001f; // Update MIDI every 1ms
 Game::Game()
     : mUpdatingActors(false), mWindow(nullptr), mGLContext(nullptr),
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
-      mPendingScene(nullptr), mCameraPos(Vector3::Zero),
-      mCameraForward(0.0f, 0.0f, -1.0f) // Looking toward negative Z
-      ,
-      mCameraUp(0.0f, 1.0f, 0.0f), mTicksCount(0), mIsRunning(true),
-      mIsDebugging(false) {}
+      mPendingScene(nullptr),
+      mTicksCount(0), mIsRunning(true),
+      mIsDebugging(false) {
+    mCamera = new Camera(this, Vector3::Zero);
+}
 
 bool Game::Initialize() {
   // Initialize SDL
@@ -149,8 +149,6 @@ void Game::LoadScene(Scene *scene) {
   }
 }
 
-void Game::SetCameraPos(Vector3 position) { mCameraPos = position; }
-
 void Game::RunLoop() {
   while (mIsRunning) {
     // Calculate actual elapsed time since last frame
@@ -223,6 +221,9 @@ void Game::Shutdown() {
     SDL_GL_DeleteContext(mGLContext);
     mGLContext = nullptr;
   }
+
+  // Delete camera
+  delete mCamera;
 
   std::cout << "Shutdown: Quitting SDL..." << std::endl;
   SDL_Quit();
@@ -377,7 +378,7 @@ void Game::UpdateActors(float deltaTime) {
 }
 
 void Game::FindActiveActors() {
-  mActiveActors = mChunkGrid->GetVisibleActors(mCameraPos);
+  mActiveActors = mChunkGrid->GetVisibleActors(mCamera->GetPosition());
 
   // Add always-active actors (but avoid duplicates if they're already active
   std::unordered_set<Actor *> actorSet(mActiveActors.begin(),
@@ -411,6 +412,9 @@ void Game::UpdateGame(float deltaTime) {
   }
 
   UpdateActors(deltaTime);
+
+  // Update Camera after updating actors, as they can request camera movements
+  mCamera->Update(deltaTime);
 
   // Check collisions after all actors have been updated
   CheckCollisions();
@@ -465,10 +469,6 @@ void Game::GenerateOutput() {
   static int frameCount = 0;
   Uint32 startFrame = SDL_GetTicks();
 
-  // Update camera
-  Vector3 targetPos = mCameraPos + mCameraForward;
-  mRenderer->SetViewMatrix(
-      Matrix4::CreateLookAt(mCameraPos, targetPos, mCameraUp));
 
   RendererMode mode =
       mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;

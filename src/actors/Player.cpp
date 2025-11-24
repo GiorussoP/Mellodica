@@ -13,38 +13,11 @@
 constexpr float PLAYER_MOVE_SPEED = 7.0f;
 constexpr float PLAYER_ACCELERATION = 50.0f;
 constexpr float PLAYER_FRICTION = 30.0f;
-constexpr float CAMERA_MOVE_SPEED = 2.0f;
-constexpr float CAMERA_TURN_SPEED = 2.0f;
 
 constexpr SDL_Scancode notebuttons[12] = {
     SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,     SDL_SCANCODE_4,
     SDL_SCANCODE_5, SDL_SCANCODE_6, SDL_SCANCODE_7,     SDL_SCANCODE_8,
     SDL_SCANCODE_9, SDL_SCANCODE_0, SDL_SCANCODE_MINUS, SDL_SCANCODE_EQUALS};
-
-// All directions normalized with the same Y component for consistent tilt
-// Y = -0.42262 gives approximately 25 degree downward angle
-Quaternion CAMERA_DIRECTIONS[8] = {
-    Math::LookRotation(Vector3::Normalize(Vector3(0.0f, -0.42262f, 0.90631f)),
-                       Vector3::UnitY), // N
-    Math::LookRotation(
-        Vector3::Normalize(Vector3(0.64085f, -0.42262f, 0.64085f)),
-        Vector3::UnitY), // NE
-    Math::LookRotation(Vector3::Normalize(Vector3(0.90631f, -0.42262f, 0.0f)),
-                       Vector3::UnitY), // E
-    Math::LookRotation(
-        Vector3::Normalize(Vector3(0.64085f, -0.42262f, -0.64085f)),
-        Vector3::UnitY), // SE
-    Math::LookRotation(Vector3::Normalize(Vector3(0.0f, -0.42262f, -0.90631f)),
-                       Vector3::UnitY), // S
-    Math::LookRotation(
-        Vector3::Normalize(Vector3(-0.64085f, -0.42262f, -0.64085f)),
-        Vector3::UnitY), // SW
-    Math::LookRotation(Vector3::Normalize(Vector3(-0.90631f, -0.42262f, 0.0f)),
-                       Vector3::UnitY), // W
-    Math::LookRotation(
-        Vector3::Normalize(Vector3(-0.64085f, -0.42262f, 0.64085f)),
-        Vector3::UnitY) // NW
-};
 
 Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
@@ -88,13 +61,17 @@ Player::Player(Game *game)
   mSpriteComponent->SetAnimFPS(8.0f);
 
   mNotePlayerComponent = new NotePlayerComponent(this, false);
+
+  // turn on Camera's isometric mode
+  mGame->GetCamera()->SetMode(CameraMode::Isometric);
+  mGame->GetCamera()->SetIsometricDirection(static_cast<IsometricDirections>(mCameraDirection));
 }
 
 void Player::OnUpdate(float deltaTime) {
   // Calculate movement direction
   Vector3 moveDir = Vector3::Zero;
   Vector3 front = Vector3::Normalize(
-      mGame->GetCameraForward().ProjectedOnPlane(Vector3::UnitY));
+      mGame->GetCamera()->GetCameraForward().ProjectedOnPlane(Vector3::UnitY));
   if (mMoveForward) {
     moveDir += front;
   }
@@ -146,14 +123,9 @@ void Player::OnUpdate(float deltaTime) {
     mSpriteComponent->SetAnimation(playing ? "play" : "idle");
   }
 
-  mGame->SetCameraPos(Vector3::Lerp(mGame->GetCameraPos(),
-                                    GetPosition() + mFront * 4.0f,
-                                    CAMERA_MOVE_SPEED * deltaTime));
-
-  // Convert current camera forward to quaternion
-  mGame->SetCameraRotation(Quaternion::Slerp(
-      mGame->GetCameraRotation(), CAMERA_DIRECTIONS[mCameraDirection],
-      CAMERA_TURN_SPEED * deltaTime));
+  mGame->GetCamera()->SetMode(CameraMode::Isometric);
+  mGame->GetCamera()->SetTargetPosition(GetPosition() + mFront * 4.0f);
+  mGame->GetCamera()->SetIsometricDirection(static_cast<IsometricDirections>(mCameraDirection));
 }
 
 void Player::OnProcessInput() {

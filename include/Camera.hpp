@@ -20,9 +20,12 @@ enum class IsometricDirections {
     NorthWest
 };
 
+constexpr float CAMERA_MOVE_SPEED = 2.0f;
+constexpr float CAMERA_TURN_SPEED = 2.0f;
+
 class Camera {
 public:
-    Camera(class Game *game, const Vector3 &eye, const Quaternion rotation, float speed);
+    Camera(class Game *game, const Vector3 &eye, const Quaternion rotation = Quaternion::Identity, float moveSpeed = CAMERA_MOVE_SPEED, float turnSpeed = CAMERA_TURN_SPEED);
     void Update(float deltaTime);
 
     // Get/set position
@@ -42,6 +45,17 @@ public:
 
     // Get mode
     CameraMode GetMode() const { return mMode; }
+    void SetMode(const CameraMode mode) { mMode = mode; }
+
+    // legacy methods: (not using rotations)
+    void SetCameraForward(const Vector3& forward);
+    void SetCameraUp(const Vector3& up);
+    Vector3 GetCameraForward() const {
+        return Vector3::Transform(Vector3::UnitZ, mRotation);
+    }
+    Vector3 GetCameraUp() const {
+        return Vector3::Transform(Vector3::UnitY, mRotation);
+    }
 
 
 private:
@@ -56,7 +70,8 @@ private:
 
     CameraMode mMode;
 
-    float mSpeed;
+    float mMoveSpeed;
+    float mTurnSpeed;
 
     static Quaternion ISOMETRIC_DIRECTIONS[8];
     int isometricIndex;

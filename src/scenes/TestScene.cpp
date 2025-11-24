@@ -121,8 +121,9 @@ void TestSceneA::Initialize() {
   hudElement->GetSpriteComponent().SetAnimation("default");
 
   // Setting camera
-  mGame->SetCameraPos(mGame->GetPlayer()->GetPosition());
-  mGame->SetCameraForward(Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
+  mGame->GetCamera()->SetMode(CameraMode::Fixed); // TODO: confirm this was the intended mode originally
+  mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
+  mGame->GetCamera()->SetCameraForward(Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
 
   for (int i = -25; i < 25; i++) {
     for (int j = -25; j < 25; j++) {
