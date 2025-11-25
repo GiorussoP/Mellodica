@@ -256,17 +256,23 @@ void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent *> &meshes,
     instanceData.reserve(group.components.size() * 36);
 
     for (auto *meshComp : group.components) {
-      Vector3 position =
-          meshComp->GetOwner()->GetPosition() +
-          meshComp->GetOffset() * meshComp->GetOwner()->GetScale();
-      Vector3 size = meshComp->GetOwner()->GetScale() * meshComp->GetScale();
-      Quaternion rotation = Quaternion::Concatenate(
-          meshComp->GetOwner()->GetRotation(), meshComp->GetRelativeRotation());
+      Vector3 position = meshComp->GetOffset();
+
+      Vector3 size = meshComp->GetScale();
+
+      Quaternion rotation = meshComp->GetRelativeRotation();
+
+      Vector3 ownerPos = meshComp->GetOwner()->GetPosition();
+      Vector3 ownerScale = meshComp->GetOwner()->GetScale();
+      Quaternion ownerRot = meshComp->GetOwner()->GetRotation();
 
       // Model matrix (just transform, not MVP)
       Matrix4 model = Matrix4::CreateScale(size) *
                       Matrix4::CreateFromQuaternion(rotation) *
-                      Matrix4::CreateTranslation(position);
+                      Matrix4::CreateTranslation(position) *
+                      Matrix4::CreateScale(ownerScale) *
+                      Matrix4::CreateFromQuaternion(ownerRot) *
+                      Matrix4::CreateTranslation(ownerPos);
 
       // Add model matrix (16 floats)
       for (int row = 0; row < 4; row++) {
@@ -528,16 +534,19 @@ void Renderer::DrawSpritesInstanced(
     instanceData.reserve(group.components.size() * 36);
 
     for (auto *spriteComp : group.components) {
-      Vector3 position =
-          spriteComp->GetOwner()->GetPosition() +
-          spriteComp->GetOffset() * spriteComp->GetOwner()->GetScale();
-      Vector3 size =
-          spriteComp->GetOwner()->GetScale() * spriteComp->GetScale();
+
+      Vector3 position = spriteComp->GetOffset();
+      Vector3 size = spriteComp->GetScale();
+
+      Vector3 ownerPos = spriteComp->GetOwner()->GetPosition();
+      Vector3 ownerScale = spriteComp->GetOwner()->GetScale();
 
       // Create initial model matrix
-      Matrix4 model = Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
-                      Matrix4::CreateFromQuaternion(Quaternion::Identity) *
-                      Matrix4::CreateTranslation(position);
+      Matrix4 model =
+          Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
+          Matrix4::CreateTranslation(position) *
+          Matrix4::CreateScale(Vector3(ownerScale.x, ownerScale.y, 1.0f)) *
+          Matrix4::CreateTranslation(ownerPos);
 
       // Transform to view space
       Matrix4 modelView = model * mViewMatrix;
@@ -548,14 +557,14 @@ void Renderer::DrawSpritesInstanced(
       Matrix4 billboard = Matrix4::Identity;
 
       // Row 0: X-axis (scaled, no rotation)
-      billboard.mat[0][0] = size.x;
+      billboard.mat[0][0] = size.x * ownerScale.x;
       billboard.mat[0][1] = 0.0f;
       billboard.mat[0][2] = 0.0f;
       billboard.mat[0][3] = 0.0f;
 
       // Row 1: Y-axis (scaled, no rotation)
       billboard.mat[1][0] = 0.0f;
-      billboard.mat[1][1] = size.y;
+      billboard.mat[1][1] = size.y * ownerScale.y;
       billboard.mat[1][2] = 0.0f;
       billboard.mat[1][3] = 0.0f;
 

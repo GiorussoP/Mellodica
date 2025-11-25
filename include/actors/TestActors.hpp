@@ -113,4 +113,5 @@ private:
   MeshComponent *mMeshComponent1;
   MeshComponent *mMeshComponent2;
   SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
 };

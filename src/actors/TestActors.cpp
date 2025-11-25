@@ -66,6 +66,10 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
     mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
   }
 
+  mColliderComponent =
+      new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
+                      Vector3(0.75f, 1.0f, 0.75f), true);
+
   // Second MeshComponent - Pyramid
   {
     Texture *texture =
@@ -76,8 +80,6 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 3);
     mMeshComponent2->SetColor(Color::Red);
-    mMeshComponent2->SetRelativeRotation(
-        Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
     mMeshComponent2->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
     mMeshComponent2->SetScale(Vector3(2.0f, 0.5f, 2.0f));
   }
@@ -104,12 +106,14 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
 }
 
 void MultiDrawablesActor::OnUpdate(float deltaTime) {
-  mRotation =
-      Quaternion::Concatenate(mRotation, Quaternion(Vector3::UnitY, deltaTime));
-  mPosition.y = 1.5f + 0.5f * Math::Sin(3.0f * SDL_GetTicks() / 1000.0f);
+  mRotation = Quaternion::Concatenate(
+      mRotation, Quaternion(Vector3::UnitY, deltaTime * 0.05));
 
-  mScale = Vector3::One *
-           (0.75f + 0.25f * Math::Sin(4.0f * SDL_GetTicks() / 1000.0f));
+  mPosition.y = 2.0f - 1.0f * Math::Sin(4.0f * SDL_GetTicks() / 10000.0f);
+
+  mScale = Vector3(5.0f + 3.0f * Math::Cos(4.0f * SDL_GetTicks() / 10000.0f),
+                   3.0f - 2.0f * Math::Sin(4.0f * SDL_GetTicks() / 10000.0f),
+                   (5.0f - 3.0f * Math::Sin(4.0f * SDL_GetTicks() / 10000.0f)));
 }
 
 PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)

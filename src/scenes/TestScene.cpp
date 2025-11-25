@@ -207,17 +207,6 @@ void TestSceneB::Initialize() {
   cube2->SetScale(Vector3(32.0f, 1.0f, 32.0f));
   mGame->AddAlwaysActive(cube2);
 
-  auto cube3 = new CubeActor(mGame, Color::LightBlue, 0);
-  cube3->SetPosition(Vector3(-5.0f, 2.0f, 8.0f));
-  cube3->SetScale(Vector3(4.0f, 3.0f, 6.0f));
-  cube3->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(30.0f)));
-
-  auto testPyramid = new PyramidActor(mGame, Color::Red, 3);
-  testPyramid->SetPosition(Vector3(-5.0f, 4.25f, 8.0f));
-  testPyramid->SetScale(Vector3(4.5f, 1.5f, 6.5f));
-  testPyramid->GetComponent<MeshComponent>()->SetBloomed(false);
-  testPyramid->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(30.0f)));
-
   MultiDrawablesActor *multiDrawablesActor = new MultiDrawablesActor(mGame);
-  multiDrawablesActor->SetPosition(Vector3(10.0f, 1.0f, 10.0f));
+  multiDrawablesActor->SetPosition(Vector3(-10.0f, 1.0f, 10.0f));
 }
