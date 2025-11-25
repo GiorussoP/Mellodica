@@ -198,75 +198,6 @@ void Renderer::Clear() {
   // Clear the color and depth buffers
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-/*
-void Renderer::DrawMesh(MeshComponent& mesh,RendererMode mode)
-{
-
-    Vector3 position = mesh.GetOwner()->GetPosition();
-    Vector3 size = mesh.GetOwner()->GetScale();
-    Quaternion rotation = mesh.GetOwner()->GetRotation();
-
-    // Visibility is now handled by spatial grid
-    if (!mesh.IsVisible()) {
-        return;
-    }
-
-    // Create model matrix: Scale * Rotation * Translation
-    Matrix4 model = Matrix4::CreateScale(size) *
-                    Matrix4::CreateFromQuaternion(rotation) *
-                    Matrix4::CreateTranslation(position);
-
-
-    if (!mMeshShader) {
-        std::cerr << "Mesh shader not loaded" << std::endl;
-        return;
-    }
-
-    // Apply view matrix
-    Matrix4 modelView = model * mViewMatrix;
-
-    // Combine with projection matrix
-    Matrix4 mvp = modelView * mProjectionMatrix;
-
-    // Normal matrix uses object rotation
-    Matrix4 normalMatrix = Matrix4::CreateFromQuaternion(rotation);
-
-    // Set mesh-specific uniforms
-    mMeshShader->SetMatrixUniform("uWorldTransform", mvp);
-    mMeshShader->SetMatrixUniform("uModelMatrix", model);
-    mMeshShader->SetMatrixUniform("uNormalMatrix", normalMatrix);
-
-    mMeshShader->SetVectorUniform("uColor", mesh.GetColor());
-
-
-    // Bind atlas texture and set atlas-specific uniforms
-    if (mesh.GetTextureAtlas() && mesh.GetTextureAtlas()->GetTextureIndex() <
-mTextures.size()) {
-
-
-        mTextures[mesh.GetTextureAtlas()->GetTextureIndex()]->Bind(0);
-
-        mMeshShader->SetIntegerUniform("uTileIndex", mode ==
-RendererMode::TRIANGLES ? static_cast<int>(mesh.GetStartingIndex()) : -1);
-        mMeshShader->SetIntegerUniform("uTextureAtlas", 0);
-        mMeshShader->SetIntegerUniform("uAtlasColumns",
-mesh.GetTextureAtlas()->GetColumns());
-        mMeshShader->SetVectorUniform("uAtlasTileSize",
-Vector2(mesh.GetTextureAtlas()->GetUVTileSizeX(),
-mesh.GetTextureAtlas()->GetUVTileSizeY()));
-    }
-
-    mesh.GetMesh().SetActive();
-
-    if (mode == RendererMode::LINES) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, mesh.GetMesh().GetNumIndices(),
-GL_UNSIGNED_INT, nullptr); glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); } else if
-(mode == RendererMode::TRIANGLES) { glDrawElements(GL_TRIANGLES,
-mesh.GetMesh().GetNumIndices(), GL_UNSIGNED_INT, nullptr);
-    }
-}
-    */
 
 void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent *> &meshes,
                                    RendererMode mode) {
@@ -325,9 +256,11 @@ void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent *> &meshes,
     instanceData.reserve(group.components.size() * 36);
 
     for (auto *meshComp : group.components) {
-      Vector3 position = meshComp->GetOwner()->GetPosition();
-      Vector3 size = meshComp->GetOwner()->GetScale();
-      Quaternion rotation = meshComp->GetOwner()->GetRotation();
+      Vector3 position =
+          meshComp->GetOwner()->GetPosition() + meshComp->GetOffset();
+      Vector3 size = meshComp->GetOwner()->GetScale() * meshComp->GetScale();
+      Quaternion rotation = Quaternion::Concatenate(
+          meshComp->GetOwner()->GetRotation(), meshComp->GetRelativeRotation());
 
       // Model matrix (just transform, not MVP)
       Matrix4 model = Matrix4::CreateScale(size) *
@@ -539,113 +472,6 @@ TextureAtlas *Renderer::LoadAtlas(const std::string &atlasPath) {
   return nullptr;
 }
 
-/*
-void Renderer::DrawSprite(SpriteComponent& sprite, RendererMode mode)
-{
-
-    Vector3 position = sprite.GetOwner()->GetPosition();
-    Vector3 size = sprite.GetOwner()->GetScale();
-    Quaternion rotation = sprite.GetOwner()->GetRotation();
-
-    // Visibility is now handled by spatial grid - no need for frustum check
-    if (!sprite.IsVisible()) {
-        return;
-    }
-
-    if (!mSpriteQuad) {
-        std::cerr << "Sprite quad not created" << std::endl;
-        return;
-    }
-
-    if (!mSpriteShader) {
-        std::cerr << "Sprite shader not loaded" << std::endl;
-        return;
-    }
-
-    // Create model matrix: Scale * Rotation * Translation
-    // For sprites, we use a billboard effect by default (rotation around Y-axis
-only) Matrix4 model = Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
-                    Matrix4::CreateFromQuaternion(rotation) *
-                    Matrix4::CreateTranslation(position);
-
-    // Apply view matrix
-    Matrix4 modelView = model * mViewMatrix;
-
-    // Strip rotation from modelView matrix for billboard effect
-    modelView.mat[0][0] = size.x;
-    modelView.mat[0][1] = 0.0f;
-    modelView.mat[0][2] = 0.0f;
-
-    modelView.mat[1][0] = 0.0f;
-    modelView.mat[1][1] = size.y;
-    modelView.mat[1][2] = 0.0f;
-
-    modelView.mat[2][0] = 0.0f;
-    modelView.mat[2][1] = 0.0f;
-    modelView.mat[2][2] = 1.0f;
-
-    // Combine with projection matrix
-    Matrix4 mvp = modelView * mProjectionMatrix;
-
-    // Extract camera rotation from view matrix for sprite normals
-    Matrix4 normalMatrix = Matrix4::Identity;
-    normalMatrix.mat[0][0] = mViewMatrix.mat[0][0];
-    normalMatrix.mat[0][1] = mViewMatrix.mat[1][0];
-    normalMatrix.mat[0][2] = mViewMatrix.mat[2][0];
-
-    normalMatrix.mat[1][0] = mViewMatrix.mat[0][1];
-    normalMatrix.mat[1][1] = mViewMatrix.mat[1][1];
-    normalMatrix.mat[1][2] = mViewMatrix.mat[2][1];
-
-    normalMatrix.mat[2][0] = mViewMatrix.mat[0][2];
-    normalMatrix.mat[2][1] = mViewMatrix.mat[1][2];
-    normalMatrix.mat[2][2] = mViewMatrix.mat[2][2];
-
-    // Set sprite-specific uniforms
-    mSpriteShader->SetMatrixUniform("uWorldTransform", mvp);
-    mSpriteShader->SetMatrixUniform("uModelMatrix", model);
-    mSpriteShader->SetMatrixUniform("uNormalMatrix", normalMatrix);
-    mSpriteShader->SetVectorUniform("uColor", sprite.GetColor());
-
-    // Bind texture atlas and set atlas-specific uniforms
-    TextureAtlas* atlas = sprite.GetTextureAtlas();
-    int texIndex = sprite.GetTextureIndex();
-
-    if (!atlas) {
-        std::cerr << "DrawSprite: sprite has no atlas!" << std::endl;
-        return;
-    }
-
-    if (texIndex < 0 || texIndex >= static_cast<int>(mTextures.size())) {
-        std::cerr << "DrawSprite: invalid texture index " << texIndex << "
-(size=" << mTextures.size() << ")" << std::endl; return;
-    }
-
-    mTextures[texIndex]->Bind(0);
-    mSpriteShader->SetIntegerUniform("uTextureAtlas", 0);
-    mSpriteShader->SetVectorUniform("uAtlasTileSize",
-Vector2(atlas->GetUVTileSizeX(), atlas->GetUVTileSizeY()));
-
-    // Get the current tile index (handles animation)
-    int tileIndex = sprite.GetCurrentTileIndex();
-
-    // Get actual UV offset from atlas
-    float offsetX = 0.0f, offsetY = 0.0f;
-    atlas->GetTileUVOffset(tileIndex, offsetX, offsetY);
-    mSpriteShader->SetVectorUniform("uTileOffset", Vector2(offsetX, offsetY));
-
-    mSpriteQuad->SetActive();
-
-    if (mode == RendererMode::LINES) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, mSpriteQuad->GetNumIndices(),
-GL_UNSIGNED_INT, nullptr); glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); } else if
-(mode == RendererMode::TRIANGLES) { glDrawElements(GL_TRIANGLES,
-mSpriteQuad->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
-    }
-}
-    */
-
 void Renderer::DrawSpritesInstanced(
     const std::vector<SpriteComponent *> &sprites, RendererMode mode) {
   if (sprites.empty() || !mSpriteShader || !mSpriteQuad) {
@@ -701,13 +527,14 @@ void Renderer::DrawSpritesInstanced(
     instanceData.reserve(group.components.size() * 36);
 
     for (auto *spriteComp : group.components) {
-      Vector3 position = spriteComp->GetOwner()->GetPosition();
-      Vector3 size = spriteComp->GetOwner()->GetScale();
-      Quaternion rotation = spriteComp->GetOwner()->GetRotation();
+      Vector3 position =
+          spriteComp->GetOwner()->GetPosition() + spriteComp->GetOffset();
+      Vector3 size =
+          spriteComp->GetOwner()->GetScale() * spriteComp->GetScale();
 
       // Create initial model matrix
       Matrix4 model = Matrix4::CreateScale(Vector3(size.x, size.y, 1.0f)) *
-                      Matrix4::CreateFromQuaternion(rotation) *
+                      Matrix4::CreateFromQuaternion(Quaternion::Identity) *
                       Matrix4::CreateTranslation(position);
 
       // Transform to view space
@@ -1231,8 +1058,10 @@ void Renderer::DrawHUDSprites(
     // (Using simple non-instanced drawing for HUD simplicity)
     for (auto *spriteComp : group.components) {
       // Get sprite properties
-      Vector3 screenPos = spriteComp->GetOwner()->GetPosition();
-      Vector3 scale = spriteComp->GetOwner()->GetScale();
+      Vector3 screenPos =
+          spriteComp->GetOwner()->GetPosition() + spriteComp->GetOffset();
+      Vector3 scale =
+          spriteComp->GetOwner()->GetScale() * spriteComp->GetScale();
       Vector3 color = spriteComp->GetColor();
       int tileIndex = spriteComp->GetTextureAtlas()
                           ? spriteComp->GetCurrentTileIndex()

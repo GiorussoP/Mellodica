@@ -48,6 +48,67 @@ void GroundActor::OnUpdate(float deltaTime) {
   // No specific behavior for ground - just render
 }
 
+MultiDrawablesActor::MultiDrawablesActor(Game *game)
+    : Actor(game), mMeshComponent1(nullptr), mMeshComponent2(nullptr),
+      mSpriteComponent(nullptr) {
+
+  // First MeshComponent - Cube
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
+    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 0);
+    mMeshComponent1->SetColor(Color::Orange);
+    mMeshComponent1->SetScale(Vector3(1.5f, 2.0f, 1.5f));
+    mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
+  }
+
+  // Second MeshComponent - Pyramid
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
+    mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 3);
+    mMeshComponent2->SetColor(Color::Orange);
+    mMeshComponent2->SetRelativeRotation(
+        Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
+    mMeshComponent2->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
+    mMeshComponent2->SetScale(Vector3(2.0f, 0.5f, 2.0f));
+  }
+
+  // SpriteComponent
+  {
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/textures/shine.json");
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/textures/shine.png");
+    int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
+    atlas->SetTextureIndex(textureIndex);
+    mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
+    mSpriteComponent->SetColor(Color::Blue);
+    mSpriteComponent->AddAnimation("sloop",
+                                   {"s1.png", "s2.png", "s3.png", "s4.png",
+                                    "s5.png", "s4.png", "s3.png", "s2.png"},
+                                   true);
+    mSpriteComponent->SetAnimation("sloop");
+    mSpriteComponent->SetAnimFPS(12.0f);
+    mSpriteComponent->SetOffset(Vector3(0.0f, 3.0f, 0.0f));
+    mSpriteComponent->SetScale(Vector3(3.0f, 3.0f, 1.0f));
+  }
+}
+
+void MultiDrawablesActor::OnUpdate(float deltaTime) {
+  mRotation =
+      Quaternion::Concatenate(mRotation, Quaternion(Vector3::UnitY, deltaTime));
+  mPosition.y = 1.5f + 0.5f * Math::Sin(3.0f * SDL_GetTicks() / 1000.0f);
+}
+
 PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
 

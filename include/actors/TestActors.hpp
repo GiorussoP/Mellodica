@@ -103,3 +103,14 @@ private:
   bool mPrevMinusPressed;
   bool mPrevPPressed;
 };
+
+class MultiDrawablesActor : public Actor {
+public:
+  MultiDrawablesActor(Game *game);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  MeshComponent *mMeshComponent1;
+  MeshComponent *mMeshComponent2;
+  SpriteComponent *mSpriteComponent;
+};

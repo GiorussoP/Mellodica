@@ -217,4 +217,7 @@ void TestSceneB::Initialize() {
   testPyramid->SetScale(Vector3(4.5f, 1.5f, 6.5f));
   testPyramid->GetComponent<MeshComponent>()->SetBloomed(false);
   testPyramid->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(30.0f)));
+
+  MultiDrawablesActor *multiDrawablesActor = new MultiDrawablesActor(mGame);
+  multiDrawablesActor->SetPosition(Vector3(10.0f, 1.0f, 10.0f));
 }

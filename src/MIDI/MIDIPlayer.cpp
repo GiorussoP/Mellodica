@@ -149,6 +149,8 @@ void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
     channels[i].pos = 0;
     channels[i].pitchBendPos = 0;
     channels[i].transpose = 0;
+    fluid_synth_pitch_bend(SynthEngine::synth, i,
+                           8192); // Reset pitch bend to center
     channels[i].active = !channels[i].notes.empty();
     if (channels[i].active)
       std::cout << i << " ";
@@ -251,6 +253,8 @@ void MIDIPlayer::update(float dt) {
           fluid_synth_all_notes_off(SynthEngine::synth, i);
           channels[i].pos = 0;
           channels[i].pitchBendPos = 0;
+          fluid_synth_pitch_bend(SynthEngine::synth, i,
+                                 8192); // Reset pitch bend to center
         }
       }
     }
@@ -265,6 +269,8 @@ void MIDIPlayer::play() {
     for (int i = 0; i < 16; ++i) {
       channels[i].pos = 0;
       channels[i].pitchBendPos = 0;
+      fluid_synth_pitch_bend(SynthEngine::synth, i,
+                             8192); // Reset pitch bend to center
       if (channels[i].active) {
       }
     }
@@ -294,6 +300,8 @@ void MIDIPlayer::jumpTo(float seconds) {
       fluid_synth_all_notes_off(SynthEngine::synth, i);
       channels[i].pos = 0;
       channels[i].pitchBendPos = 0;
+      fluid_synth_pitch_bend(SynthEngine::synth, i,
+                             8192); // Reset pitch bend to center
       // Find the correct position for this time
       while (channels[i].pos < channels[i].notes.size() &&
              channels[i].notes[channels[i].pos].start < time) {
@@ -302,6 +310,12 @@ void MIDIPlayer::jumpTo(float seconds) {
       while (channels[i].pitchBendPos < channels[i].pitchBends.size() &&
              channels[i].pitchBends[channels[i].pitchBendPos].time < time) {
         channels[i].pitchBendPos++;
+      }
+      // Apply the current pitch bend state
+      if (channels[i].pitchBendPos > 0) {
+        fluid_synth_pitch_bend(
+            SynthEngine::synth, i,
+            channels[i].pitchBends[channels[i].pitchBendPos - 1].value);
       }
     }
   }

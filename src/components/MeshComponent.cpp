@@ -7,7 +7,8 @@
 
 MeshComponent::MeshComponent(Actor *owner, Mesh &mesh, Texture *texture,
                              TextureAtlas *textureAtlas, int startingIndex)
-    : DrawComponent(owner), mMesh(mesh), mTexture(texture),
-      mTextureAtlas(textureAtlas), mStartingIndex(startingIndex) {}
+    : DrawComponent(owner), mRelativeRotation(Quaternion::Identity),
+      mMesh(mesh), mTexture(texture), mTextureAtlas(textureAtlas),
+      mStartingIndex(startingIndex) {}
 
 MeshComponent::~MeshComponent() {}
