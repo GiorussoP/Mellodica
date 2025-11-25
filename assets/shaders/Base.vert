@@ -29,8 +29,16 @@ void main()
     // Transform normal to world space using instance normal matrix
     fragNormal = mat3(inInstanceNormal) * inNormal;
     
-    // Pass texture coordinates to fragment shader
-    fragTexCoord = inTexCoord;
+    // Extract scale from model matrix
+    vec3 scale = vec3(length(inInstanceModel[0].xyz), length(inInstanceModel[1].xyz), length(inInstanceModel[2].xyz));
+    
+    // Scale texture coordinates based on the face normal direction
+    vec3 aN = abs(inNormal);
+  
+    // Facing X: scale UV by (Y, Z)
+    fragTexCoord = (aN.x * inTexCoord * vec2(scale.z, scale.y)) +
+                        (aN.y * inTexCoord * vec2(scale.x, scale.z)) +
+                        (aN.z * inTexCoord * vec2(scale.x, scale.y));
     
     // Pass texture index to fragment shader
     fragTexIndex = inTexIndex;

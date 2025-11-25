@@ -68,8 +68,8 @@ void Camera::Update(float deltaTime) {
   case CameraMode::Following:
     SetPosition(
         Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
-    SetRotation(Quaternion::Lerp(GetRotation(), mTargetRotation,
-                                 mMoveSpeed * deltaTime));
+    SetRotation(Quaternion::Slerp(GetRotation(), mTargetRotation,
+                                  mMoveSpeed * deltaTime));
     break;
   }
   mGame->GetRenderer()->SetViewMatrix(GetCameraMatrix());

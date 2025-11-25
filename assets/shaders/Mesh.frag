@@ -38,8 +38,11 @@ void main()
     // Calculate UV offset for the tile
     vec2 tileOffset = vec2(float(tileX), float(tileY)) * uAtlasTileSize;
 
-    // Scale the texture coordinates to fit within the tile
-    vec2 scaledTexCoord = fragTexCoord * uAtlasTileSize;
+    // Use fractional part of texture coordinates for repeating within the tile
+    vec2 repeatedTexCoord = fract(fragTexCoord);
+
+    // Scale the repeated texture coordinates to fit within the tile
+    vec2 scaledTexCoord = repeatedTexCoord * uAtlasTileSize;
 
     // Final UV coordinates in the atlas
     vec2 atlasUV = tileOffset + scaledTexCoord;

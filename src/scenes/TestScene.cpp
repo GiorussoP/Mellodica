@@ -65,18 +65,10 @@ void TestSceneA::Initialize() {
   MIDIPlayer::setChannelTranspose(11, -60);
 
   // Some actors for testing
-  const int gridSize = 300;
-  const float spacing = 1.0f;
-  const float gridOffset = (gridSize - 1) * spacing * 0.5f;
-  int actorCount = 0;
-  for (int x = 0; x < gridSize; x++) {
-    for (int z = 0; z < gridSize; z++) {
-      auto mesh = new Actor(mGame);
-      mesh->SetPosition(
-          Vector3(x * spacing - gridOffset, 0.0f, z * spacing - gridOffset));
-      actorCount += 2;
-    }
-  }
+
+  auto mesh = new Actor(mGame);
+  mesh->SetScale(Vector3(300.f, 1.0f, 300.f));
+  mesh->SetPosition(Vector3(0.0f, -1.0f, 0.0f));
 
   auto pyramid = new PyramidActor(mGame, Color::Red);
   pyramid->SetPosition(Vector3(-3.0f, 1.0f, 0.0f));
@@ -121,9 +113,11 @@ void TestSceneA::Initialize() {
   hudElement->GetSpriteComponent().SetAnimation("default");
 
   // Setting camera
-  mGame->GetCamera()->SetMode(CameraMode::Fixed); // TODO: confirm this was the intended mode originally
+  mGame->GetCamera()->SetMode(
+      CameraMode::Fixed); // TODO: confirm this was the intended mode originally
   mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
-  mGame->GetCamera()->SetCameraForward(Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
+  mGame->GetCamera()->SetCameraForward(
+      Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
 
   for (int i = -25; i < 25; i++) {
     for (int j = -25; j < 25; j++) {
@@ -165,7 +159,7 @@ void TestSceneB::Initialize() {
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
   mGame->GetRenderer()->SetIsDark(false);
 
-  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
+  MIDIPlayer::loadSong("assets/songs/a1.mid", true);
   // MIDIPlayer::muteChannel(0);
   MIDIPlayer::muteChannel(1);
   // MIDIPlayer::muteChannel(2);
@@ -216,4 +210,9 @@ void TestSceneB::Initialize() {
   cube2->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
   cube2->SetScale(Vector3(32.0f, 1.0f, 32.0f));
   mGame->AddAlwaysActive(cube2);
+
+  auto cube3 = new CubeActor(mGame, Color::Magenta, 0);
+  cube3->SetPosition(Vector3(0.0f, 2.0f, 8.0f));
+  cube3->SetScale(Vector3(4.0f, 3.0f, 6.0f));
+  mGame->AddAlwaysActive(cube3);
 }
