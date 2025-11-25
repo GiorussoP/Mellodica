@@ -75,7 +75,7 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 3);
-    mMeshComponent2->SetColor(Color::Orange);
+    mMeshComponent2->SetColor(Color::Red);
     mMeshComponent2->SetRelativeRotation(
         Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
     mMeshComponent2->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
@@ -99,7 +99,7 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
     mSpriteComponent->SetAnimation("sloop");
     mSpriteComponent->SetAnimFPS(12.0f);
     mSpriteComponent->SetOffset(Vector3(0.0f, 3.0f, 0.0f));
-    mSpriteComponent->SetScale(Vector3(3.0f, 3.0f, 1.0f));
+    mSpriteComponent->SetScale(Vector3(1.0f, 1.0f, 1.0f));
   }
 }
 
@@ -107,6 +107,9 @@ void MultiDrawablesActor::OnUpdate(float deltaTime) {
   mRotation =
       Quaternion::Concatenate(mRotation, Quaternion(Vector3::UnitY, deltaTime));
   mPosition.y = 1.5f + 0.5f * Math::Sin(3.0f * SDL_GetTicks() / 1000.0f);
+
+  mScale = Vector3::One *
+           (0.75f + 0.25f * Math::Sin(4.0f * SDL_GetTicks() / 1000.0f));
 }
 
 PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)

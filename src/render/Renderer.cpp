@@ -257,7 +257,8 @@ void Renderer::DrawMeshesInstanced(const std::vector<MeshComponent *> &meshes,
 
     for (auto *meshComp : group.components) {
       Vector3 position =
-          meshComp->GetOwner()->GetPosition() + meshComp->GetOffset();
+          meshComp->GetOwner()->GetPosition() +
+          meshComp->GetOffset() * meshComp->GetOwner()->GetScale();
       Vector3 size = meshComp->GetOwner()->GetScale() * meshComp->GetScale();
       Quaternion rotation = Quaternion::Concatenate(
           meshComp->GetOwner()->GetRotation(), meshComp->GetRelativeRotation());
@@ -528,7 +529,8 @@ void Renderer::DrawSpritesInstanced(
 
     for (auto *spriteComp : group.components) {
       Vector3 position =
-          spriteComp->GetOwner()->GetPosition() + spriteComp->GetOffset();
+          spriteComp->GetOwner()->GetPosition() +
+          spriteComp->GetOffset() * spriteComp->GetOwner()->GetScale();
       Vector3 size =
           spriteComp->GetOwner()->GetScale() * spriteComp->GetScale();
 
