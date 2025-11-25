@@ -119,15 +119,11 @@ void TestSceneA::Initialize() {
   mGame->GetCamera()->SetCameraForward(
       Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
 
-  for (int i = -25; i < 25; i++) {
-    for (int j = -25; j < 25; j++) {
-      auto cube4 = new CubeActor(mGame, Color::White, 5);
-      cube4->SetPosition(Vector3((float)i, 0.0f, (float)j));
-      cube4->SetScale(Vector3(1.0f, 1.0f, 1.0f));
-      cube4->GetComponent<MeshComponent>()->SetBloomed(false);
-      mGame->AddAlwaysActive(cube4);
-    }
-  }
+  auto cube4 = new CubeActor(mGame, Color::White, 5);
+  cube4->SetPosition(Vector3(0.0f, -1.0f, 0.0f));
+  cube4->SetScale(Vector3(25.0f, 1.0f, 25.0f));
+  cube4->GetComponent<MeshComponent>()->SetBloomed(false);
+  mGame->AddAlwaysActive(cube4);
 
   auto testGoomba = new GoombaActor(mGame);
   testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));

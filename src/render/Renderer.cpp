@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "Actor.hpp"
+#include "Game.hpp"
 #include "Mesh.hpp"
 #include "MeshComponent.hpp"
 #include "Shader.hpp"
@@ -9,15 +10,16 @@
 #include <algorithm>
 #include <iostream>
 
-Renderer::Renderer()
-    : mViewMatrix(Matrix4::Identity), mProjectionMatrix(Matrix4::Identity),
-      mMeshShader(nullptr), mSpriteShader(nullptr), mFramebufferShader(nullptr),
-      mHUDShader(nullptr), mBloomBlurShader(nullptr), mSpriteQuad(nullptr),
-      mScreenQuad(nullptr), mFramebuffer(0), mFramebufferTexture(0),
-      mFramebufferDepthStencil(0), mFramebufferWidth(320),
-      mFramebufferHeight(240), mBloomFramebuffer(0), mBloomTexture(0),
-      mBloomDepthStencil(0), mBlurTexture1(0), mBlurTexture2(0),
-      mBlurFramebuffer1(0), mBlurFramebuffer2(0), mIsDark(true) {}
+Renderer::Renderer(Game *game)
+    : mGame(game), mViewMatrix(Matrix4::Identity),
+      mProjectionMatrix(Matrix4::Identity), mMeshShader(nullptr),
+      mSpriteShader(nullptr), mFramebufferShader(nullptr), mHUDShader(nullptr),
+      mBloomBlurShader(nullptr), mSpriteQuad(nullptr), mScreenQuad(nullptr),
+      mFramebuffer(0), mFramebufferTexture(0), mFramebufferDepthStencil(0),
+      mFramebufferWidth(320), mFramebufferHeight(240), mBloomFramebuffer(0),
+      mBloomTexture(0), mBloomDepthStencil(0), mBlurTexture1(0),
+      mBlurTexture2(0), mBlurFramebuffer1(0), mBlurFramebuffer2(0),
+      mIsDark(true) {}
 
 Renderer::~Renderer() {
   // Delete framebuffer objects
@@ -1117,7 +1119,8 @@ void Renderer::EndFramebuffer() {
   glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
   mFramebufferShader->SetIntegerUniform("uFramebufferTexture", 0);
 
-  mFramebufferShader->SetIntegerUniform("uIsDark", mIsDark);
+  mFramebufferShader->SetIntegerUniform("uIsDark",
+                                        mGame->IsDebugging() ? 0 : mIsDark);
 
   // Bind bloom texture (final blurred result is in mBlurTexture1 or
   // mBlurTexture2 depending on odd/even passes)

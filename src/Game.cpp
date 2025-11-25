@@ -33,10 +33,9 @@ const float MIDI_UPDATE_INTERVAL = 0.001f; // Update MIDI every 1ms
 Game::Game()
     : mUpdatingActors(false), mWindow(nullptr), mGLContext(nullptr),
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
-      mPendingScene(nullptr),
-      mTicksCount(0), mIsRunning(true),
+      mPendingScene(nullptr), mTicksCount(0), mIsRunning(true),
       mIsDebugging(false) {
-    mCamera = new Camera(this, Vector3::Zero);
+  mCamera = new Camera(this, Vector3::Zero);
 }
 
 bool Game::Initialize() {
@@ -85,7 +84,7 @@ bool Game::Initialize() {
   SDL_GL_SetSwapInterval(1);
 
   // Create renderer
-  mRenderer = new Renderer();
+  mRenderer = new Renderer(this);
   if (!mRenderer->Initialize(static_cast<float>(WINDOW_WIDTH),
                              static_cast<float>(WINDOW_HEIGHT))) {
     std::cerr << "Failed to initialize renderer" << std::endl;
@@ -468,7 +467,6 @@ void Game::GenerateOutput() {
   static Uint32 lastTime = SDL_GetTicks();
   static int frameCount = 0;
   Uint32 startFrame = SDL_GetTicks();
-
 
   RendererMode mode =
       mIsDebugging ? RendererMode::LINES : RendererMode::TRIANGLES;

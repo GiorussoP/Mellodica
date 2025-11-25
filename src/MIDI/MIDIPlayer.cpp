@@ -148,6 +148,7 @@ void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
   for (int i = 0; i < 16; ++i) {
     channels[i].pos = 0;
     channels[i].pitchBendPos = 0;
+    channels[i].transpose = 0;
     channels[i].active = !channels[i].notes.empty();
     if (channels[i].active)
       std::cout << i << " ";

@@ -38,6 +38,9 @@ public:
   // Camera
   Camera *GetCamera() const { return mCamera; }
 
+  // Debugging getter
+  bool IsDebugging() const { return mIsDebugging; }
+
   // Player getter
   Player *GetPlayer() { return mPlayer; }
   void SetPlayer(Player *player) { mPlayer = player; }
