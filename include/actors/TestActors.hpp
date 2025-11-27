@@ -2,9 +2,9 @@
 #include "Game.hpp"
 #include "Math.hpp"
 #include "actors/Actor.hpp"
+#include "actors/NotePlayerActor.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/MeshComponent.hpp"
-#include "components/NotePlayerComponent.hpp"
 #include "components/RigidBodyComponent.hpp"
 #include "components/SpriteComponent.hpp"
 
@@ -72,7 +72,7 @@ public:
 private:
   SpriteComponent *mSpriteComponent;
   ColliderComponent *mColliderComponent;
-  NotePlayerComponent *mNotePlayerComponent;
+  NotePlayerActor *mNotePlayerActor;
 };
 
 // Test actor with tilted OBB collider

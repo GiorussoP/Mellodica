@@ -20,7 +20,7 @@ public:
 
   // Position getter/setter
   const Vector3 &GetPosition() const { return mPosition; }
-  void SetPosition(const Vector3 pos);
+  virtual void SetPosition(const Vector3 pos);
 
   // Scale getter/setter
   Vector3 GetScale() const { return mScale; }

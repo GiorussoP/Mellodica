@@ -6,20 +6,26 @@
 #include "components/MeshComponent.hpp"
 #include "components/RigidBodyComponent.hpp"
 
-class NotePlayerComponent;
+const Vector3 NOTE_COLORS[16] = {
+    Color::Red,     Color::Green, Color::Yellow, Color::Blue,
+    Color::Magenta, Color::Blue,  Color::Purple, Color::Orange,
+    Color::White,   Color::White, Color::White,  Color::White,
+    Color::White,   Color::White, Color::White,  Color::White};
+
+class NotePlayerActor;
 
 class NoteActor : public Actor {
 public:
   NoteActor(class Game *game, unsigned int midChannel, unsigned int midiNote,
             Vector3 direction = Vector3::UnitZ, Vector3 color = Color::White,
-            float speed = 5.0f);
+            float speed = 1.0f);
 
-  NoteActor(NotePlayerComponent *NotePlayerComponent, class Game *game,
+  NoteActor(NotePlayerActor *NotePlayerActor, class Game *game,
             unsigned int midChannel, unsigned int midiNote,
             Vector3 direction = Vector3::UnitZ, Vector3 color = Color::White,
-            float speed = 10.0f)
+            float speed = 1.0f)
       : NoteActor(game, midChannel, midiNote, direction, color, speed) {
-    mNotePlayerComponent = NotePlayerComponent;
+    mNotePlayerActor = NotePlayerActor;
   }
 
   void Start();
@@ -44,6 +50,6 @@ private:
   ColliderComponent *mColliderComponent;
   MeshComponent *mMeshComponent;
 
-  NotePlayerComponent *mNotePlayerComponent;
+  NotePlayerActor *mNotePlayerActor;
 };
 #endif

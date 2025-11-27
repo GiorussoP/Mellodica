@@ -218,8 +218,24 @@ void MIDIPlayer::update(float dt) {
               nextNote = 0;
             if (nextNote > 127)
               nextNote = 127;
-            nextNoteTime = channel.notes[lookAhead].start;
+            nextNoteTime = channel.notes[lookAhead].start - time;
             break;
+          }
+        }
+
+        if (!hasNextNote && loop_song) {
+          // Find the first noteOn in the channel for looping
+          for (const auto &note : channel.notes) {
+            if (note.on) {
+              nextNote = note.note + channel.transpose;
+              // Clamp next note to valid MIDI range
+              if (nextNote < 0)
+                nextNote = 0;
+              if (nextNote > 127)
+                nextNote = 127;
+              nextNoteTime = note.start + song_length - time;
+              break;
+            }
           }
         }
 

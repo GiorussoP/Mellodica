@@ -12,7 +12,7 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
                      Vector3 direction, Vector3 color, float speed)
     : Actor(game), mMidiChannel(midChannel), mMidiNote(midiNote),
       mIsPlaying(false), mDirection(direction), mSpeed(speed),
-      mLastStepMovement(0.0f), mNotePlayerComponent(nullptr) {
+      mLastStepMovement(0.0f), mNotePlayerActor(nullptr) {
 
   mGame->AddAlwaysActive(this);
 
@@ -51,8 +51,8 @@ void NoteActor::OnUpdate(float deltaTime) {
   if (mScale.z < 0.1f) {
     mIsPlaying = false;
     SetState(ActorState::Destroy);
-    if (mNotePlayerComponent)
-      mNotePlayerComponent->MarkNoteDead(this);
+    if (mNotePlayerActor)
+      mNotePlayerActor->MarkNoteDead(this);
   }
 }
 

@@ -1014,6 +1014,11 @@ public:
     return retVal;
   }
 
+  // Dot product between two quaternions
+  [[nodiscard]] static float Dot(const Quaternion &a, const Quaternion &b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+  }
+
   // Spherical Linear Interpolation
   [[nodiscard]] static Quaternion Slerp(const Quaternion &a,
                                         const Quaternion &b, float f) {

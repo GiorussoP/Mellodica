@@ -22,8 +22,7 @@ constexpr SDL_Scancode notebuttons[12] = {
 Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
       mMoveRight(false), mRotateLeft(false), mRotateRight(false),
-      mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ),
-      mCameraDirection(0) {
+      mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ) {
   // Mark player as always active so it's always visible
   game->AddAlwaysActive(this);
 
@@ -60,18 +59,28 @@ Player::Player(Game *game)
   mSpriteComponent->SetAnimation("idle");
   mSpriteComponent->SetAnimFPS(8.0f);
 
-  mNotePlayerComponent = new NotePlayerComponent(this, false);
-
   // turn on Camera's isometric mode
   mGame->GetCamera()->SetMode(CameraMode::Isometric);
-  mGame->GetCamera()->SetIsometricDirection(static_cast<IsometricDirections>(mCameraDirection));
+  mGame->GetCamera()->SetIsometricDirection(
+      mGame->GetCamera()->GetIsometricDirection());
 }
 
 void Player::OnUpdate(float deltaTime) {
+  if (mGame->GetBattleSystem()->IsTransitioning()) {
+    mRigidBodyComponent->SetVelocity(Vector3::Zero);
+    mSpriteComponent->SetAnimation("idle");
+    return;
+  }
+
   // Calculate movement direction
   Vector3 moveDir = Vector3::Zero;
-  Vector3 front = Vector3::Normalize(
-      mGame->GetCamera()->GetCameraForward().ProjectedOnPlane(Vector3::UnitY));
+  Vector3 front =
+      mGame->GetCamera()->GetMode() == CameraMode::Isometric
+          ? mGame->GetCamera()->GetCameraForward().ProjectedOnPlane(
+                Vector3::UnitY)
+          : mGame->GetCamera()->GetCameraUp().ProjectedOnPlane(Vector3::UnitY);
+  front.Normalize();
+
   if (mMoveForward) {
     moveDir += front;
   }
@@ -94,7 +103,8 @@ void Player::OnUpdate(float deltaTime) {
   }
 
   bool playing = false;
-  for (auto note : mNotePlayerComponent->GetActiveNotes()) {
+  for (auto note :
+       mGame->GetBattleSystem()->GetPlayerNotePlayer()->GetActiveNotes()) {
     if (note != nullptr) {
       playing = true;
       break;
@@ -123,12 +133,17 @@ void Player::OnUpdate(float deltaTime) {
     mSpriteComponent->SetAnimation(playing ? "play" : "idle");
   }
 
-  mGame->GetCamera()->SetMode(CameraMode::Isometric);
-  mGame->GetCamera()->SetTargetPosition(GetPosition() + mFront * 4.0f);
-  mGame->GetCamera()->SetIsometricDirection(static_cast<IsometricDirections>(mCameraDirection));
+  if (!mGame->GetBattleSystem()->IsInBattle()) {
+    mGame->GetCamera()->SetTargetPosition(GetPosition() + mFront * 4.0f);
+  }
 }
 
 void Player::OnProcessInput() {
+  if (mGame->GetBattleSystem()->IsTransitioning()) {
+    mRigidBodyComponent->SetVelocity(Vector3::Zero);
+    return;
+  }
+
   mMoveForward = Input::IsKeyDown(SDL_SCANCODE_UP);
   mMoveBackward = Input::IsKeyDown(SDL_SCANCODE_DOWN);
   mMoveLeft = Input::IsKeyDown(SDL_SCANCODE_LEFT);
@@ -136,21 +151,22 @@ void Player::OnProcessInput() {
 
   // Camera
   if (Input::WasKeyPressed(SDL_SCANCODE_D)) {
-    mCameraDirection = (mCameraDirection + 7) % 8;
+    mGame->GetCamera()->PrevIsometricDirection();
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_A)) {
-    mCameraDirection = (mCameraDirection + 1) % 8;
+    mGame->GetCamera()->NextIsometricDirection();
   }
 
   Vector3 right = Vector3::Cross(Vector3::UnitY, mFront);
 
   for (int i = 0; i < 12; ++i) {
     if (Input::WasKeyPressed(notebuttons[i])) {
-      if (mNotePlayerComponent->PlayNote(60 + i, 12)) {
+      if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(60 + i,
+                                                                    12)) {
         SynthEngine::startNote(12, 60 + i);
       };
     } else if (Input::WasKeyReleased(notebuttons[i])) {
-      if (mNotePlayerComponent->EndNote(60 + i)) {
+      if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(60 + i)) {
         // mActiveNotes[i]->End();
         // mActiveNotes[i] = nullptr;
         SynthEngine::stopNote(12, 60 + i);
@@ -165,8 +181,10 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
   // colliders
   if (other->GetLayer() == ColliderLayer::Note) {
     // Ignore collisions with notes for now
+    mSpriteComponent->SetColor(Color::Red);
     return;
-  }
+  } else
+    mSpriteComponent->SetColor(Color::White);
   SetPosition(GetPosition() + penetration.ProjectedOnPlane(Vector3::UnitY));
 
   // Stop velocity in the direction of the collision to prevent sliding back

@@ -1,4 +1,5 @@
 #pragma once
+#include "BattleSystem.hpp"
 #include "Math.hpp"
 #include "Player.hpp"
 #include <SDL2/SDL.h>
@@ -45,6 +46,12 @@ public:
   Player *GetPlayer() { return mPlayer; }
   void SetPlayer(Player *player) { mPlayer = player; }
 
+  // Battle system getter
+  BattleSystem *GetBattleSystem() { return mBattleSystem; }
+  void SetBattleSystem(BattleSystem *battleSystem) {
+    mBattleSystem = battleSystem;
+  }
+
 private:
   void ProcessInput();
   void UpdateGame(float deltaTime);
@@ -82,6 +89,9 @@ private:
 
   // Player
   Player *mPlayer;
+
+  // Battle system
+  BattleSystem *mBattleSystem;
 
   // Game state
   Uint32 mTicksCount;

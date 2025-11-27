@@ -171,7 +171,7 @@ void MarioActor::OnUpdate(float deltaTime) {}
 
 GoombaActor::GoombaActor(Game *game)
     : Actor(game), mSpriteComponent(nullptr), mColliderComponent(nullptr),
-      mNotePlayerComponent(nullptr) {
+      mNotePlayerActor(nullptr) {
 
   mGame->AddAlwaysActive(this);
   // Get atlas from renderer cache
@@ -195,21 +195,10 @@ GoombaActor::GoombaActor(Game *game)
   mColliderComponent = new AABBCollider(
       this, ColliderLayer::Player, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f));
 
-  mNotePlayerComponent = new NotePlayerComponent(this, true, Vector3::Zero);
+  mNotePlayerActor = new NotePlayerActor(mGame, true);
 }
 
-void GoombaActor::OnUpdate(float deltaTime) {
-  auto notes = MIDIPlayer::pollNoteEvents();
-  for (auto note : notes) {
-    if (note.channel == 0 || note.channel == 2) {
-      if (note.noteOn)
-        // mPosition += Vector3::UnitY;
-        mNotePlayerComponent->PlayNote(note.note, note.channel);
-      else
-        mNotePlayerComponent->EndNote(note.note);
-    }
-  }
-}
+void GoombaActor::OnUpdate(float deltaTime) {}
 
 // OBBTestActor implementation
 OBBTestActor::OBBTestActor(Game *game)

@@ -8,7 +8,7 @@
 class MeshComponent : public DrawComponent {
 public:
   MeshComponent(class Actor *owner, Mesh &mesh, Texture *texture = nullptr,
-                TextureAtlas *textureAtlas = nullptr, int startingIndex = 0);
+                TextureAtlas *textureAtlas = nullptr, int startingIndex = -1);
   ~MeshComponent();
 
   Mesh &GetMesh() const { return mMesh; }

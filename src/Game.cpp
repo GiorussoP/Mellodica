@@ -34,11 +34,13 @@ Game::Game()
     : mUpdatingActors(false), mWindow(nullptr), mGLContext(nullptr),
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
       mPendingScene(nullptr), mTicksCount(0), mIsRunning(true),
-      mIsDebugging(false) {
+      mIsDebugging(false), mPlayer(nullptr), mCamera(nullptr),
+      mBattleSystem(nullptr) {
   mCamera = new Camera(this, Vector3::Zero);
 }
 
 bool Game::Initialize() {
+
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;

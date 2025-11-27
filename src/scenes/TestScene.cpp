@@ -2,6 +2,8 @@
 #include "HUDElement.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "Renderer.hpp"
+#include "actors/Combatant.hpp"
+#include "actors/EnemyGroup.hpp"
 #include "actors/Player.hpp"
 #include "actors/TestActors.hpp"
 
@@ -31,38 +33,12 @@ void TestSceneA::Initialize() {
                             {0, 52}});
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/a2.mid", true);
-  MIDIPlayer::setSpeed(0.75);
+  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
+  MIDIPlayer::setChannelTranspose(11, -60);
   MIDIPlayer::play();
 
-  // MIDIPlayer::muteChannel(0);
-  MIDIPlayer::muteChannel(1);
-  // MIDIPlayer::muteChannel(2);
-  MIDIPlayer::muteChannel(3);
-  MIDIPlayer::muteChannel(4);
-  MIDIPlayer::muteChannel(5);
-  MIDIPlayer::muteChannel(6);
-  // MIDIPlayer::muteChannel(7);
-  // MIDIPlayer::muteChannel(8);
-  MIDIPlayer::muteChannel(9);
-  //   MIDIPlayer::muteChannel(10);
-  //  MIDIPlayer::muteChannel(11);
-
-  MIDIPlayer::setChannelVolume(0, 127);
-  MIDIPlayer::setChannelVolume(1, 127);
-  MIDIPlayer::setChannelVolume(2, 127);
-  MIDIPlayer::setChannelVolume(3, 127);
-  MIDIPlayer::setChannelVolume(4, 127);
-  MIDIPlayer::setChannelVolume(5, 127);
-  MIDIPlayer::setChannelVolume(6, 127);
-  MIDIPlayer::setChannelVolume(7, 127);
-
-  MIDIPlayer::setChannelVolume(8, 100);
-  MIDIPlayer::setChannelVolume(9, 100);
-  MIDIPlayer::setChannelVolume(10, 127);
-  MIDIPlayer::setChannelVolume(11, 100);
-
-  MIDIPlayer::setChannelTranspose(11, -60);
+  // Creating the battke system
+  mGame->SetBattleSystem(new BattleSystem(mGame));
 
   // Some actors for testing
 
@@ -113,8 +89,7 @@ void TestSceneA::Initialize() {
   hudElement->GetSpriteComponent().SetAnimation("default");
 
   // Setting camera
-  mGame->GetCamera()->SetMode(
-      CameraMode::Fixed); // TODO: confirm this was the intended mode originally
+  mGame->GetCamera()->SetMode(CameraMode::Isometric);
   mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
   mGame->GetCamera()->SetCameraForward(
       Vector3::Normalize(Vector3(0.0f, -1.0f, -1.0f)));
@@ -125,8 +100,8 @@ void TestSceneA::Initialize() {
   cube4->GetComponent<MeshComponent>()->SetBloomed(false);
   mGame->AddAlwaysActive(cube4);
 
-  auto testGoomba = new GoombaActor(mGame);
-  testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
+  auto testEnemyGroup = new EnemyGroup(mGame, {{0, 100}, {1, 100}, {2, 100}});
+  testEnemyGroup->SetPosition(Vector3(-10.0f, 1.0f, -10.0f));
 }
 
 void TestSceneB::Initialize() {
@@ -156,35 +131,9 @@ void TestSceneB::Initialize() {
   mGame->GetRenderer()->SetIsDark(false);
 
   MIDIPlayer::loadSong("assets/songs/a1.mid", true);
-  // MIDIPlayer::muteChannel(0);
-  MIDIPlayer::muteChannel(1);
-  // MIDIPlayer::muteChannel(2);
-  MIDIPlayer::muteChannel(3);
-  MIDIPlayer::muteChannel(4);
-  MIDIPlayer::muteChannel(5);
-  MIDIPlayer::muteChannel(6);
-  MIDIPlayer::muteChannel(7);
-  // MIDIPlayer::muteChannel(8);
-  MIDIPlayer::muteChannel(9);
-  //   MIDIPlayer::muteChannel(10);
-  //  MIDIPlayer::muteChannel(11);
 
-  MIDIPlayer::setChannelVolume(0, 127);
-  MIDIPlayer::setChannelVolume(1, 127);
-  MIDIPlayer::setChannelVolume(2, 127);
-  MIDIPlayer::setChannelVolume(3, 127);
-  MIDIPlayer::setChannelVolume(4, 127);
-  MIDIPlayer::setChannelVolume(5, 127);
-  MIDIPlayer::setChannelVolume(6, 127);
-  MIDIPlayer::setChannelVolume(7, 127);
-
-  MIDIPlayer::setChannelVolume(8, 127);
-  MIDIPlayer::setChannelVolume(9, 127);
-  MIDIPlayer::setChannelVolume(10, 127);
-  MIDIPlayer::setChannelVolume(11, 100);
-
-  // MIDIPlayer::muteChannel(10); ----- IGNORE -----
-  // MIDIPlayer::setChannelVolume(10, 127);
+  // Creating the battke system
+  mGame->SetBattleSystem(new BattleSystem(mGame));
 
   MIDIPlayer::setChannelTranspose(11, -60);
 
@@ -202,11 +151,18 @@ void TestSceneB::Initialize() {
   obbTest1->SetPosition(Vector3(5.0f, 1.0f, 12.0f));
   obbTest1->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
 
-  auto cube2 = new CubeActor(mGame, Color::Cyan, 0);
+  auto cube2 = new CubeActor(mGame, Color::LightBlue, 0);
   cube2->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
   cube2->SetScale(Vector3(32.0f, 1.0f, 32.0f));
   mGame->AddAlwaysActive(cube2);
 
   MultiDrawablesActor *multiDrawablesActor = new MultiDrawablesActor(mGame);
   multiDrawablesActor->SetPosition(Vector3(-10.0f, 1.0f, 10.0f));
+
+  EnemyGroup *enemies = new EnemyGroup(mGame, {{0, 100}});
+  enemies->SetPosition(Vector3(-10.0f, 1.0f, -10.0f));
+
+  EnemyGroup *enemies2 =
+      new EnemyGroup(mGame, {{4, 100}, {5, 100}, {6, 100}, {7, 100}});
+  enemies2->SetPosition(Vector3(10.0f, 1.0f, -10.0f));
 }
