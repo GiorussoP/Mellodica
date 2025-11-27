@@ -22,3 +22,14 @@ namespace CSVHelper
 		return retVal;
 	}
 } // namespace CSVHelper
+
+// TODO: Rename this class
+class MapReader {
+	public:
+	explicit MapReader(const std::string& filePath);
+
+private:
+	std::vector<std::vector<int>> data;
+	unsigned width;
+	unsigned height;
+};
