@@ -1,6 +1,21 @@
 #pragma once
+#include <SDL_log.h>
 #include <string>
 #include <vector>
+#include <random>
+
+#include "Math.hpp"
+
+// TODO: fine tunar isso aqui nos csvs reais depois
+// how many random partitions are tried
+#define PARTITION_TRIES 10
+
+// TODO: Colocar as coisas de verdade aqui
+// Holds actors that appears on Map files
+enum class ActorMap {
+	FLOOR,
+	HOUSE,
+};
 
 namespace CSVHelper
 {
@@ -21,6 +36,16 @@ namespace CSVHelper
 		retVal.emplace_back(std::stoi(str.substr(start, delimLoc - start)));
 		return retVal;
 	}
+
+	inline ActorMap GetActorMap(const int csvEntry) {
+		switch (csvEntry) {
+			case 0: return ActorMap::FLOOR;
+			case 1: return ActorMap::HOUSE;
+			default:
+				SDL_Log("Invalid csv entry: %d", csvEntry);
+				exit(-1);
+		}
+	}
 } // namespace CSVHelper
 
 // TODO: Rename this class
@@ -29,7 +54,11 @@ class MapReader {
 	explicit MapReader(const std::string& filePath);
 
 private:
-	std::vector<std::vector<int>> data;
+
+	void PartitionGrid();
+
+	std::vector<std::vector<int>> grid;
+	std::vector<std::tuple<Vector2, int, int, ActorMap>> mapActors;
 	unsigned width;
 	unsigned height;
 };
