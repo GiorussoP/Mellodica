@@ -9,6 +9,7 @@ public:
   HUDElement(Game *game, const std::string &hudTexturePath,
              const std::string &hudAtlasPath);
   HUDElement(Game *game, const std::string &singleImagePath);
+
   SpriteComponent &GetSpriteComponent() { return *mSpriteComponent; }
 
 private:

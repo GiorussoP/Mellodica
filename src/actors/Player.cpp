@@ -122,17 +122,18 @@ void Player::OnUpdate(float deltaTime) {
   // Update allies positions
   if (!mGame->GetBattleSystem()->IsInBattle() &&
       !mGame->GetBattleSystem()->IsTransitioning()) {
-    Vector3 pos = mPosition - mFront * 2.0f;
+    Vector3 pos = mPosition - 0.5f * mFront;
     for (auto &ally : mActiveAllies) {
       if (ally->GetCombatantState() == CombatantState::Dead)
         continue;
 
-      if ((ally->GetPosition() - pos).LengthSq() < 9.0f) {
+      if ((ally->GetPosition() - pos).LengthSq() < 1.0f) {
         ally->SetCombatantState(CombatantState::Idle);
       } else {
         ally->SetCombatantState(CombatantState::Moving);
         ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
       }
+      pos -= mFront;
     }
   }
 
@@ -199,7 +200,9 @@ void Player::OnUpdate(float deltaTime) {
   if (Input::WasKeyPressed(SDL_SCANCODE_Z) && mActiveAllies.size() < 8) {
     mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(), 100));
     mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f, 0.0f));
-    MIDIPlayer::unmuteChannel(mActiveAllies.back()->GetChannel());
+    if (mGame->GetBattleSystem()->IsInBattle()) {
+      MIDIPlayer::unmuteChannel(mActiveAllies.back()->GetChannel());
+    }
   }
 }
 

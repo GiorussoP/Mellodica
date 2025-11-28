@@ -15,7 +15,7 @@ enum class CombatantState { Idle, Attacking, Dead, Moving };
 
 class Combatant : public Actor {
 public:
-  Combatant(class Game *game, int channel, int health = 100,
+  Combatant(class Game *game, int channel, int health = 1000,
             const std::string &texture_name = "./assets/textures/Goomba");
 
   ~Combatant();

@@ -77,34 +77,35 @@ void TestSceneA::Initialize() {
 
   auto cube4 = new CubeActor(mGame, Color::White, 5);
   cube4->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-  cube4->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+  cube4->SetScale(Vector3(1000.0f, 1.0f, 1000.0f));
   cube4->GetComponent<MeshComponent>()->SetBloomed(false);
   mGame->AddAlwaysActive(cube4);
 
-  auto testEnemyGroup = new EnemyGroup(mGame, {{0, 100}, {1, 100}, {2, 100}});
+  auto testEnemyGroup =
+      new EnemyGroup(mGame, {{0, 1000}, {1, 1000}, {2, 1000}});
   testEnemyGroup->SetPosition(Vector3(-10.0f, 1.0f, -10.0f));
 
   // Additional random enemy groups for testing
-  auto enemyGroup2 = new EnemyGroup(mGame, {{3, 100}});
+  auto enemyGroup2 = new EnemyGroup(mGame, {{3, 1000}});
   enemyGroup2->SetPosition(Vector3(10.0f, 1.0f, -10.0f));
 
-  auto enemyGroup3 = new EnemyGroup(mGame, {{4, 100}, {5, 100}});
+  auto enemyGroup3 = new EnemyGroup(mGame, {{4, 1000}, {5, 1000}});
   enemyGroup3->SetPosition(Vector3(15.0f, 1.0f, 10.0f));
 
-  auto enemyGroup4 = new EnemyGroup(mGame, {{6, 100}});
+  auto enemyGroup4 = new EnemyGroup(mGame, {{6, 1000}});
   enemyGroup4->SetPosition(Vector3(-15.0f, 1.0f, -15.0f));
 
-  auto enemyGroup5 = new EnemyGroup(mGame, {{7, 100}});
+  auto enemyGroup5 = new EnemyGroup(mGame, {{7, 1000}});
   enemyGroup5->SetPosition(Vector3(0.0f, 1.0f, -20.0f));
 
   auto enemyGroup6 =
-      new EnemyGroup(mGame, {{0, 100}, {1, 100}, {2, 100}, {3, 100}});
+      new EnemyGroup(mGame, {{0, 1000}, {1, 1000}, {2, 1000}, {3, 1000}});
   enemyGroup6->SetPosition(Vector3(20.0f, 1.0f, -5.0f));
 
-  auto enemyGroup7 = new EnemyGroup(mGame, {{4, 100}, {5, 100}, {6, 100}});
+  auto enemyGroup7 = new EnemyGroup(mGame, {{4, 1000}, {5, 1000}, {6, 1000}});
   enemyGroup7->SetPosition(Vector3(-20.0f, 1.0f, 5.0f));
 
-  auto enemyGroup8 = new EnemyGroup(mGame, {{7, 100}, {0, 100}, {1, 100}});
+  auto enemyGroup8 = new EnemyGroup(mGame, {{7, 1000}, {0, 1000}, {1, 1000}});
   enemyGroup8->SetPosition(Vector3(5.0f, 1.0f, 20.0f));
 }
 
@@ -145,37 +146,37 @@ void TestSceneB::Initialize() {
   multiDrawablesActor->SetPosition(Vector3(-15.0f, 1.0f, 15.0f));
 
   EnemyGroup *enemies =
-      new EnemyGroup(mGame, {{4, 100}, {5, 100}, {6, 100}, {7, 100}});
+      new EnemyGroup(mGame, {{4, 1000}, {5, 1000}, {6, 1000}, {7, 1000}});
   enemies->SetPosition(Vector3(10.0f, 1.0f, -10.0f));
 
-  EnemyGroup *enemies2 = new EnemyGroup(mGame, {{8, 100}, {9, 100}});
+  EnemyGroup *enemies2 = new EnemyGroup(mGame, {{8, 1000}, {9, 1000}});
   enemies2->SetPosition(Vector3(15.0f, 1.0f, 10.0f));
 
   EnemyGroup *enemies3 =
-      new EnemyGroup(mGame, {{10, 100}, {11, 100}, {12, 100}});
+      new EnemyGroup(mGame, {{10, 1000}, {11, 1000}, {12, 1000}});
   enemies3->SetPosition(Vector3(-15.0f, 1.0f, -15.0f));
 
-  EnemyGroup *enemy0 = new EnemyGroup(mGame, {{0, 100}});
+  EnemyGroup *enemy0 = new EnemyGroup(mGame, {{0, 1000}});
   enemy0->SetPosition(Vector3(-10.0f, 1.0f, -10.0f));
 
-  EnemyGroup *enemy1 = new EnemyGroup(mGame, {{1, 100}});
+  EnemyGroup *enemy1 = new EnemyGroup(mGame, {{1, 1000}});
   enemy1->SetPosition(Vector3(-10.0f, 1.0f, -20.0f));
 
-  EnemyGroup *enemy2 = new EnemyGroup(mGame, {{2, 100}});
+  EnemyGroup *enemy2 = new EnemyGroup(mGame, {{2, 1000}});
   enemy2->SetPosition(Vector3(-10.0f, 1.0f, -30.0f));
 
-  EnemyGroup *enemy3 = new EnemyGroup(mGame, {{3, 100}});
+  EnemyGroup *enemy3 = new EnemyGroup(mGame, {{3, 1000}});
   enemy3->SetPosition(Vector3(-10.0f, 1.0f, -40.0f));
 
-  EnemyGroup *enemy4 = new EnemyGroup(mGame, {{4, 100}});
+  EnemyGroup *enemy4 = new EnemyGroup(mGame, {{4, 1000}});
   enemy4->SetPosition(Vector3(-10.0f, 1.0f, -50.0f));
 
-  EnemyGroup *enemy5 = new EnemyGroup(mGame, {{5, 100}});
+  EnemyGroup *enemy5 = new EnemyGroup(mGame, {{5, 1000}});
   enemy5->SetPosition(Vector3(-10.0f, 1.0f, -60.0f));
 
-  EnemyGroup *enemy6 = new EnemyGroup(mGame, {{6, 100}});
+  EnemyGroup *enemy6 = new EnemyGroup(mGame, {{6, 1000}});
   enemy6->SetPosition(Vector3(-10.0f, 1.0f, -70.0f));
 
-  EnemyGroup *enemy7 = new EnemyGroup(mGame, {{7, 100}});
+  EnemyGroup *enemy7 = new EnemyGroup(mGame, {{7, 1000}});
   enemy7->SetPosition(Vector3(-10.0f, 1.0f, -80.0f));
 }
