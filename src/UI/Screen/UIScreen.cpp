@@ -28,14 +28,14 @@ UIScreen::~UIScreen() {
 }
 
 HUDElement* UIScreen::AddImageOrElement(const std::string &hudTexturePath, const std::string &hudAtlasPath) {
-    HUDElement* hE = new HUDElement(mGame, hudTexturePath, hudAtlasPath);
-    mHudButtons.push_back(hE);
+    auto hE = new HUDElement(mGame, hudTexturePath, hudAtlasPath);
+    mHudImages.push_back(hE);
     return hE;
 }
 
 HUDElement* UIScreen::AddImageOrElement(const std::string &singleImagePath) {
     auto hE = new HUDElement(mGame, singleImagePath);
-    mHudButtons.push_back(hE);
+    mHudImages.push_back(hE);
     return hE;
 }
 
