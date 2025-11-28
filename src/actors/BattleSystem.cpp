@@ -9,8 +9,9 @@
 #include "actors/Player.hpp"
 
 BattleSystem::BattleSystem(Game *game)
-    : Actor(game), mGame(game), mInBattle(false), mEnemyNotePlayer(nullptr),
-      mPlayerNotePlayer(nullptr), mCurrentEnemyGroup(nullptr) {
+    : Actor(game), mGame(game), mInBattle(false), mIsTransitioning(false),
+      mEnemyNotePlayer(nullptr), mPlayerNotePlayer(nullptr),
+      mCurrentEnemyGroup(nullptr) {
   mPlayerNotePlayer = new NotePlayerActor(game, false);
   mEnemyNotePlayer = new NotePlayerActor(game, true);
 
@@ -24,7 +25,7 @@ BattleSystem::BattleSystem(Game *game)
 
   mEdge = new MeshComponent(this, *mesh);
   mEdge->SetColor(Color::White);
-  mEdge->SetScale(Vector3(0.0f, 0.0f, 0.0f));
+  mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
   mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
   mEdge->SetBloomed(true);
 
@@ -35,7 +36,7 @@ BattleSystem::BattleSystem(Game *game)
   for (int i = 8; i < 16; ++i) {
 
     i == 9 ? MIDIPlayer::muteChannel(i) : MIDIPlayer::unmuteChannel(i);
-    MIDIPlayer::setChannelVolume(i, (i == 12 || i == 8 || i == 9) ? 127 : 120);
+    MIDIPlayer::setChannelVolume(i, (i == 12 || i == 11 || i == 9) ? 127 : 100);
   }
 
   MIDIPlayer::setSpeed(0.9f);
@@ -88,6 +89,44 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
   MIDIPlayer::setSpeed(1.0f);
 
   mEdge->SetVisible(true);
+  mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
+  mField->SetScale(Vector3(6.0f, 1.0f, 0.0f));
+  mPosition = mGame->GetPlayer()->GetPosition() + mBattleDir;
+  mRotation = Math::LookRotation(mBattleDir);
+
+  // Setting enemy positions:
+  Vector3 right = Vector3::Cross(Vector3::UnitY, mBattleDir);
+  for (int i = 0; i < mCurrentEnemyGroup->GetEnemies().size(); ++i) {
+    Vector3 pos =
+        mCurrentEnemyGroup->GetPosition() + right * i * 1.5f -
+        right * ((mCurrentEnemyGroup->GetEnemies().size() - 1) * 1.5f / 2.0f);
+
+    pos = pos - 0.5f * mBattleDir;
+    mCurrentEnemyGroup->GetEnemies()[i]->GoToPositionAtSpeed(pos, 1.5f);
+    mCurrentEnemyGroup->GetEnemies()[i]->SetCombatantState(
+        CombatantState::Moving);
+
+    mCurrentEnemyGroup->GetEnemies()[i]->SetRotation(
+        Math::LookRotation(-1.0f * mBattleDir));
+  }
+
+  // Setting ally positions
+  Vector3 allyRight = Vector3::Cross(Vector3::NegUnitY, mBattleDir);
+
+  for (int i = 0; i < mGame->GetPlayer()->GetActiveAllies().size(); ++i) {
+    if (mGame->GetPlayer()->GetActiveAllies()[i]->GetCombatantState() ==
+        CombatantState::Dead) {
+      continue;
+    }
+    Vector3 pos =
+        mGame->GetPlayer()->GetPosition() + allyRight * i * 1.5f -
+        allyRight *
+            ((mGame->GetPlayer()->GetActiveAllies().size() - 1) * 1.5f / 2.0f);
+    pos = pos - 1.5f * mBattleDir;
+    mGame->GetPlayer()->GetActiveAllies()[i]->GoToPositionAtSpeed(pos, 1.5f);
+    mGame->GetPlayer()->GetActiveAllies()[i]->SetCombatantState(
+        CombatantState::Moving);
+  }
 }
 
 void BattleSystem::EndBattle() {
@@ -115,10 +154,20 @@ void BattleSystem::EndBattle() {
   MIDIPlayer::muteChannel(9); // END BATTLE DRUMS
   MIDIPlayer::setSpeed(0.9f);
 
-  // Mute channels 0-7
-  for (int channel = 0; channel <= 7; ++channel) {
-    MIDIPlayer::muteChannel(channel);
+  // Mute enemies
+  for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
+    MIDIPlayer::muteChannel(enemy->GetChannel());
+    if (enemy->GetCombatantState() != CombatantState::Dead)
+      enemy->SetCombatantState(CombatantState::Idle);
   }
+
+  // Mute allies
+  for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
+    MIDIPlayer::muteChannel(ally->GetChannel());
+    if (ally->GetCombatantState() != CombatantState::Dead)
+      ally->SetCombatantState(CombatantState::Idle);
+  }
+
   // Mute Player
   MIDIPlayer::muteChannel(12);
 
@@ -126,6 +175,27 @@ void BattleSystem::EndBattle() {
   for (int i = 0; i < 128; ++i) {
     mPlayerNotePlayer->EndNote(i);
     mEnemyNotePlayer->EndNote(i);
+  }
+
+  // Destroy dead combatants
+  for (auto it = mCurrentEnemyGroup->GetEnemies().begin();
+       it != mCurrentEnemyGroup->GetEnemies().end();) {
+    if ((*it)->GetCombatantState() == CombatantState::Dead) {
+      (*it)->SetState(ActorState::Destroy);
+      it = mCurrentEnemyGroup->GetEnemies().erase(it);
+
+    } else {
+      ++it;
+    }
+  }
+  for (auto it = mGame->GetPlayer()->GetActiveAllies().begin();
+       it != mGame->GetPlayer()->GetActiveAllies().end();) {
+    if ((*it)->GetCombatantState() == CombatantState::Dead) {
+      (*it)->SetState(ActorState::Destroy);
+      it = mGame->GetPlayer()->GetActiveAllies().erase(it);
+    } else {
+      ++it;
+    }
   }
 
   mGame->GetPlayer()->SetRotation(Math::LookRotation(mBattleDir));
@@ -144,35 +214,37 @@ void BattleSystem::OnUpdate(float deltaTime) {
       mGame->GetCamera()->SetTargetPosition(
           enemyPos - 0.5f * mCurrentEnemyGroup->GetRadius() * mBattleDir);
 
+      std::array<bool, 8> channelActive;
+      channelActive.fill(false);
       auto notes = MIDIPlayer::pollNoteEvents();
+
+      // Handle enemy notes
       for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
         if (enemy->GetCombatantState() != CombatantState::Dead) {
+          channelActive[enemy->GetChannel()] = true;
           for (auto note : notes) {
 
             if (enemy->GetChannel() == note.channel) {
               if (note.noteOn) {
+                MIDIPlayer::unmuteChannel(enemy->GetChannel());
                 mEnemyNotePlayer->PlayNote(note.note, note.channel);
                 enemy->SetCombatantState(CombatantState::Attacking);
                 enemy->SetPosition(
                     mEnemyNotePlayer->GetNotePosition(note.note) + mBattleDir);
               } else {
                 mEnemyNotePlayer->EndNote(note.note);
-                enemy->SetCombatantState(CombatantState::Idle);
-                /*
-                // GOTO NEXT NOTE BEHAVIOUR - DISABLED FOR NOW
-                if (note.hasNextNote) {
-                  Vector3 nextNotePos =
-                      mEnemyNotePlayer->GetNotePosition(note.nextNote);
+                Vector3 nextNotePos =
+                    mEnemyNotePlayer->GetNotePosition(note.nextNote) +
+                    mBattleDir;
+                float nextNoteTime = note.nextNoteTime;
 
-                  float distance =
-                      Vector3::Distance(enemy->GetPosition(), nextNotePos);
-                  float speed = distance / Math::Max(note.nextNoteTime, 0.1);
+                float distance =
+                    Vector3::Distance(enemy->GetPosition(), nextNotePos);
 
-                  enemy->SetCombatantState(CombatantState::Dodging);
-                  enemy->GoToPositionAtSpeed(nextNotePos, speed);
-                }
+                enemy->GoToPositionAtSpeed(
+                    nextNotePos, distance / Math::Max(nextNoteTime, 0.1f));
 
-                */
+                enemy->SetCombatantState(CombatantState::Moving);
               }
             }
           }
@@ -186,14 +258,67 @@ void BattleSystem::OnUpdate(float deltaTime) {
               mEnemyNotePlayer->EndNote(note->GetNote());
             }
           }
-          MIDIPlayer::muteChannel(enemy->GetChannel());
+          enemy->GetComponent<SpriteComponent>()->SetBloomed(false);
         }
       }
+
+      // Handle ally notes
+      for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
+        if (ally->GetCombatantState() != CombatantState::Dead) {
+          channelActive[ally->GetChannel()] = true;
+          for (auto note : notes) {
+
+            if (ally->GetChannel() == note.channel) {
+              if (note.noteOn) {
+                mPlayerNotePlayer->PlayNote(note.note, note.channel);
+                ally->SetCombatantState(CombatantState::Attacking);
+                ally->SetPosition(
+                    mPlayerNotePlayer->GetNotePosition(note.note) -
+                    2.0f * mBattleDir);
+              } else {
+                mPlayerNotePlayer->EndNote(note.note);
+                Vector3 nextNotePos =
+                    mPlayerNotePlayer->GetNotePosition(note.nextNote) -
+                    2.0f * mBattleDir;
+                float nextNoteTime = note.nextNoteTime;
+
+                float distance =
+                    Vector3::Distance(ally->GetPosition(), nextNotePos);
+
+                ally->GoToPositionAtSpeed(
+                    nextNotePos, distance / Math::Max(nextNoteTime, 0.1f));
+
+                ally->SetCombatantState(CombatantState::Moving);
+              }
+            }
+          }
+
+        } else {
+          // Ensure all notes are ended for dead allies
+          for (int i = 0; i < MAX_NOTES; ++i) {
+            auto note = mPlayerNotePlayer->GetActiveNotes()[i];
+            if (note != nullptr &&
+                ally->GetChannel() == note->GetMidiChannel()) {
+              mPlayerNotePlayer->EndNote(note->GetNote());
+            }
+          }
+          ally->GetComponent<SpriteComponent>()->SetBloomed(false);
+        }
+      }
+
+      // Muting channels with no alive enemies or allies
+      for (int channel = 0; channel < 8; ++channel) {
+        if (!channelActive[channel]) {
+          MIDIPlayer::muteChannel(channel);
+        }
+      }
+
       // Field resizing
 
       dist =
           (mPlayerNotePlayer->GetPosition() - mEnemyNotePlayer->GetPosition());
-      SetPosition(mEnemyNotePlayer->GetPosition() + 0.5f * dist);
+
+      mPosition = mEnemyNotePlayer->GetPosition() + 0.5f * dist;
 
       mField->SetScale(Vector3(6.0f, 1.0f, dist.Length() + 0.5f));
 
@@ -204,14 +329,11 @@ void BattleSystem::OnUpdate(float deltaTime) {
 
       Vector3 dist =
           (mPlayerNotePlayer->GetPosition() - mEnemyNotePlayer->GetPosition());
-      SetPosition(mEnemyNotePlayer->GetPosition() + 0.5f * dist);
 
       mField->SetScale(Vector3::Lerp(mField->GetScale(),
                                      Vector3(6.0f, 1.0f, dist.Length() + 0.5f),
                                      4.0f * deltaTime));
-      mEdge->SetScale(Vector3::Lerp(
-          mEdge->GetScale(), mField->GetScale() + Vector3(0.25f, 0.0f, 0.25f),
-          4.0f * deltaTime));
+      mEdge->SetScale(mField->GetScale() + Vector3(0.25f, 0.0f, 0.25f));
 
       mRotation = Quaternion::Slerp(mRotation, Math::LookRotation(mBattleDir),
                                     4.0f * deltaTime);
@@ -219,8 +341,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
                                 mEnemyNotePlayer->GetPosition() + 0.5f * dist,
                                 4.0f * deltaTime);
 
-      if (Vector3::Dot(Vector3::NegUnitY,
-                       mGame->GetCamera()->GetCameraForward()) > 0.99) {
+      if (mField->GetScale().z > dist.Length() + 0.49f) {
         mIsTransitioning = false;
 
         auto &allies = mGame->GetPlayer()->GetActiveAllies();
@@ -264,6 +385,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
       mEdge->SetVisible(visible);
 
     } else {
+
       // Is transitioning to outside battle
       mField->SetScale(Vector3::Lerp(
           mField->GetScale(), Vector3(6.0f, 1.0f, 0.0f), 4.0f * deltaTime));
@@ -277,6 +399,8 @@ void BattleSystem::OnUpdate(float deltaTime) {
         mIsTransitioning = false;
         mField->SetScale(Vector3(6.0f, 1.0f, 0.0f));
         mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
+        mPosition = pos;
+        mRotation = mGame->GetPlayer()->GetRotation();
 
         std::cout << "Exited battle mode." << std::endl;
       }

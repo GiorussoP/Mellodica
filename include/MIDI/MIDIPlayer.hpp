@@ -81,6 +81,53 @@ public:
   static void unregisterChannelForEvents(int channel);
   static void clearRegisteredChannels();
 
+  static void loadSong2() {
+    SynthEngine::setChannels({{0, 36}, // Slap Bass
+                              {0, 1},  // Piano
+                              {0, 50}, // Strings
+                              {0, 30}, // Distorted Guitar
+                              {0, 62}, // Synth Brass
+                              {0, 54}, // Soprano voice
+                              {0, 80}, // Square lead
+                              {0, 78}, // Whistle
+                              {0, 66},
+                              {128, 0},
+                              {0, 89},
+                              {0, 73},
+                              {0, 57},
+                              {0, 42},
+                              {0, 11},
+                              {0, 52}});
+
+    // Initializing MIDI Player
+    MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
+
+    MIDIPlayer::setChannelTranspose(11, -60);
+  }
+
+  static void loadSong1() {
+    SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
+                              {0, 40},  // Violin
+                              {0, 21},  // Accordion
+                              {0, 43},  // Contrabass
+                              {0, 73},  // Flute
+                              {0, 71},  // Clarinet
+                              {0, 56},  // Trumpet
+                              {0, 46},  // Harp
+                              {0, 0},   // Always active: Piano
+                              {128, 0}, // Battle drums
+                              {0, 49},  // Always active: Slow strings
+                              {128, 1}, // Always Active: song drums
+                              {0, 0},   // Player Channel: Piano
+                              {0, 42},  // SFX1
+                              {0, 11},  // SFX2
+                              {0, 0}}); // SFX3
+
+    MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+
+    MIDIPlayer::setChannelTranspose(11, -60);
+  }
+
 private:
   static void midiThreadFunction();
   static void pushNoteEvent(int channel, int note, int velocity, bool noteOn,

@@ -1,4 +1,5 @@
 #include "actors/NotePlayerActor.hpp"
+#include "SynthEngine.hpp"
 #include "actors/NoteActor.hpp"
 
 float NotePlayerActor::noteSpacing = 0.5f;
@@ -31,6 +32,10 @@ bool NotePlayerActor::PlayNote(unsigned int note, unsigned int channel,
   // std::cout << "Playing note " << noteIndex << " on channel " << channel
   //          << std::endl;
 
+  if (channel == 12 && mMirrored == false) {
+    SynthEngine::startNote(channel, mActiveNotes[noteIndex]->GetNote());
+  }
+
   return true;
 }
 
@@ -41,8 +46,13 @@ bool NotePlayerActor::EndNote(unsigned int note) {
   if (mActiveNotes[noteIndex] == nullptr)
     return false;
 
+  if (mActiveNotes[noteIndex]->GetMidiChannel() == 12 && mMirrored == false) {
+    SynthEngine::stopNote(12, mActiveNotes[noteIndex]->GetNote());
+  }
+
   mActiveNotes[noteIndex]->End();
   mActiveNotes[noteIndex] = nullptr;
+
   return true;
 }
 

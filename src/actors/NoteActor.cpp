@@ -40,6 +40,8 @@ void NoteActor::Start() {
   mShineActor->Start(SHINE_TIME);
 }
 
+//
+
 void NoteActor::OnUpdate(float deltaTime) {
 
   mLastStepMovement = mSpeed * deltaTime;
@@ -48,7 +50,8 @@ void NoteActor::OnUpdate(float deltaTime) {
     SetPosition(mPosition - 0.5f * mDirection * mLastStepMovement);
   }
 
-  if (mScale.z < 0.1f) {
+  if (mScale.z < 0.1f ||
+      Vector3::Distance(mPosition, mGame->GetPlayer()->GetPosition()) > 50.0f) {
     mIsPlaying = false;
     SetState(ActorState::Destroy);
     if (mNotePlayerActor)
@@ -59,9 +62,11 @@ void NoteActor::OnUpdate(float deltaTime) {
 void NoteActor::End() { mIsPlaying = false; }
 
 void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
-  if (other->GetLayer() != ColliderLayer::Ground &&
-      other->GetLayer() != ColliderLayer::Note) {
-    return;
+
+  if (other->GetLayer() == ColliderLayer::Entity) {
+    Combatant *otherCombatant = static_cast<Combatant *>(other->GetOwner());
+    if (otherCombatant->GetCombatantState() == CombatantState::Dead)
+      return;
   }
 
   mShineActor->Start(SHINE_TIME);

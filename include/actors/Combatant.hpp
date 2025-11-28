@@ -11,12 +11,7 @@
 
 const float COMBATANT_MOVE_SPEED = 5.0f;
 
-enum class CombatantState {
-  Idle,
-  Attacking,
-  Dodging,
-  Dead,
-};
+enum class CombatantState { Idle, Attacking, Dead, Moving };
 
 class Combatant : public Actor {
 public:
@@ -36,8 +31,7 @@ public:
   void GoToPositionAtSpeed(Vector3 &position,
                            float moveSpeed = COMBATANT_MOVE_SPEED) {
     mTargetPosition = position;
-    mMoveSpeed =
-        Math::Min(moveSpeed, 5.0f); // Cap max speed to prevent teleporting
+    mMoveSpeed = moveSpeed;
   }
 
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;

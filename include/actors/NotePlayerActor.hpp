@@ -5,6 +5,7 @@
 #include <iostream>
 
 class Game;
+#include "SynthEngine.hpp"
 #include <array>
 
 static const unsigned int MAX_NOTES = 12;
@@ -24,6 +25,10 @@ public:
   void MarkNoteDead(NoteActor *note) {
     if (note != nullptr && mActiveNotes[note->GetNote() % MAX_NOTES] == note) {
       mActiveNotes[note->GetNote() % MAX_NOTES] = nullptr;
+
+      if (note->GetMidiChannel() == 12 && mMirrored == false) {
+        SynthEngine::stopNote(12, note->GetNote());
+      }
 
       std::cout << "Marked note " << note->GetNote() << " on channel "
                 << note->GetMidiChannel() << " as dead." << std::endl;

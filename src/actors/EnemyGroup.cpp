@@ -26,11 +26,19 @@ EnemyGroup::EnemyGroup(class Game *game, std::vector<EnemyInfo> enemies,
 EnemyGroup::~EnemyGroup() {}
 
 void EnemyGroup::OnUpdate(float deltaTime) {
-  // Update positions of enemies in a circle around the group position
+
+  bool everyoneDead = true;
+  for (auto enemy : mEnemies) {
+    if (enemy->GetCombatantState() != CombatantState::Dead) {
+      everyoneDead = false;
+      break;
+    }
+  }
 
   if (!mGame->GetBattleSystem()->IsInBattle()) {
     if ((mGame->GetPlayer()->GetPosition() - mPosition).LengthSq() <
-        mRadius * mRadius) {
+            mRadius * mRadius &&
+        !everyoneDead) {
       mGame->GetBattleSystem()->StartBattle(this);
     }
   } else {
@@ -40,8 +48,9 @@ void EnemyGroup::OnUpdate(float deltaTime) {
       Vector3 battleDir = mGame->GetBattleSystem()->GetBattleDirection();
       Vector3 flatDist = (Vector3::Dot(playerDist, battleDir) * battleDir);
 
-      if (flatDist.LengthSq() > mRadius * mRadius + 1.0f ||
-          (playerDist - flatDist).LengthSq() > 3.4f * 3.4f) {
+      if (everyoneDead || flatDist.LengthSq() > mRadius * mRadius + 1.5f ||
+          (playerDist - flatDist).LengthSq() > 3.4f * 3.4f ||
+          -Vector3::Dot(flatDist, battleDir) < 0.0f) {
         mGame->GetBattleSystem()->EndBattle();
       }
     }

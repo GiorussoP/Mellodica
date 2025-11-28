@@ -55,6 +55,7 @@ Player::Player(Game *game)
   mSpriteComponent->AddAnimation("run", {"Run1.png", "Run2.png", "Run3.png"});
   mSpriteComponent->AddAnimation("play", {"Stomp1.png", "Stomp2.png"});
   mSpriteComponent->AddAnimation("idle", {"Idle.png"});
+  mSpriteComponent->AddAnimation("damage", {"Dead.png"});
 
   mSpriteComponent->SetAnimation("idle");
   mSpriteComponent->SetAnimFPS(8.0f);
@@ -66,10 +67,28 @@ Player::Player(Game *game)
 }
 
 void Player::OnUpdate(float deltaTime) {
+  // Stop during battle transition
   if (mGame->GetBattleSystem()->IsTransitioning()) {
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
     mSpriteComponent->SetAnimation("idle");
     return;
+  }
+
+  // Update allies positions
+  if (!mGame->GetBattleSystem()->IsInBattle() &&
+      !mGame->GetBattleSystem()->IsTransitioning()) {
+    Vector3 pos = mPosition - mFront * 2.0f;
+    for (auto &ally : mActiveAllies) {
+      if (ally->GetCombatantState() == CombatantState::Dead)
+        continue;
+
+      if ((ally->GetPosition() - pos).LengthSq() < 9.0f) {
+        ally->SetCombatantState(CombatantState::Idle);
+      } else {
+        ally->SetCombatantState(CombatantState::Moving);
+        ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
+      }
+    }
   }
 
   // Calculate movement direction
@@ -105,7 +124,7 @@ void Player::OnUpdate(float deltaTime) {
   bool playing = false;
   for (auto note :
        mGame->GetBattleSystem()->GetPlayerNotePlayer()->GetActiveNotes()) {
-    if (note != nullptr) {
+    if (note != nullptr && note->GetMidiChannel() == 12) {
       playing = true;
       break;
     }
@@ -133,8 +152,17 @@ void Player::OnUpdate(float deltaTime) {
     mSpriteComponent->SetAnimation(playing ? "play" : "idle");
   }
 
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetBloomed(playing ? true : mGame->GetRenderer()->IsDark());
+
   if (!mGame->GetBattleSystem()->IsInBattle()) {
     mGame->GetCamera()->SetTargetPosition(GetPosition() + mFront * 4.0f);
+  }
+
+  // DEBUGGING ALLY
+  if (Input::WasKeyPressed(SDL_SCANCODE_Z) && mActiveAllies.size() < 8) {
+    mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(), 100));
+    mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f, 0.0f));
   }
 }
 
@@ -163,13 +191,9 @@ void Player::OnProcessInput() {
     if (Input::WasKeyPressed(notebuttons[i])) {
       if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(60 + i,
                                                                     12)) {
-        SynthEngine::startNote(12, 60 + i);
       };
     } else if (Input::WasKeyReleased(notebuttons[i])) {
       if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(60 + i)) {
-        // mActiveNotes[i]->End();
-        // mActiveNotes[i] = nullptr;
-        SynthEngine::stopNote(12, 60 + i);
       }
     }
   }
@@ -177,14 +201,20 @@ void Player::OnProcessInput() {
 
 void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
   // Resolve collision by moving the player out of the other collider
-  // The penetration vector tells us how much to move to separate the
-  // colliders
-  if (other->GetLayer() == ColliderLayer::Note) {
-    // Ignore collisions with notes for now
-    mSpriteComponent->SetColor(Color::Red);
+
+  if (other->GetLayer() == ColliderLayer::Enemy ||
+      other->GetLayer() == ColliderLayer::Entity) {
     return;
-  } else
-    mSpriteComponent->SetColor(Color::White);
+  }
+
+  if (other->GetLayer() == ColliderLayer::Note) {
+    // Take Damage
+    mSpriteComponent->SetAnimation("damage");
+    mSpriteComponent->SetColor(Color::Red);
+    mSpriteComponent->SetBloomed(true);
+    return;
+  }
+
   SetPosition(GetPosition() + penetration.ProjectedOnPlane(Vector3::UnitY));
 
   // Stop velocity in the direction of the collision to prevent sliding back

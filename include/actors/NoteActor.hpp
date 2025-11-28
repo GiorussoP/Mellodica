@@ -8,7 +8,7 @@
 
 const Vector3 NOTE_COLORS[16] = {
     Color::Red,     Color::Green, Color::Yellow, Color::Blue,
-    Color::Magenta, Color::Blue,  Color::Purple, Color::Orange,
+    Color::Magenta, Color::Cyan,  Color::Purple, Color::Orange,
     Color::White,   Color::White, Color::White,  Color::White,
     Color::White,   Color::White, Color::White,  Color::White};
 

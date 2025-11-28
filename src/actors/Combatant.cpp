@@ -29,7 +29,7 @@ Combatant::Combatant(Game *game, int channel, int health,
 
   mSpriteComponent->SetAnimFPS(2.0f);
 
-  mColliderComponent = new SphereCollider(this, ColliderLayer::Enemy,
+  mColliderComponent = new SphereCollider(this, ColliderLayer::Entity,
                                           Vector3::Zero, 0.5f, false);
 
   mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f, false);
@@ -40,51 +40,62 @@ Combatant::Combatant(Game *game, int channel, int health,
 Combatant::~Combatant() {}
 
 void Combatant::OnUpdate(float deltaTime) {
-  /*
-    if (mCombatantState == CombatantState::Idle) {
-      mRigidBodyComponent->SetVelocity(Vector3::Zero);
-      mSpriteComponent->SetAnimation("idle");
-      return;
-    }
+  if (mCombatantState == CombatantState::Dead) {
+    mRigidBodyComponent->SetVelocity(Vector3::Zero);
+    mSpriteComponent->SetAnimation("dead");
+    mSpriteComponent->SetBloomed(false);
+    return;
+  }
 
-    if (mCombatantState == CombatantState::Dead) {
-      mRigidBodyComponent->SetVelocity(Vector3::Zero);
-      mSpriteComponent->SetAnimation("dead");
-      return;
-    }
+  if (mCombatantState == CombatantState::Idle) {
+    mRigidBodyComponent->SetVelocity(Vector3::Zero);
+    mSpriteComponent->SetAnimation("idle");
+    mSpriteComponent->SetBloomed(false);
+    return;
+  }
 
+  if (mCombatantState == CombatantState::Attacking) {
+    mSpriteComponent->SetBloomed(true);
+    mRigidBodyComponent->SetVelocity(Vector3::Zero);
+    return;
+  }
+
+  if (mCombatantState == CombatantState::Moving) {
     // Move towards target position
     Vector3 direction = (mTargetPosition - GetPosition());
-    direction.Normalize();
-    Vector3 velocity = direction * mMoveSpeed;
-
-    mRigidBodyComponent->SetVelocity(velocity);
-    if ((mPosition + velocity * deltaTime).LengthSq() >=
-        (mTargetPosition - mPosition).LengthSq()) {
+    float distanceToTarget = direction.Length();
+    if (distanceToTarget < 0.1f) { // Close enough to target
       SetPosition(mTargetPosition);
       mRigidBodyComponent->SetVelocity(Vector3::Zero);
+      mCombatantState = CombatantState::Idle;
       mSpriteComponent->SetAnimation("idle");
-    } else {
-      mSpriteComponent->SetAnimation("run");
+      return;
     }
-      */
+    direction.Normalize();
+    Vector3 velocity = direction * mMoveSpeed;
+    mRigidBodyComponent->SetVelocity(velocity);
+    mSpriteComponent->SetAnimation("run");
+  }
 }
 
 void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
+  if (mCombatantState == CombatantState::Dead) {
+    return;
+  }
+
   if (other->GetLayer() == ColliderLayer::Enemy ||
-      other->GetLayer() == ColliderLayer::Entity) {
+      (mGame->GetBattleSystem()->IsInBattle() &&
+       (other->GetLayer() == ColliderLayer::Entity ||
+        other->GetLayer() == ColliderLayer::Player))) {
     return;
   }
   if (other->GetLayer() == ColliderLayer::Note) {
-    return;
     mHealth -= 1; // Template damage value
     if (mHealth <= 0) {
       mHealth = 0;
       mCombatantState = CombatantState::Dead;
     }
-
-    if (mCombatantState != CombatantState::Dodging)
-      return;
+    return;
   }
 
   SetPosition(GetPosition() + penetration.ProjectedOnPlane(Vector3::UnitY));
