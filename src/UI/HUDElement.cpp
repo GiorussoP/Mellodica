@@ -1,4 +1,4 @@
-#include "HUDElement.hpp"
+#include "../../include/UI/HUDElement.hpp"
 #include "Game.hpp"
 #include "Renderer.hpp"
 #include "Texture.hpp"

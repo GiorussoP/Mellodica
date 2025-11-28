@@ -668,6 +668,22 @@ void Renderer::DrawSpritesInstanced(
   }
 }
 
+void Renderer::AddUIElement(UIElement *comp)
+{
+  mUIComps.emplace_back(comp);
+  SDL_Log("Renderer::AddUIElement - Added UI element. Total UI elements: %zu", mUIComps.size());
+
+  std::sort(mUIComps.begin(), mUIComps.end(),[](UIElement* a, UIElement* b) {
+      return a->GetDrawOrder() < b->GetDrawOrder();
+  });
+}
+
+void Renderer::RemoveUIElement(UIElement *comp)
+{
+  auto iter = std::find(mUIComps.begin(), mUIComps.end(), comp);
+  mUIComps.erase(iter);
+}
+
 void Renderer::CreateSpriteQuad() {
   // Create a simple quad mesh centered at origin with UVs
   std::vector<Vertex> vertices;

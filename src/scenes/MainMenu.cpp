@@ -2,7 +2,7 @@
 
 #include "scenes/MainMenu.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "actors/HUDElement.hpp"
+#include "../../include/UI/HUDElement.hpp"
 
 void MainMenu::Initialize() {
   auto image = new HUDElement(mGame, "assets/sprites/scenes/title-screen.png");

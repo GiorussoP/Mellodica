@@ -1,6 +1,6 @@
 #include "Game.hpp"
 #include "ChunkGrid.hpp"
-#include "HUDElement.hpp"
+#include "../include/UI/HUDElement.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MIDI/SynthEngine.hpp"
 #include "Player.hpp"

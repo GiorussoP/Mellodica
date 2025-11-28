@@ -1,5 +1,5 @@
 #include "TestScene.hpp"
-#include "HUDElement.hpp"
+#include "../../include/UI/HUDElement.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "Renderer.hpp"
 #include "actors/Player.hpp"
