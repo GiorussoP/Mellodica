@@ -21,6 +21,7 @@ public:
   bool EndNote(unsigned int note);
 
   Vector3 GetNotePosition(unsigned int noteIndex);
+  int GetNoteFromPosition(Vector3 position);
 
   void MarkNoteDead(NoteActor *note) {
     if (note != nullptr && mActiveNotes[note->GetNote() % MAX_NOTES] == note) {

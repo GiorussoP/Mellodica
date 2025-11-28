@@ -75,6 +75,7 @@ void Combatant::OnUpdate(float deltaTime) {
     Vector3 velocity = direction * mMoveSpeed;
     mRigidBodyComponent->SetVelocity(velocity);
     mSpriteComponent->SetAnimation("run");
+    mSpriteComponent->SetBloomed(false);
   }
 }
 

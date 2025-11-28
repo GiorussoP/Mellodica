@@ -38,6 +38,9 @@ private:
   unsigned int mCameraDirection;
 
   std::vector<Combatant *> mActiveAllies;
+
+  std::array<bool, 12> mPlayingNotes;
+  unsigned int mFrontNote;
 };
 
 #endif

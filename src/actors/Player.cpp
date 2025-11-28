@@ -22,7 +22,8 @@ constexpr SDL_Scancode notebuttons[12] = {
 Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
       mMoveRight(false), mRotateLeft(false), mRotateRight(false),
-      mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ) {
+      mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ),
+      mFrontNote(-1) {
   // Mark player as always active so it's always visible
   game->AddAlwaysActive(this);
 
@@ -64,6 +65,9 @@ Player::Player(Game *game)
   mGame->GetCamera()->SetMode(CameraMode::Isometric);
   mGame->GetCamera()->SetIsometricDirection(
       mGame->GetCamera()->GetIsometricDirection());
+
+  // Not playing notes initially
+  mPlayingNotes.fill(false);
 }
 
 void Player::OnUpdate(float deltaTime) {
@@ -72,6 +76,47 @@ void Player::OnUpdate(float deltaTime) {
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
     mSpriteComponent->SetAnimation("idle");
     return;
+  }
+
+  // Process notes playing
+  bool playing = false;
+  bool newPlayingNotes[12] = {false};
+  for (int i = 0; i < 12; ++i) {
+    if (Input::IsKeyDown(notebuttons[i])) {
+      playing = true;
+      newPlayingNotes[i] = true;
+    }
+  }
+
+  if (Input::IsKeyDown(SDL_SCANCODE_SPACE)) {
+    mFrontNote = mGame->GetBattleSystem()->GetPlayerPositionNote();
+    playing = true;
+    newPlayingNotes[mFrontNote] = true;
+  } else {
+    mFrontNote = -1;
+  }
+
+  for (int i = 0; i < 12; ++i) {
+    if (mPlayingNotes[i] && !newPlayingNotes[i]) {
+      if (mGame->GetBattleSystem()
+                  ->GetPlayerNotePlayer()
+                  ->GetActiveNotes()[i] != nullptr &&
+          mGame->GetBattleSystem()
+                  ->GetPlayerNotePlayer()
+                  ->GetActiveNotes()[i]
+                  ->GetMidiChannel() == 12) {
+
+        // Stop note
+        mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(
+            i + 60); // MIDI note offset
+      }
+    } else if (newPlayingNotes[i] && !mPlayingNotes[i]) {
+      // Play note
+      mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(
+          i + 60, 12); // MIDI note offset
+    }
+
+    mPlayingNotes[i] = newPlayingNotes[i];
   }
 
   // Update allies positions
@@ -119,15 +164,6 @@ void Player::OnUpdate(float deltaTime) {
     SetScale(Vector3(1.0, 1.0f, 1.0f));
   } else if (mMoveLeft - mMoveRight == 1) {
     SetScale(Vector3(-1.0f, 1.0f, 1.0f));
-  }
-
-  bool playing = false;
-  for (auto note :
-       mGame->GetBattleSystem()->GetPlayerNotePlayer()->GetActiveNotes()) {
-    if (note != nullptr && note->GetMidiChannel() == 12) {
-      playing = true;
-      break;
-    }
   }
 
   // Only normalize if there's movement
@@ -184,19 +220,6 @@ void Player::OnProcessInput() {
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_A)) {
     mGame->GetCamera()->NextIsometricDirection();
-  }
-
-  Vector3 right = Vector3::Cross(Vector3::UnitY, mFront);
-
-  for (int i = 0; i < 12; ++i) {
-    if (Input::WasKeyPressed(notebuttons[i])) {
-      if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(60 + i,
-                                                                    12)) {
-      };
-    } else if (Input::WasKeyReleased(notebuttons[i])) {
-      if (mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(60 + i)) {
-      }
-    }
   }
 }
 

@@ -240,10 +240,9 @@ void BattleSystem::OnUpdate(float deltaTime) {
                 if (Vector3::Distance(enemy->GetPosition(), nextNotePos) <
                     0.5f) {
                   // Go to random position if already on the note pos
-                  nextNotePos = mCurrentEnemyGroup->GetPosition() +
-                                Vector3::Cross(Vector3::UnitY, mBattleDir) *
-                                    (fmod(rand(), 6.0f) - 3.0) -
-                                0.5f * mBattleDir;
+                  nextNotePos =
+                      mEnemyNotePlayer->GetNotePosition(note.note + 6) +
+                      mBattleDir;
                 }
                 float nextNoteTime = note.nextNoteTime;
 
@@ -293,11 +292,9 @@ void BattleSystem::OnUpdate(float deltaTime) {
                 if (Vector3::Distance(ally->GetPosition(), nextNotePos) <
                     0.5f) {
                   // Go to random position if already on the note pos
-                  // Go to random position if already on the note pos
-                  nextNotePos = mPlayerNotePlayer->GetPosition() +
-                                Vector3::Cross(Vector3::UnitY, mBattleDir) *
-                                    (fmod(rand(), 6.0f) - 3.0) -
-                                2.0f * mBattleDir;
+                  nextNotePos =
+                      mPlayerNotePlayer->GetNotePosition(note.note + 6) -
+                      2.0f * mBattleDir;
                 }
 
                 float nextNoteTime = note.nextNoteTime;
@@ -426,4 +423,10 @@ void BattleSystem::OnUpdate(float deltaTime) {
       }
     }
   }
+}
+
+unsigned int BattleSystem::GetPlayerPositionNote() {
+  return !mInBattle ? 5
+                    : mPlayerNotePlayer->GetNoteFromPosition(
+                          mGame->GetPlayer()->GetPosition());
 }

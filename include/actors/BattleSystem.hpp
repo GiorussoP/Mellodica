@@ -24,6 +24,8 @@ public:
   class NotePlayerActor *GetPlayerNotePlayer() { return mPlayerNotePlayer; }
   class NotePlayerActor *GetEnemyNotePlayer() { return mEnemyNotePlayer; }
 
+  unsigned int GetPlayerPositionNote();
+
 private:
   class Game *mGame;
   class NotePlayerActor *mPlayerNotePlayer;
