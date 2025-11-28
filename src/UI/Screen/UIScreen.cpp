@@ -51,6 +51,7 @@ UIButton *UIScreen::AddButton(const std::string &singleImagePath, std::function<
     return hB;
 }
 
+/*
 void UIScreen::HandleKeyPress(int key)
 {
     // Navigate between buttons with UP/DOWN arrows
@@ -82,4 +83,4 @@ void UIScreen::HandleKeyPress(int key)
             mHudButtons[mSelectedElement]->OnClick();
         }
     }
-}
+}*/
