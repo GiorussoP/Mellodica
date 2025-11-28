@@ -48,6 +48,12 @@ void EnemyGroup::OnUpdate(float deltaTime) {
       Vector3 battleDir = mGame->GetBattleSystem()->GetBattleDirection();
       Vector3 flatDist = (Vector3::Dot(playerDist, battleDir) * battleDir);
 
+      if (flatDist.Length() < 2.5f) {
+        // Fix player position if too close
+
+        mGame->GetPlayer()->SetPosition(mPosition - battleDir * 2.5f +
+                                        playerDist - flatDist);
+      }
       if (everyoneDead || flatDist.LengthSq() > mRadius * mRadius + 1.5f ||
           (playerDist - flatDist).LengthSq() > 3.4f * 3.4f ||
           -Vector3::Dot(flatDist, battleDir) < 0.0f) {

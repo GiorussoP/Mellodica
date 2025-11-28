@@ -163,6 +163,7 @@ void Player::OnUpdate(float deltaTime) {
   if (Input::WasKeyPressed(SDL_SCANCODE_Z) && mActiveAllies.size() < 8) {
     mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(), 100));
     mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f, 0.0f));
+    MIDIPlayer::unmuteChannel(mActiveAllies.back()->GetChannel());
   }
 }
 
