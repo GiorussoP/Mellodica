@@ -47,16 +47,41 @@ void EnemyGroup::OnUpdate(float deltaTime) {
       Vector3 playerDist = (mGame->GetPlayer()->GetPosition() - mPosition);
       Vector3 battleDir = mGame->GetBattleSystem()->GetBattleDirection();
       Vector3 flatDist = (Vector3::Dot(playerDist, battleDir) * battleDir);
+      Vector3 lateral = playerDist - flatDist;
 
-      if (flatDist.Length() < 2.5f) {
-        // Fix player position if too close
+      bool correctClose = flatDist.LengthSq() < 1.5f * 1.5f;
+      bool correctFar = lateral.LengthSq() > 3.0f * 3.0f;
 
-        mGame->GetPlayer()->SetPosition(mPosition - battleDir * 2.5f +
-                                        playerDist - flatDist);
+      Vector3 desired_flatDist = correctClose ? battleDir * (-1.5f) : flatDist;
+      Vector3 desired_lateral = lateral;
+      if (correctFar) {
+        Vector3 lateralDir = lateral;
+        lateralDir.Normalize();
+        desired_lateral = lateralDir * 3.0f;
       }
-      if (everyoneDead || flatDist.LengthSq() > mRadius * mRadius + 1.5f ||
-          (playerDist - flatDist).LengthSq() > 3.4f * 3.4f ||
-          -Vector3::Dot(flatDist, battleDir) < 0.0f) {
+
+      Vector3 newPos = mPosition + desired_flatDist + desired_lateral;
+      mGame->GetPlayer()->SetPosition(newPos);
+
+      // Anullate movement in corrected directions
+      Vector3 velocity =
+          mGame->GetPlayer()->GetComponent<RigidBodyComponent>()->GetVelocity();
+      if (correctClose) {
+        velocity -= Vector3::Dot(velocity, battleDir) * battleDir;
+      }
+      if (correctFar) {
+        Vector3 lateralDir = lateral;
+        lateralDir.Normalize();
+        velocity -= Vector3::Dot(velocity, lateralDir) * lateralDir;
+      }
+
+      if (velocity.LengthSq() < 0.1f * 0.1f) {
+        velocity = Vector3::Zero;
+      }
+      mGame->GetPlayer()->GetComponent<RigidBodyComponent>()->SetVelocity(
+          velocity);
+
+      if (everyoneDead || flatDist.LengthSq() > mRadius * mRadius + 1.5f) {
         mGame->GetBattleSystem()->EndBattle();
       }
     }

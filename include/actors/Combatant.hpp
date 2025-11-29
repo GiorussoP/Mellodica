@@ -23,6 +23,8 @@ public:
   void OnUpdate(float deltaTime) override;
   int GetHealth() const { return mHealth; }
   void SetHealth(int health) { mHealth = health; }
+  void SetMaxHealth(int maxHealth) { mMaxHealth = maxHealth; }
+  int GetMaxHealth() const { return mMaxHealth; }
   int GetChannel() const { return mChannel; }
 
   CombatantState GetCombatantState() const { return mCombatantState; }
@@ -38,6 +40,7 @@ public:
 
 private:
   int mHealth;
+  int mMaxHealth;
   int mChannel;
 
   CombatantState mCombatantState;

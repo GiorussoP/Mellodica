@@ -36,6 +36,12 @@ public:
     }
   };
 
+  NoteActor *GetActiveNote(unsigned int note) const {
+    int noteIndex =
+        mMirrored ? (MAX_NOTES - 1) - (note % MAX_NOTES) : note % MAX_NOTES;
+    return mActiveNotes[noteIndex];
+  }
+
   const std::array<NoteActor *, MAX_NOTES> &GetActiveNotes() const {
     return mActiveNotes;
   }

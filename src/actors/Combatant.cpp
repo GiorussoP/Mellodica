@@ -5,7 +5,7 @@
 
 Combatant::Combatant(Game *game, int channel, int health,
                      const std::string &texture_name)
-    : Actor(game), mHealth(health), mChannel(channel % 8),
+    : Actor(game), mHealth(health), mMaxHealth(health), mChannel(channel % 8),
       mCombatantState(CombatantState::Idle), mTargetPosition(GetPosition()),
       mMoveSpeed(COMBATANT_MOVE_SPEED) {
 
@@ -45,6 +45,11 @@ void Combatant::OnUpdate(float deltaTime) {
     mSpriteComponent->SetAnimation("dead");
     mSpriteComponent->SetBloomed(false);
     return;
+  }
+
+  if (mGame->GetBattleSystem()->IsInBattle() == false && mHealth < mMaxHealth) {
+    // Regenerate health outside of battle
+    mHealth += 1;
   }
 
   if (mCombatantState == CombatantState::Idle) {
@@ -90,7 +95,8 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
         other->GetLayer() == ColliderLayer::Player))) {
     return;
   }
-  if (other->GetLayer() == ColliderLayer::Note) {
+  if (other->GetLayer() == ColliderLayer::Note &&
+      mGame->GetBattleSystem()->IsInBattle()) {
     mHealth -= 1; // Template damage value
     if (mHealth <= 0) {
       mHealth = 0;

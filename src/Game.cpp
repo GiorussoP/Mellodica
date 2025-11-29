@@ -21,6 +21,7 @@
 
 #include <GL/glew.h>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <unordered_set>
 
@@ -289,17 +290,19 @@ void Game::ProcessInput() {
       break;
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-        // Handle window resize
-        glViewport(0, 0, event.window.data1, event.window.data2);
-
-        float orthoSize = 5.0f;
-        float aspectRatio = static_cast<float>(event.window.data1) /
-                            static_cast<float>(event.window.data2);
-        Matrix4 orthoProjection = Matrix4::CreateOrtho(
-            -orthoSize * aspectRatio, orthoSize * aspectRatio, -orthoSize,
-            orthoSize, 0.1f, 1000.0f);
-        mRenderer->SetProjectionMatrix(orthoProjection);
+        int w, h;
+        SDL_GetWindowSize(mWindow, &w, &h);
+        float currentAspect = (float)w / h;
+        float targetAspect = 16.0f / 9.0f;
+        if (currentAspect > targetAspect) {
+          w = (int)(h * targetAspect + 0.5f);
+        } else {
+          h = (int)(w / targetAspect + 0.5f);
+        }
+        SDL_SetWindowSize(mWindow, w, h);
       }
+      break;
+    default:
       break;
     }
   }
@@ -343,13 +346,19 @@ void Game::ProcessInput() {
 void Game::UpdateActors(float deltaTime) {
   mUpdatingActors = true;
 
-  // Get visible actors from chunk grid
-  // std::vector<Actor*> mActiveActors =
-  // mChunkGrid->GetVisibleActors(mCameraPos);
+  // Update player first if it exists
+  if (mPlayer) {
+    auto it = std::find(mActiveActors.begin(), mActiveActors.end(), mPlayer);
+    if (it != mActiveActors.end()) {
+      mPlayer->Update(deltaTime);
+    }
+  }
 
-  // Update all active actors
+  // Update all other active actors
   for (auto actor : mActiveActors) {
-    actor->Update(deltaTime);
+    if (actor != mPlayer) {
+      actor->Update(deltaTime);
+    }
   }
   mUpdatingActors = false;
 

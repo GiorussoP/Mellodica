@@ -122,18 +122,21 @@ void Player::OnUpdate(float deltaTime) {
   // Update allies positions
   if (!mGame->GetBattleSystem()->IsInBattle() &&
       !mGame->GetBattleSystem()->IsTransitioning()) {
-    Vector3 pos = mPosition - 0.5f * mFront;
-    for (auto &ally : mActiveAllies) {
-      if (ally->GetCombatantState() == CombatantState::Dead)
-        continue;
-
-      if ((ally->GetPosition() - pos).LengthSq() < 1.0f) {
-        ally->SetCombatantState(CombatantState::Idle);
+    Vector3 pos = mPosition - 4.0f * mFront;
+    for (auto it = mActiveAllies.begin(); it != mActiveAllies.end(); ) {
+      auto ally = *it;
+      if (ally->GetCombatantState() == CombatantState::Dead) {
+        it = mActiveAllies.erase(it);
       } else {
-        ally->SetCombatantState(CombatantState::Moving);
-        ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
+        if ((ally->GetPosition() - pos).LengthSq() < 1.0f) {
+          ally->SetCombatantState(CombatantState::Idle);
+        } else {
+          ally->SetCombatantState(CombatantState::Moving);
+          ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
+        }
+        pos -= mFront;
+        ++it;
       }
-      pos -= mFront;
     }
   }
 

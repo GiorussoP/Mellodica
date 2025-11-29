@@ -23,10 +23,6 @@ void TestSceneA::Initialize() {
 
   // Some actors for testing
 
-  auto mesh = new Actor(mGame);
-  mesh->SetScale(Vector3(300.f, 1.0f, 300.f));
-  mesh->SetPosition(Vector3(0.0f, -1.0f, 0.0f));
-
   auto pyramid = new PyramidActor(mGame, Color::Red);
   pyramid->SetPosition(Vector3(-3.0f, 1.0f, 0.0f));
   pyramid->SetScale(Vector3(2.0f, 1.0f, 2.0f));

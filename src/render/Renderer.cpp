@@ -16,7 +16,7 @@ Renderer::Renderer(Game *game)
       mSpriteShader(nullptr), mFramebufferShader(nullptr), mHUDShader(nullptr),
       mBloomBlurShader(nullptr), mSpriteQuad(nullptr), mScreenQuad(nullptr),
       mFramebuffer(0), mFramebufferTexture(0), mFramebufferDepthStencil(0),
-      mFramebufferWidth(320), mFramebufferHeight(240), mBloomFramebuffer(0),
+      mFramebufferWidth(480), mFramebufferHeight(270), mBloomFramebuffer(0),
       mBloomTexture(0), mBloomDepthStencil(0), mBlurTexture1(0),
       mBlurTexture2(0), mBlurFramebuffer1(0), mBlurFramebuffer2(0),
       mIsDark(true) {}
@@ -137,7 +137,7 @@ bool Renderer::Initialize(float width, float height) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Set default projection matrix based on framebuffer size (orthographic)
-  float orthoSize = 4.0f; // Size of the orthographic view (half-height)
+  float orthoSize = 5.0f; // Size of the orthographic view (half-height)
   float aspectRatio = static_cast<float>(mFramebufferWidth) /
                       static_cast<float>(mFramebufferHeight);
   mProjectionMatrix =
