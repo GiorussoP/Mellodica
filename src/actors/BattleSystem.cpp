@@ -184,6 +184,7 @@ void BattleSystem::EndBattle() {
       (*it)->SetState(ActorState::Destroy);
       it = mGame->GetPlayer()->GetActiveAllies().erase(it);
     } else {
+      (*it)->SetCombatantState(CombatantState::Idle);
       ++it;
     }
   }
@@ -195,6 +196,7 @@ void BattleSystem::EndBattle() {
       (*it)->SetState(ActorState::Destroy);
       it = mCurrentEnemyGroup->GetEnemies().erase(it);
     } else {
+      (*it)->SetCombatantState(CombatantState::Idle);
       ++it;
     }
   }

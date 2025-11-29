@@ -110,7 +110,11 @@ void Player::OnUpdate(float deltaTime) {
         mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(
             i + 60); // MIDI note offset
       }
-    } else if (newPlayingNotes[i] && !mPlayingNotes[i]) {
+    } else if (newPlayingNotes[i] &&
+               (!mPlayingNotes[i] ||
+                mGame->GetBattleSystem()
+                        ->GetPlayerNotePlayer()
+                        ->GetActiveNotes()[i] == nullptr)) {
       // Play note
       mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(
           i + 60, 12); // MIDI note offset
@@ -123,20 +127,17 @@ void Player::OnUpdate(float deltaTime) {
   if (!mGame->GetBattleSystem()->IsInBattle() &&
       !mGame->GetBattleSystem()->IsTransitioning()) {
     Vector3 pos = mPosition - 4.0f * mFront;
-    for (auto it = mActiveAllies.begin(); it != mActiveAllies.end(); ) {
-      auto ally = *it;
-      if (ally->GetCombatantState() == CombatantState::Dead) {
-        it = mActiveAllies.erase(it);
+    for (auto &ally : mActiveAllies) {
+      if (ally->GetCombatantState() == CombatantState::Dead)
+        continue;
+
+      if ((ally->GetPosition() - pos).LengthSq() < 1.0f) {
+        ally->SetCombatantState(CombatantState::Idle);
       } else {
-        if ((ally->GetPosition() - pos).LengthSq() < 1.0f) {
-          ally->SetCombatantState(CombatantState::Idle);
-        } else {
-          ally->SetCombatantState(CombatantState::Moving);
-          ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
-        }
-        pos -= mFront;
-        ++it;
+        ally->SetCombatantState(CombatantState::Moving);
+        ally->GoToPositionAtSpeed(pos, PLAYER_MOVE_SPEED);
       }
+      pos -= mFront;
     }
   }
 
