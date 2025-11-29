@@ -6,6 +6,7 @@
 #include "actors/EnemyGroup.hpp"
 #include "actors/Player.hpp"
 #include "actors/TestActors.hpp"
+#include "actors/PuzzleActors.hpp"
 
 #include <iostream>
 
@@ -125,6 +126,10 @@ void TestSceneB::Initialize() {
 
   auto testMario = new MarioActor(mGame);
   testMario->SetPosition(Vector3(-5.0f, 1.0f, 0.0f));
+
+    // Create teste puzzle
+    auto* puzzleBtn = new MusicButtonActor(mGame, 0);
+    puzzleBtn->SetPosition(Vector3(5.0f, 1.0f, 0.0f));
 
   auto testGoomba = new GoombaActor(mGame);
   testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
