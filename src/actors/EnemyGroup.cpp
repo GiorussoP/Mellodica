@@ -2,20 +2,14 @@
 
 #include "Game.hpp"
 
-EnemyGroup::EnemyGroup(class Game *game, std::vector<EnemyInfo> enemies,
+EnemyGroup::EnemyGroup(class Game *game, std::vector<Combatant *> enemies,
                        float radius)
     : Actor(game), mRadius(radius) {
-
   mGame->AddAlwaysActive(this);
-
-  // Create Combatant for each enemy channel
   const float minRadius = 1.0f;
   for (unsigned int i = 0; i < enemies.size(); ++i) {
-    Combatant *combatant =
-        new Combatant(game, enemies[i].channel, enemies[i].health);
+    Combatant *combatant = enemies[i];
     mEnemies.push_back(combatant);
-
-    // Set position around circle
     float angle = (static_cast<float>(i) / enemies.size()) * Math::TwoPi;
     Vector3 offset = Vector3(minRadius * Math::Cos(angle), 0.0f,
                              minRadius * Math::Sin(angle));

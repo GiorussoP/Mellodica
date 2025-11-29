@@ -3,38 +3,14 @@
 #include "actors/NoteActor.hpp"
 #include "render/Renderer.hpp"
 
-Combatant::Combatant(Game *game, int channel, int health,
-                     const std::string &texture_name)
+Combatant::Combatant(Game *game, int channel, int health)
     : Actor(game), mHealth(health), mMaxHealth(health), mChannel(channel % 8),
       mCombatantState(CombatantState::Idle), mTargetPosition(GetPosition()),
-      mMoveSpeed(COMBATANT_MOVE_SPEED) {
-
+      mMoveSpeed(COMBATANT_MOVE_SPEED), mSpriteComponent(nullptr) {
   mGame->AddAlwaysActive(this);
-  // Get atlas from renderer cache
-  TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(texture_name + ".json");
-
-  // Get texture index from renderer cache
-  Texture *texture = game->GetRenderer()->LoadTexture(texture_name + ".png");
-  int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
-  atlas->SetTextureIndex(textureIndex);
-
-  // Create sprite component with atlas
-  mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
-
-  // Setup running animation with Walk0 and Walk1 frames
-  mSpriteComponent->AddAnimation("run", {"Walk0.png", "Walk1.png"});
-  mSpriteComponent->AddAnimation("idle", {"Walk0.png"});
-  mSpriteComponent->AddAnimation("dead", {"Dead.png"});
-  mSpriteComponent->SetAnimation("idle");
-
-  mSpriteComponent->SetAnimFPS(2.0f);
-
   mColliderComponent = new SphereCollider(this, ColliderLayer::Entity,
                                           Vector3::Zero, 0.5f, false);
-
   mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f, false);
-
-  mSpriteComponent->SetColor(NOTE_COLORS[channel % 8]);
 }
 
 Combatant::~Combatant() {}
@@ -68,14 +44,12 @@ void Combatant::OnUpdate(float deltaTime) {
       SetPosition(mTargetPosition);
       mRigidBodyComponent->SetVelocity(Vector3::Zero);
       mCombatantState = CombatantState::Idle;
-      mSpriteComponent->SetAnimation("idle");
       mSpriteComponent->SetBloomed(false);
       return;
     }
     direction.Normalize();
     Vector3 velocity = direction * mMoveSpeed;
     mRigidBodyComponent->SetVelocity(velocity);
-    mSpriteComponent->SetAnimation("run");
     mSpriteComponent->SetBloomed(false);
   }
 }
@@ -124,4 +98,10 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
   }
 
   (void)other; // Suppress unused parameter warning for now
+}
+
+void Combatant::SetSpriteColorByChannel() {
+  if (mSpriteComponent) {
+    mSpriteComponent->SetColor(NOTE_COLORS[mChannel % 16]);
+  }
 }

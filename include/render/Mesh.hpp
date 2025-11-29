@@ -121,4 +121,14 @@ private:
   static MeshData GenerateIcosahedronData();
 };
 
+// Wall mesh class (tall cube with vertical texture strips)
+class WallMesh : public Mesh {
+public:
+  WallMesh();
+  virtual ~WallMesh() = default;
+
+private:
+  static MeshData GenerateWallData();
+};
+
 #endif // MESH_HPP

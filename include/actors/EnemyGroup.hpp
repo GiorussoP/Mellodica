@@ -14,7 +14,7 @@ struct EnemyInfo {
 class EnemyGroup : public Actor {
 
 public:
-  EnemyGroup(class Game *game, std::vector<EnemyInfo> enemies,
+  EnemyGroup(class Game *game, std::vector<Combatant *> enemies,
              float radius = 8.0f);
   ~EnemyGroup();
 

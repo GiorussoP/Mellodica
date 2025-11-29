@@ -10,6 +10,8 @@
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
 
+#include <cmath>
+
 constexpr float PLAYER_MOVE_SPEED = 7.0f;
 constexpr float PLAYER_ACCELERATION = 50.0f;
 constexpr float PLAYER_FRICTION = 30.0f;
@@ -41,11 +43,11 @@ Player::Player(Game *game)
   //                    Vector3(0.5f, 0.5f, 0.5f), false);
 
   // Get atlas from renderer cache
-  TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Mario.json");
+  TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
+      "./assets/sprites/main-character/player.json");
   // Get texture index from renderer cache
-  Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Mario.png");
+  Texture *texture = game->GetRenderer()->LoadTexture(
+      "./assets/sprites/main-character/player.png");
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
 
   // Create sprite component with atlas
@@ -53,13 +55,39 @@ Player::Player(Game *game)
 
   // Setup running animation using atlas tile indices for
   // Run1, Run2, Run3
-  mSpriteComponent->AddAnimation("run", {"Run1.png", "Run2.png", "Run3.png"});
-  mSpriteComponent->AddAnimation("play", {"Stomp1.png", "Stomp2.png"});
-  mSpriteComponent->AddAnimation("idle", {"Idle.png"});
-  mSpriteComponent->AddAnimation("damage", {"Dead.png"});
+  mSpriteComponent->AddAnimation("idle_S", {"main-front-idle.png"});
+  mSpriteComponent->AddAnimation(
+      "run_S", {"main-front-run1.png", "main-front-run2.png"});
 
-  mSpriteComponent->SetAnimation("idle");
-  mSpriteComponent->SetAnimFPS(8.0f);
+  mSpriteComponent->AddAnimation("idle_SE", {"main-diagonal-right-1.png"});
+  mSpriteComponent->AddAnimation(
+      "run_SE", {"main-diagonal-right-2.png", "main-diagonal-right-3.png"});
+
+  mSpriteComponent->AddAnimation("idle_E", {"main-right-2.png"});
+  mSpriteComponent->AddAnimation("run_E",
+                                 {"main-right-1.png", "main-right-3.png"});
+
+  mSpriteComponent->AddAnimation("idle_NE", {"main-diagonal-back-right-1.png"});
+  mSpriteComponent->AddAnimation("run_NE", {"main-diagonal-back-right-2.png",
+                                            "main-diagonal-back-right-3.png"});
+
+  mSpriteComponent->AddAnimation("idle_N", {"main-back-idle.png"});
+  mSpriteComponent->AddAnimation("run_N",
+                                 {"main-back-1.png", "main-back-2.png"});
+
+  mSpriteComponent->AddAnimation("idle_NW", {"main-diagonal-back-left-1.png"});
+  mSpriteComponent->AddAnimation("run_NW", {"main-diagonal-back-left-2.png",
+                                            "main-diagonal-back-left-3.png"});
+
+  mSpriteComponent->AddAnimation("idle_W", {"main-left-2.png"});
+  mSpriteComponent->AddAnimation("run_W",
+                                 {"main-left-1.png", "main-left-3.png"});
+
+  mSpriteComponent->AddAnimation("idle_SW", {"main-diagonal-left-1.png"});
+  mSpriteComponent->AddAnimation(
+      "run_SW", {"main-diagonal-left-2.png", "main-diagonal-left-3.png"});
+
+  mSpriteComponent->SetAnimFPS(4.0f);
 
   // turn on Camera's isometric mode
   mGame->GetCamera()->SetMode(CameraMode::Isometric);
@@ -71,10 +99,37 @@ Player::Player(Game *game)
 }
 
 void Player::OnUpdate(float deltaTime) {
+
+  // Set directional animation
+  Vector3 camForward =
+      mGame->GetCamera()->GetCameraForward().ProjectedOnPlane(Vector3::UnitY);
+  camForward.Normalize();
+
+  Vector3 camRight = Vector3::Cross(Vector3::UnitY, camForward);
+  camRight.Normalize();
+
+  // player components in camera-space: x = right, z = forward
+  float x = Vector3::Dot(mFront, camRight);
+  float z = Vector3::Dot(mFront, camForward);
+
+  // angle measured from camera forward, positive toward camera right
+  float angle = atan2(x, z);
+
+  int rawDir = static_cast<int>(round(angle / (Math::Pi / 4.0f)));
+  int dirIndex = (rawDir + 8) % 8;
+
+  // dirs[0] == forward (camera-forward), then rotate clockwise (to the right)
+  const std::string dirs[8] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+
+  bool isMoving = mRigidBodyComponent->GetVelocity().LengthSq() > 0.5f;
+  std::string animType = isMoving ? "run_" : "idle_";
+  std::string animName = animType + dirs[dirIndex];
+  mSpriteComponent->SetAnimation(animName);
+
   // Stop during battle transition
   if (mGame->GetBattleSystem()->IsTransitioning()) {
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
-    mSpriteComponent->SetAnimation("idle");
+
     return;
   }
 
@@ -165,12 +220,6 @@ void Player::OnUpdate(float deltaTime) {
     moveDir += right;
   }
 
-  if (mMoveLeft - mMoveRight == -1) {
-    SetScale(Vector3(1.0, 1.0f, 1.0f));
-  } else if (mMoveLeft - mMoveRight == 1) {
-    SetScale(Vector3(-1.0f, 1.0f, 1.0f));
-  }
-
   // Only normalize if there's movement
   if (moveDir.LengthSq() > 0.0f) {
     moveDir.Normalize();
@@ -184,13 +233,17 @@ void Player::OnUpdate(float deltaTime) {
           PLAYER_MOVE_SPEED);
     }
 
-    SetRotation(Math::LookRotation(moveDir));
-    mSpriteComponent->SetAnimation(playing ? "play" : "run");
+    if (!mGame->GetBattleSystem()->IsInBattle()) {
+      SetRotation(Math::LookRotation(moveDir));
 
-    mFront = moveDir;
+      mFront = moveDir;
+    }
+  }
 
-  } else {
-    mSpriteComponent->SetAnimation(playing ? "play" : "idle");
+  if (mGame->GetBattleSystem()->IsInBattle()) {
+    mFront =
+        mGame->GetCamera()->GetCameraForward().ProjectedOnPlane(Vector3::UnitY);
+    mFront.Normalize();
   }
 
   mSpriteComponent->SetColor(Color::White);
@@ -243,7 +296,6 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
   if (other->GetLayer() == ColliderLayer::Note) {
     // Take Damage
-    mSpriteComponent->SetAnimation("damage");
     mSpriteComponent->SetColor(Color::Red);
     mSpriteComponent->SetBloomed(true);
     return;

@@ -15,10 +15,10 @@ enum class CombatantState { Idle, Attacking, Dead, Moving };
 
 class Combatant : public Actor {
 public:
-  Combatant(class Game *game, int channel, int health = 1000,
-            const std::string &texture_name = "./assets/textures/Goomba");
+  Combatant(class Game *game, int channel, int health = 1000);
+  virtual ~Combatant();
 
-  ~Combatant();
+  virtual void InitializeSprite() = 0;
 
   void OnUpdate(float deltaTime) override;
   int GetHealth() const { return mHealth; }
@@ -38,6 +38,11 @@ public:
 
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
 
+  void SetSpriteColorByChannel();
+
+protected:
+  SpriteComponent *mSpriteComponent;
+
 private:
   int mHealth;
   int mMaxHealth;
@@ -46,7 +51,6 @@ private:
   CombatantState mCombatantState;
 
   ColliderComponent *mColliderComponent;
-  SpriteComponent *mSpriteComponent;
   RigidBodyComponent *mRigidBodyComponent;
 
   Vector3 mTargetPosition;

@@ -137,7 +137,7 @@ bool Renderer::Initialize(float width, float height) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Set default projection matrix based on framebuffer size (orthographic)
-  float orthoSize = 5.0f; // Size of the orthographic view (half-height)
+  float orthoSize = 5.5f; // Size of the orthographic view (half-height)
   float aspectRatio = static_cast<float>(mFramebufferWidth) /
                       static_cast<float>(mFramebufferHeight);
   mProjectionMatrix =
@@ -445,6 +445,8 @@ Mesh *Renderer::LoadMesh(const std::string &meshName) {
     mesh = new PlaneMesh();
   } else if (meshName == "sphere") {
     mesh = new SphereMesh();
+  } else if (meshName == "wall") {
+    mesh = new WallMesh();
   } else {
     std::cerr << "LoadMesh: unknown mesh name '" << meshName << "'"
               << std::endl;

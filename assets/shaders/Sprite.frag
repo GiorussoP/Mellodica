@@ -6,6 +6,8 @@ in vec2 fragTexCoord;
 flat in float fragTexIndex;         // Per vertex texturing
 in vec3 fragColor;                  // Per instance color
 flat in float fragTileIndex;        // Per instance tile index (used as direct tile index for sprites)
+in vec2 spriteSize;
+
 
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
@@ -41,7 +43,7 @@ void main()
     vec2 atlasTexel = 1.0 / vec2(textureSize(uTextureAtlas, 0));
 
     // Compute inner tile UV size by removing a one-texel border on each side
-    vec2 innerTileSize = uAtlasTileSize - 2.0 * atlasTexel;
+    vec2 innerTileSize = (uAtlasTileSize - 2.0 * atlasTexel) / spriteSize;
 
     // Final atlas UV: tileOffset + one-texel inset + scaled coordinate into the inner area
     vec2 atlasUV = tileOffset + atlasTexel + fragTexCoord * innerTileSize;

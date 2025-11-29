@@ -11,10 +11,10 @@
 CubeActor::CubeActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -27,13 +27,185 @@ CubeActor::CubeActor(Game *game, const Vector3 &color, int startingIndex)
   // AABBCollider(this,ColliderLayer::Ground,Vector3::Zero,Vector3(0.5f,0.5f,0.5f));
 }
 
+// SolidCubeActor implementation
+SolidCubeActor::SolidCubeActor(Game *game, const Vector3 &color,
+                               int startingIndex)
+    : CubeActor(game, color, startingIndex), mColliderComponent(nullptr) {
+  // Add AABB collider
+  mColliderComponent = new AABBCollider(
+      this, ColliderLayer::Ground, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f));
+}
+
+void SolidCubeActor::OnUpdate(float deltaTime) {
+  // Call base class update
+  CubeActor::OnUpdate(deltaTime);
+}
+
+// SolidWallActor implementation
+SolidWallActor::SolidWallActor(Game *game, const Vector3 &color,
+                               int startingIndex)
+    : Actor(game), mMeshComponent(nullptr), mColliderComponent(nullptr) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+  // Get atlas from renderer cache
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  // Get shared mesh from renderer cache (only one instance created)
+  Mesh *mesh = game->GetRenderer()->LoadMesh("wall");
+
+  mMeshComponent =
+      new MeshComponent(this, *mesh, texture, atlas, startingIndex);
+  mMeshComponent->SetColor(color);
+
+  // Add AABB collider (wall is 1x3x1 units, so half-extents 0.5, 1.5, 0.5)
+  mColliderComponent = new AABBCollider(
+      this, ColliderLayer::Ground, Vector3::Zero, Vector3(0.5f, 1.5f, 0.5f));
+}
+
+void SolidWallActor::OnUpdate(float deltaTime) {
+  // No specific behavior for wall - just render
+}
+
+TreeActor::TreeActor(Game *game) : Actor(game) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/tree.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/tree.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, 0.25f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(1.5f, 1.5f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"tree-64x64.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+
+  mColliderComponent = new SphereCollider(
+      this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
+}
+
+SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, 0.0f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"little-rock-32x32.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+
+  mColliderComponent = new SphereCollider(
+      this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.125f, true);
+}
+
+MediumRockActor::MediumRockActor(Game *game) : Actor(game) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, 0.0f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"medium-rock-32x32.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+
+  mColliderComponent = new SphereCollider(
+      this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.25f, true);
+}
+
+BushActor::BushActor(Game *game) : Actor(game) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, 0.0f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"bush-32x32.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+
+  mColliderComponent = new SphereCollider(
+      this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
+}
+
+GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"grass1-16x16.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+}
+
+GrassActorB::GrassActorB(Game *game) : Actor(game), mSpriteComponent(nullptr) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"grass2-16x16.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+}
+
+GrassActorC::GrassActorC(Game *game) : Actor(game), mSpriteComponent(nullptr) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"grass3-16x16.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+}
+
 GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -55,13 +227,13 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // First MeshComponent - Cube
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
-    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 0);
-    mMeshComponent1->SetColor(Color::Orange);
+    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 6);
+    mMeshComponent1->SetColor(Color::White);
     mMeshComponent1->SetScale(Vector3(1.5f, 2.0f, 1.5f));
     mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
   }
@@ -73,13 +245,13 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // Second MeshComponent - Pyramid
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
-    mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 3);
-    mMeshComponent2->SetColor(Color::Red);
+    mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 50);
+    mMeshComponent2->SetColor(Color::White);
     mMeshComponent2->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
     mMeshComponent2->SetScale(Vector3(2.0f, 0.5f, 2.0f));
   }
@@ -121,11 +293,12 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
 
   // Get texture from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
 
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -136,6 +309,42 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
       new MeshComponent(this, *mesh, texture, atlas, startingIndex);
   mMeshComponent->SetColor(color);
   mMeshComponent->SetBloomed(true);
+}
+
+HouseActor::HouseActor(Game *game)
+    : Actor(game), mMeshComponent1(nullptr), mMeshComponent2(nullptr) {
+
+  // First MeshComponent - Cube
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
+    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 6);
+    mMeshComponent1->SetColor(Color::White);
+    mMeshComponent1->SetScale(Vector3(1.5f, 2.0f, 1.5f));
+    mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
+  }
+
+  mColliderComponent =
+      new OBBCollider(this, ColliderLayer::Ground, Vector3(0.0f, 0.5f, 0.0f),
+                      Vector3(0.75f, 1.0f, 0.75f), true);
+
+  // Second MeshComponent - Pyramid
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
+    mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 50);
+    mMeshComponent2->SetColor(Color::White);
+    mMeshComponent2->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
+    mMeshComponent2->SetScale(Vector3(2.0f, 0.5f, 2.0f));
+  }
 }
 
 void PyramidActor::OnUpdate(float deltaTime) {}
@@ -206,22 +415,23 @@ OBBTestActor::OBBTestActor(Game *game)
   // Register as always-active so it's included in collision detection
   game->AddAlwaysActive(this);
 
-  // Create a tilted OBB collider with base size matching the cube mesh
-  // The cube mesh is 1.0 unit, so half-extents are 0.5
-  // The scale will be applied automatically to both mesh and collider
+  // Create a tilted OBB collider with base size matching the wall mesh
+  // The wall mesh is 1.0 unit in X/Z and 3.0 units in Y, so half-extents are
+  // 0.5, 1.5, 0.5 The scale will be applied automatically to both mesh and
+  // collider
   mColliderComponent =
       new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
-                      Vector3(0.5f, 0.5f, 0.5f), true);
+                      Vector3(0.5f, 1.5f, 0.5f), true);
 
   // Get texture from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Blocks.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Blocks.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
-  Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
+  Mesh *mesh = game->GetRenderer()->LoadMesh("wall");
 
-  mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, 0);
+  mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, 16);
   SetScale(Vector3(7.0f, 1.0f, 1.0f));
 
   // Rotate 45 degrees around Y axis

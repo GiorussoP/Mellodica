@@ -537,6 +537,251 @@ MeshData SphereMesh::GenerateIcosahedronData() {
   return data;
 }
 
+// ============== WallMesh Class ==============
+
+WallMesh::WallMesh() { Build(GenerateWallData()); }
+
+MeshData WallMesh::GenerateWallData() {
+  MeshData data;
+
+  // Wall is 3 times taller than cube (Y from -1.5 to 1.5)
+  // Side textures: bottom 0, middle 1, top 2, top face 3
+
+  // Front face (Z+)
+  {
+    Vector3 normal(0.0f, 0.0f, 1.0f);
+    unsigned int baseIdx = data.vertices.size();
+    // Bottom segment (Y: -1.5 to -0.5)
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 0));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 0));
+
+    // Middle segment (Y: -0.5 to 0.5)
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 1));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 1));
+
+    // Top segment (Y: 0.5 to 1.5)
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 2));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 2));
+  }
+
+  // Back face (Z-)
+  {
+    Vector3 normal(0.0f, 0.0f, -1.0f);
+    unsigned int baseIdx = data.vertices.size();
+    // Bottom segment
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 0));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 0));
+
+    // Middle segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 1));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 1));
+
+    // Top segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 2));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 2));
+  }
+
+  // Right face (X+)
+  {
+    Vector3 normal(1.0f, 0.0f, 0.0f);
+    unsigned int baseIdx = data.vertices.size();
+    // Bottom segment
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 0));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 0));
+
+    // Middle segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 1));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 1));
+
+    // Top segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 0.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 2));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 2));
+  }
+
+  // Left face (X-)
+  {
+    Vector3 normal(-1.0f, 0.0f, 0.0f);
+    unsigned int baseIdx = data.vertices.size();
+    // Bottom segment
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 0));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 0));
+
+    // Middle segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 1));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 1));
+
+    // Top segment
+    baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 0.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 2));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 2));
+  }
+
+  // Top face (Y+)
+  {
+    Vector3 normal(0.0f, 1.0f, 0.0f);
+    unsigned int baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, 0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, 0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, 1.5f, -0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, 1.5f, -0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 3));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 3));
+  }
+
+  // Bottom face (Y-)
+  {
+    Vector3 normal(0.0f, -1.0f, 0.0f);
+    unsigned int baseIdx = data.vertices.size();
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, -0.5f), normal, Vector2(0.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, -0.5f), normal, Vector2(1.0f, 0.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(0.5f, -1.5f, 0.5f), normal, Vector2(1.0f, 1.0f)));
+    data.vertices.push_back(
+        Vertex(Vector3(-0.5f, -1.5f, 0.5f), normal, Vector2(0.0f, 1.0f)));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 2, baseIdx + 1, 0));
+    data.triangles.push_back(
+        Triangle(baseIdx + 0, baseIdx + 3, baseIdx + 2, 0));
+  }
+
+  return data;
+}
+
 void Mesh::SetupInstanceBuffer(size_t maxInstances) {
   mMaxInstances = maxInstances;
 

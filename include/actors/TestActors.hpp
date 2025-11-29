@@ -41,16 +41,133 @@ private:
   MeshComponent *mMeshComponent;
 };
 
-class GrassCubeActor : public CubeActor {
+class SolidCubeActor : public CubeActor {
 public:
-  GrassCubeActor(Game *game, const Vector3 &color = Color::White)
-      : CubeActor(game, color, 0) {}
+  SolidCubeActor(Game *game, const Vector3 &color = Color::White,
+                 int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  ColliderComponent *mColliderComponent;
 };
 
-class RockCubeActor : public CubeActor {
+class DirtCubeActor : public SolidCubeActor {
+public:
+  DirtCubeActor(Game *game, const Vector3 &color = Color::White)
+      : SolidCubeActor(game, color, 0) {}
+};
+
+class GrassCubeActor : public SolidCubeActor {
+public:
+  GrassCubeActor(Game *game, const Vector3 &color = Color::White)
+      : SolidCubeActor(game, color, 2) {}
+};
+
+class RockCubeActor : public SolidCubeActor {
 public:
   RockCubeActor(Game *game, const Vector3 &color = Color::White)
-      : CubeActor(game, color, 4) {}
+      : SolidCubeActor(game, color, 4) {}
+};
+
+class TreeActor : public Actor {
+public:
+  TreeActor(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class SmallRockActor : public Actor {
+public:
+  SmallRockActor(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class MediumRockActor : public Actor {
+public:
+  MediumRockActor(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class BushActor : public Actor {
+public:
+  BushActor(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class GrassActorA : public Actor {
+public:
+  GrassActorA(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+};
+
+class GrassActorB : public Actor {
+public:
+  GrassActorB(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+};
+
+class GrassActorC : public Actor {
+public:
+  GrassActorC(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+};
+
+class SolidWallActor : public Actor {
+public:
+  SolidWallActor(Game *game, const Vector3 &color = Color::White,
+                 int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  MeshComponent *mMeshComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class GrassWall : public SolidWallActor {
+public:
+  GrassWall(Game *game, const Vector3 &color = Color::White)
+      : SolidWallActor(game, color, 0) {}
+};
+
+class RockWall : public SolidWallActor {
+public:
+  RockWall(Game *game, const Vector3 &color = Color::White)
+      : SolidWallActor(game, color, 4) {}
+};
+
+class DoorWall : public SolidWallActor {
+public:
+  DoorWall(Game *game, const Vector3 &color = Color::White)
+      : SolidWallActor(game, color, 8) {}
+};
+
+class WindowWall : public SolidWallActor {
+public:
+  WindowWall(Game *game, const Vector3 &color = Color::White)
+      : SolidWallActor(game, color, 12) {}
+};
+
+class EntranceWall : public SolidWallActor {
+public:
+  EntranceWall(Game *game, const Vector3 &color = Color::White)
+      : SolidWallActor(game, color, 16) {}
 };
 
 class MarioActor : public Actor {
@@ -113,5 +230,15 @@ private:
   MeshComponent *mMeshComponent1;
   MeshComponent *mMeshComponent2;
   SpriteComponent *mSpriteComponent;
+  ColliderComponent *mColliderComponent;
+};
+
+class HouseActor : public Actor {
+public:
+  HouseActor(Game *game);
+
+private:
+  MeshComponent *mMeshComponent1;
+  MeshComponent *mMeshComponent2;
   ColliderComponent *mColliderComponent;
 };

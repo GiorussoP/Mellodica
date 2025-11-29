@@ -20,6 +20,7 @@ out vec2 fragTexCoord;
 flat out float fragTexIndex;
 out vec3 fragColor;
 flat out float fragTileIndex;
+out vec2 spriteSize;
 
 void main()
 {
@@ -31,7 +32,7 @@ void main()
     
     // Extract scale from model matrix
     vec3 scale = vec3(length(inInstanceModel[0].xyz), length(inInstanceModel[1].xyz), length(inInstanceModel[2].xyz));
-    
+    spriteSize = scale.xy;
     // Scale texture coordinates based on the face normal direction
     vec3 aN = abs(inNormal);
   
