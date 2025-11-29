@@ -47,11 +47,6 @@ void Combatant::OnUpdate(float deltaTime) {
     return;
   }
 
-  if (mGame->GetBattleSystem()->IsInBattle() == false && mHealth < mMaxHealth) {
-    // Regenerate health outside of battle
-    mHealth += 1;
-  }
-
   if (mCombatantState == CombatantState::Idle) {
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
     mSpriteComponent->SetAnimation("idle");
@@ -74,6 +69,7 @@ void Combatant::OnUpdate(float deltaTime) {
       mRigidBodyComponent->SetVelocity(Vector3::Zero);
       mCombatantState = CombatantState::Idle;
       mSpriteComponent->SetAnimation("idle");
+      mSpriteComponent->SetBloomed(false);
       return;
     }
     direction.Normalize();

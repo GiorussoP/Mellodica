@@ -185,16 +185,21 @@ void BattleSystem::EndBattle() {
       it = mGame->GetPlayer()->GetActiveAllies().erase(it);
     } else {
       (*it)->SetCombatantState(CombatantState::Idle);
+      (*it)->SetHealth((*it)->GetMaxHealth());
       ++it;
     }
   }
 
-  // Destroy dead enemies
+  // Transfer dead enemies to player allies
   for (auto it = mCurrentEnemyGroup->GetEnemies().begin();
        it != mCurrentEnemyGroup->GetEnemies().end();) {
     if ((*it)->GetCombatantState() == CombatantState::Dead) {
-      (*it)->SetState(ActorState::Destroy);
+      auto deadEnemy = *it;
       it = mCurrentEnemyGroup->GetEnemies().erase(it);
+      deadEnemy->SetCombatantState(CombatantState::Idle);
+      deadEnemy->SetMaxHealth(100);
+      deadEnemy->SetHealth(100);
+      mGame->GetPlayer()->GetActiveAllies().push_back(deadEnemy);
     } else {
       (*it)->SetCombatantState(CombatantState::Idle);
       ++it;
@@ -245,13 +250,13 @@ void BattleSystem::OnUpdate(float deltaTime) {
 
               } else {
                 // Don't stop other's notes
-                if (activeNote == nullptr ||
-                    (activeNote != nullptr &&
-                     activeNote->GetMidiChannel() != note.channel))
-                  continue;
+                if (!(activeNote == nullptr ||
+                      (activeNote != nullptr &&
+                       activeNote->GetMidiChannel() != note.channel))) {
+                  // Stop note if playing this channel note
+                  mEnemyNotePlayer->EndNote(note.note);
+                }
 
-                // Stop note if playing this channel note
-                mEnemyNotePlayer->EndNote(note.note);
                 Vector3 nextNotePos =
                     mEnemyNotePlayer->GetNotePosition(note.nextNote) +
                     mBattleDir;
@@ -314,12 +319,12 @@ void BattleSystem::OnUpdate(float deltaTime) {
               } else {
 
                 // Don't stop other's notes
-                if (activeNote == nullptr ||
-                    (activeNote != nullptr &&
-                     activeNote->GetMidiChannel() != note.channel))
-                  continue;
+                if (!(activeNote == nullptr ||
+                      (activeNote != nullptr &&
+                       activeNote->GetMidiChannel() != note.channel))) {
 
-                mPlayerNotePlayer->EndNote(note.note);
+                  mPlayerNotePlayer->EndNote(note.note);
+                }
                 Vector3 nextNotePos =
                     mPlayerNotePlayer->GetNotePosition(note.nextNote) -
                     2.0f * mBattleDir;

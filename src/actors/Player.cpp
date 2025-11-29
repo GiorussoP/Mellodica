@@ -200,7 +200,9 @@ void Player::OnUpdate(float deltaTime) {
     mGame->GetCamera()->SetTargetPosition(GetPosition() + mFront * 4.0f);
   }
 
-  // DEBUGGING ALLY
+  // DEBUGGING ALLY - Disabled by now
+
+  /*
   if (Input::WasKeyPressed(SDL_SCANCODE_Z) && mActiveAllies.size() < 8) {
     mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(), 100));
     mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f, 0.0f));
@@ -208,6 +210,7 @@ void Player::OnUpdate(float deltaTime) {
       MIDIPlayer::unmuteChannel(mActiveAllies.back()->GetChannel());
     }
   }
+  */
 }
 
 void Player::OnProcessInput() {

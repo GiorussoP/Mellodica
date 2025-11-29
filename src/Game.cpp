@@ -603,5 +603,12 @@ void Game::GenerateOutput() {
   // Draw HUD sprites in screen space (after framebuffer)
   mRenderer->DrawHUDSprites(hudSprites);
 
-  SDL_GL_SwapWindow(mWindow);
+  // Only swap if the window has a valid drawable size (not minimized)
+  if (mWindow) {
+    int drawableW, drawableH;
+    SDL_GL_GetDrawableSize(mWindow, &drawableW, &drawableH);
+    if (drawableW > 0 && drawableH > 0) {
+      SDL_GL_SwapWindow(mWindow);
+    }
+  }
 }
