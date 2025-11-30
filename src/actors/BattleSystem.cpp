@@ -40,6 +40,7 @@ BattleSystem::BattleSystem(Game *game)
   }
 
   MIDIPlayer::setSpeed(0.9f);
+  SynthEngine::setPan(12, 64);
 }
 
 BattleSystem::~BattleSystem() {}
