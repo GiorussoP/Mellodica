@@ -19,6 +19,12 @@ public:
 
   std::vector<Combatant *> &GetActiveAllies() { return mActiveAllies; }
 
+  int getHealth() const { return mHealth; }
+  int getMaxHealth() const { return mMaxHealth; }
+
+  float getEnergy() const { return mEnergy; }
+  float getMaxEnergy() const { return mMaxEnergy; }
+
 private:
   bool mMoveForward;
   bool mMoveBackward;
@@ -28,6 +34,12 @@ private:
   bool mRotateRight;
   bool mRotateUp;
   bool mRotateDown;
+
+  int mHealth;
+  int mMaxHealth;
+
+  float mEnergy;
+  float mMaxEnergy;
 
   RigidBodyComponent *mRigidBodyComponent;
   ColliderComponent *mColliderComponent;

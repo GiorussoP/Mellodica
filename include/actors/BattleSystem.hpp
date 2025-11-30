@@ -40,6 +40,8 @@ private:
 
   class MeshComponent *mField;
   class MeshComponent *mEdge;
+
+  class BattleScreen *mBattleScreen;
 };
 
 #endif

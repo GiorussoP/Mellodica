@@ -710,13 +710,13 @@ void Renderer::ActivateMeshShader() {
   mMeshShader->SetActive();
 
   // Set frame-level uniforms (uniforms that don't change per mesh)
-  Vector3 lightdir = Vector3(1.0f, -1.0f, 1.0f);
+  Vector3 lightdir = Vector3(1.0f, -1.0f, 0.5f);
   lightdir.Normalize();
   mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
   mMeshShader->SetVectorUniform("uDirectionalLightColor",
                                 Vector3(1.0f, 1.0f, 1.0f));
   mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.2f, 0.2f, 0.2f));
+                                Vector3(0.5f, 0.5f, 0.5f));
   mMeshShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
 }
 
@@ -749,7 +749,7 @@ void Renderer::ActivateMeshShaderForBloom() {
   mMeshShader->SetVectorUniform("uDirectionalLightColor",
                                 Vector3(1.0f, 1.0f, 1.0f));
   mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.2f, 0.2f, 0.2f));
+                                Vector3(0.5f, 0.5f, 0.5f));
   mMeshShader->SetIntegerUniform("uBloomPass", 1); // We're in bloom pass
 }
 
@@ -1065,6 +1065,13 @@ void Renderer::DrawHUDSprites(
       mTextures[group.textureIndex]->Bind(0);
       mHUDShader->SetIntegerUniform("uHUDTexture", 0);
       // No atlas uniforms needed
+    }
+
+    if (group.textureIndex == -1) {
+      // No texture bound
+      mHUDShader->SetIntegerUniform("uHasTexture", 0);
+    } else {
+      mHUDShader->SetIntegerUniform("uHasTexture", 1);
     }
 
     // Draw each HUD sprite individually

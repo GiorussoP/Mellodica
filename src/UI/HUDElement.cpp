@@ -1,8 +1,14 @@
+#include "HUDElement.hpp"
 #include "../../include/UI/HUDElement.hpp"
+#include "../components/SpriteComponent.hpp"
 #include "Game.hpp"
 #include "Renderer.hpp"
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
+
+HUDElement::HUDElement(Game *game) : Actor(game) {
+  mSpriteComponent = new SpriteComponent(this, -1, nullptr, true);
+}
 
 HUDElement::HUDElement(Game *game, const std::string &hudTexturePath,
                        const std::string &hudAtlasPath)

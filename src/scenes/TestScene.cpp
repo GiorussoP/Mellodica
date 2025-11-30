@@ -57,16 +57,6 @@ void TestSceneA::Initialize() {
   mGame->GetPlayer()->SetPosition(Vector3(10.0f, 1.0f, 0.0f));
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(true);
 
-  // Creating a test HUD element
-  auto hudElement = new HUDElement(mGame, "assets/textures/hud/hud.png",
-                                   "assets/textures/hud/hud.json");
-  hudElement->SetPosition(Vector3(-0.8, -0.8f, 0.0f));
-  hudElement->SetScale(Vector3(0.2f, 0.2f, 1.0f));
-  hudElement->GetSpriteComponent().AddAnimation("default",
-                                                {"hud1.png", "hud2.png"});
-  hudElement->GetSpriteComponent().SetAnimFPS(2.0f);
-  hudElement->GetSpriteComponent().SetAnimation("default");
-
   // Setting camera
   mGame->GetCamera()->SetMode(CameraMode::Isometric);
   mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
@@ -80,44 +70,44 @@ void TestSceneA::Initialize() {
   floor->GetComponent<MeshComponent>()->SetBloomed(false);
   mGame->AddAlwaysActive(floor);
 
-  std::vector<Combatant *> ghosts1 = {new Ghost(mGame, 0, 1000),
-                                      new Ghost(mGame, 1, 1000),
-                                      new Ghost(mGame, 2, 1000)};
+  std::vector<Combatant *> ghosts1 = {new Ghost(mGame, 0, 100),
+                                      new Ghost(mGame, 1, 100),
+                                      new Ghost(mGame, 2, 100)};
   auto testEnemyGroup = new EnemyGroup(mGame, ghosts1);
   testEnemyGroup->SetPosition(Vector3(-10.0f, 1.0f, -10.0f));
 
-  std::vector<Combatant *> ghosts2 = {new Ghost(mGame, 3, 1000)};
+  std::vector<Combatant *> ghosts2 = {new Ghost(mGame, 3, 100)};
   auto enemyGroup2 = new EnemyGroup(mGame, ghosts2);
   enemyGroup2->SetPosition(Vector3(10.0f, 1.0f, -10.0f));
 
-  std::vector<Combatant *> ghosts3 = {new Ghost(mGame, 4, 1000),
-                                      new Ghost(mGame, 5, 1000)};
+  std::vector<Combatant *> ghosts3 = {new Ghost(mGame, 4, 100),
+                                      new Ghost(mGame, 5, 100)};
   auto enemyGroup3 = new EnemyGroup(mGame, ghosts3);
   enemyGroup3->SetPosition(Vector3(15.0f, 1.0f, 10.0f));
 
-  std::vector<Combatant *> ghosts4 = {new Ghost(mGame, 6, 1000)};
+  std::vector<Combatant *> ghosts4 = {new Ghost(mGame, 6, 100)};
   auto enemyGroup4 = new EnemyGroup(mGame, ghosts4);
   enemyGroup4->SetPosition(Vector3(-15.0f, 1.0f, -15.0f));
 
-  std::vector<Combatant *> ghosts5 = {new Ghost(mGame, 7, 1000)};
+  std::vector<Combatant *> ghosts5 = {new Ghost(mGame, 7, 100)};
   auto enemyGroup5 = new EnemyGroup(mGame, ghosts5);
   enemyGroup5->SetPosition(Vector3(0.0f, 1.0f, -20.0f));
 
   std::vector<Combatant *> ghosts6 = {
-      new Ghost(mGame, 0, 1000), new Ghost(mGame, 1, 1000),
-      new Ghost(mGame, 2, 1000), new Ghost(mGame, 3, 1000)};
+      new Ghost(mGame, 0, 100), new Ghost(mGame, 1, 100),
+      new Ghost(mGame, 2, 100), new Ghost(mGame, 3, 100)};
   auto enemyGroup6 = new EnemyGroup(mGame, ghosts6);
   enemyGroup6->SetPosition(Vector3(20.0f, 1.0f, -5.0f));
 
-  std::vector<Combatant *> ghosts7 = {new Ghost(mGame, 4, 1000),
-                                      new Ghost(mGame, 5, 1000),
-                                      new Ghost(mGame, 6, 1000)};
+  std::vector<Combatant *> ghosts7 = {new Ghost(mGame, 4, 100),
+                                      new Ghost(mGame, 5, 100),
+                                      new Ghost(mGame, 6, 100)};
   auto enemyGroup7 = new EnemyGroup(mGame, ghosts7);
   enemyGroup7->SetPosition(Vector3(-20.0f, 1.0f, 5.0f));
 
-  std::vector<Combatant *> ghosts8 = {new Ghost(mGame, 7, 1000),
-                                      new Ghost(mGame, 0, 1000),
-                                      new Ghost(mGame, 1, 1000)};
+  std::vector<Combatant *> ghosts8 = {new Ghost(mGame, 7, 100),
+                                      new Ghost(mGame, 0, 100),
+                                      new Ghost(mGame, 1, 100)};
   auto enemyGroup8 = new EnemyGroup(mGame, ghosts8);
   enemyGroup8->SetPosition(Vector3(5.0f, 1.0f, 20.0f));
 }
@@ -127,7 +117,7 @@ void TestSceneB::Initialize() {
 
   // Creating the Player actor
   mGame->SetPlayer(new Player(mGame));
-  mGame->GetPlayer()->SetPosition(Vector3(0.0f, 1.0f, 0.0f));
+  mGame->GetPlayer()->SetPosition(Vector3(3.0f, 1.0f, 3.0f));
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
 
   mGame->GetRenderer()->SetIsDark(false);
@@ -193,36 +183,36 @@ void TestSceneB::Initialize() {
   obbTest1->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
 
   std::vector<Combatant *> ghostsB1 = {
-      new Ghost(mGame, 4, 1000), new Ghost(mGame, 5, 1000),
-      new Ghost(mGame, 6, 1000), new Ghost(mGame, 7, 1000)};
+      new Ghost(mGame, 4, 100), new Ghost(mGame, 5, 100),
+      new Ghost(mGame, 6, 100), new Ghost(mGame, 7, 100)};
   EnemyGroup *enemies = new EnemyGroup(mGame, ghostsB1);
   enemies->SetPosition(Vector3(10.0f, 1.0f, 30.0f));
 
-  std::vector<Combatant *> ghostsB2 = {new Ghost(mGame, 8, 1000),
-                                       new Ghost(mGame, 9, 1000)};
+  std::vector<Combatant *> ghostsB2 = {new Ghost(mGame, 8, 100),
+                                       new Ghost(mGame, 9, 100)};
   EnemyGroup *enemies2 = new EnemyGroup(mGame, ghostsB2);
   enemies2->SetPosition(Vector3(20.0f, 1.0f, 8.0f));
 
-  std::vector<Combatant *> ghostsB3 = {new Ghost(mGame, 10, 1000),
-                                       new Ghost(mGame, 11, 1000),
-                                       new Ghost(mGame, 12, 1000)};
+  std::vector<Combatant *> ghostsB3 = {new Ghost(mGame, 10, 100),
+                                       new Ghost(mGame, 11, 100),
+                                       new Ghost(mGame, 12, 100)};
   EnemyGroup *enemies3 = new EnemyGroup(mGame, ghostsB3);
   enemies3->SetPosition(Vector3(35.0f, 1.0f, 15.0f));
 
-  std::vector<Combatant *> robotsB1 = {new RobotA(mGame, 0, 1000),
-                                       new RobotA(mGame, 1, 1000)};
+  std::vector<Combatant *> robotsB1 = {new RobotA(mGame, 0, 100),
+                                       new RobotA(mGame, 1, 100)};
   EnemyGroup *robotEnemies1 = new EnemyGroup(mGame, robotsB1);
   robotEnemies1->SetPosition(Vector3(5.0f, 1.0f, 30.0f));
 
-  std::vector<Combatant *> robotsB2 = {new RobotA(mGame, 2, 1000),
-                                       new RobotA(mGame, 3, 1000),
-                                       new RobotA(mGame, 4, 1000)};
+  std::vector<Combatant *> robotsB2 = {new RobotA(mGame, 2, 100),
+                                       new RobotA(mGame, 3, 100),
+                                       new RobotA(mGame, 4, 100)};
   EnemyGroup *robotEnemies2 = new EnemyGroup(mGame, robotsB2);
   robotEnemies2->SetPosition(Vector3(20.0f, 1.0f, 30.0f));
 
   std::vector<Combatant *> mixedGroup = {
-      new Ghost(mGame, 5, 1000), new RobotA(mGame, 6, 1000),
-      new Ghost(mGame, 7, 1000), new RobotA(mGame, 8, 1000)};
+      new Ghost(mGame, 5, 100), new RobotA(mGame, 6, 100),
+      new Ghost(mGame, 7, 100), new RobotA(mGame, 8, 100)};
   EnemyGroup *mixedEnemies = new EnemyGroup(mGame, mixedGroup);
-  mixedEnemies->SetPosition(Vector3(10.0f, 1.0f, 5.0f));
+  mixedEnemies->SetPosition(Vector3(15.0f, 1.0f, 5.0f));
 }

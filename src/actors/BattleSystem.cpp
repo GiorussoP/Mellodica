@@ -4,6 +4,7 @@
 #include "Game.hpp"
 #include "Mesh.hpp"
 #include "Renderer.hpp"
+#include "UI/Screen/BattleScreen.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/NotePlayerActor.hpp"
 #include "actors/Player.hpp"
@@ -11,7 +12,7 @@
 BattleSystem::BattleSystem(Game *game)
     : Actor(game), mGame(game), mInBattle(false), mIsTransitioning(false),
       mEnemyNotePlayer(nullptr), mPlayerNotePlayer(nullptr),
-      mCurrentEnemyGroup(nullptr) {
+      mCurrentEnemyGroup(nullptr), mBattleScreen(nullptr) {
   mPlayerNotePlayer = new NotePlayerActor(game, false);
   mEnemyNotePlayer = new NotePlayerActor(game, true);
 
@@ -128,6 +129,9 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
     mGame->GetPlayer()->GetActiveAllies()[i]->SetCombatantState(
         CombatantState::Moving);
   }
+
+  // Screen
+  mBattleScreen = new BattleScreen(mGame, "randomstring");
 }
 
 void BattleSystem::EndBattle() {
@@ -186,21 +190,34 @@ void BattleSystem::EndBattle() {
       it = mGame->GetPlayer()->GetActiveAllies().erase(it);
     } else {
       (*it)->SetCombatantState(CombatantState::Idle);
-      (*it)->SetHealth((*it)->GetMaxHealth());
       ++it;
     }
   }
 
-  // Transfer dead enemies to player allies
+  // Transfer new dead enemies to player allies
   for (auto it = mCurrentEnemyGroup->GetEnemies().begin();
        it != mCurrentEnemyGroup->GetEnemies().end();) {
     if ((*it)->GetCombatantState() == CombatantState::Dead) {
       auto deadEnemy = *it;
+
+      bool hasChannel = false;
+      for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
+        if (ally->GetChannel() == deadEnemy->GetChannel()) {
+          hasChannel = true;
+          break;
+        }
+      }
+
+      if (!hasChannel) {
+        deadEnemy->SetCombatantState(CombatantState::Idle);
+        deadEnemy->SetMaxHealth(100);
+        deadEnemy->SetHealth(100);
+        mGame->GetPlayer()->GetActiveAllies().push_back(deadEnemy);
+      } else {
+        deadEnemy->SetState(ActorState::Destroy);
+      }
       it = mCurrentEnemyGroup->GetEnemies().erase(it);
-      deadEnemy->SetCombatantState(CombatantState::Idle);
-      deadEnemy->SetMaxHealth(100);
-      deadEnemy->SetHealth(100);
-      mGame->GetPlayer()->GetActiveAllies().push_back(deadEnemy);
+
     } else {
       (*it)->SetCombatantState(CombatantState::Idle);
       ++it;
@@ -208,6 +225,9 @@ void BattleSystem::EndBattle() {
   }
 
   mGame->GetPlayer()->SetRotation(Math::LookRotation(mBattleDir));
+
+  mBattleScreen->Close();
+  mBattleScreen = nullptr;
 }
 
 void BattleSystem::OnUpdate(float deltaTime) {

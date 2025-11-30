@@ -32,6 +32,7 @@ public:
 
   // Get texture index (in renderer's texture array)
   int GetTextureIndex() const { return mTextureIndex; }
+  void SetTextureIndex(int idx) { mTextureIndex = idx; }
 
   // Get current tile index (accounting for animations)
   int GetCurrentTileIndex() const;

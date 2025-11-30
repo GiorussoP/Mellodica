@@ -7,6 +7,8 @@
 
 #include "../HUDElement.hpp"
 #include "../UIButton.hpp"
+#include "Game.hpp"
+#include "Renderer.hpp"
 
 class UIScreen {
 public:
@@ -14,7 +16,20 @@ public:
 
   UIScreen(class Game *game, const std::string &fontName);
 
-  void Close() { mState = UIState::Closing; }
+  void Close() {
+    if (mState == UIState::Closing) {
+      return;
+    }
+    mState = UIState::Closing;
+    for (auto img : mHudImages) {
+      img->SetState(ActorState::Destroy);
+      mGame->GetRenderer()->RemoveUIElement(img);
+    }
+    for (auto button : mHudButtons) {
+      button->SetState(ActorState::Destroy);
+      mGame->GetRenderer()->RemoveUIElement(button);
+    }
+  }
 
   // HUDElements add
   HUDElement *AddImageOrElement(const std::string &hudTexturePath,
@@ -29,6 +44,13 @@ public:
     mHudImages.push_back(hE);
     return hE;
   }
+  HUDElement *AddImageOrElement(const Vector3 &color) {
+    auto hE = new HUDElement(mGame);
+    hE->GetSpriteComponent().SetColor(color);
+    hE->GetSpriteComponent().SetTextureIndex(-1); // No texture, just color
+    mHudImages.push_back(hE);
+    return hE;
+  }
 
   // UI Buttons add
   UIButton *AddButton(const std::string &hudTexturePath,
@@ -37,6 +59,8 @@ public:
 
   UIButton *AddButton(const std::string &singleImagePath,
                       std::function<void()> onClick);
+
+  UIScreen::UIState GetUIState() const { return mState; }
 
   virtual ~UIScreen();
 

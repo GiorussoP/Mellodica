@@ -16,6 +16,12 @@ Combatant::Combatant(Game *game, int channel, int health)
 Combatant::~Combatant() {}
 
 void Combatant::OnUpdate(float deltaTime) {
+
+  if (mHealth <= 0.13f * mMaxHealth) {
+    mHealth = 0;
+    mCombatantState = CombatantState::Dead;
+  }
+
   if (mCombatantState == CombatantState::Dead) {
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
     mSpriteComponent->SetAnimation("dead");
@@ -31,6 +37,7 @@ void Combatant::OnUpdate(float deltaTime) {
   }
 
   if (mCombatantState == CombatantState::Attacking) {
+    mSpriteComponent->SetAnimation("idle");
     mSpriteComponent->SetBloomed(true);
     mRigidBodyComponent->SetVelocity(Vector3::Zero);
     return;
@@ -44,12 +51,14 @@ void Combatant::OnUpdate(float deltaTime) {
       SetPosition(mTargetPosition);
       mRigidBodyComponent->SetVelocity(Vector3::Zero);
       mCombatantState = CombatantState::Idle;
+      mSpriteComponent->SetAnimation("idle");
       mSpriteComponent->SetBloomed(false);
       return;
     }
     direction.Normalize();
     Vector3 velocity = direction * mMoveSpeed;
     mRigidBodyComponent->SetVelocity(velocity);
+    mSpriteComponent->SetAnimation("idle");
     mSpriteComponent->SetBloomed(false);
   }
 }
@@ -68,10 +77,6 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
   if (other->GetLayer() == ColliderLayer::Note &&
       mGame->GetBattleSystem()->IsInBattle()) {
     mHealth -= 1; // Template damage value
-    if (mHealth <= 0) {
-      mHealth = 0;
-      mCombatantState = CombatantState::Dead;
-    }
     return;
   }
 

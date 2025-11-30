@@ -7,6 +7,7 @@ flat in float fragTexIndex;         // Per vertex texturing
 in vec3 fragColor;                  // Per instance color
 flat in float fragTileIndex;        // Per instance tile index
 
+uniform vec3 uDirectionalLightDir;          // Directional light direction
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 uniform int uBloomPass;                 // 1 if rendering bloom pass, 0 otherwise
@@ -54,12 +55,18 @@ void main()
         discard;
     }
 
-    vec3 baseColor = texColor.rgb * fragColor;
+
+    vec3 baseColor =  texColor.rgb * fragColor;
     
     // Flat shading: check if face is pointing toward light
-    // TODO: Add lighting calculations here
-    
-    // If rendering bloom pass and object is not bloomed (indicated by fragColor.r < 0)
+    float lightIntensity = 0.5f + 0.5f* dot(normalize(fragNormal), -uDirectionalLightDir);
+
+    // Combine directional and ambient light
+    vec3 lighting = uAmbientLightColor + (uDirectionalLightColor * lightIntensity);
+
+    // Apply lighting to base color
+    baseColor *= lighting;
+
     // render as black to provide occlusion
     if (uBloomPass == 1 && fragColor.r < 0.0)
     {

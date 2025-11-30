@@ -10,10 +10,18 @@ uniform int uAtlasColumns;
 uniform int uTileIndex;  // Which tile to display from the atlas
 uniform vec4 uTintColor; // Color tint/modulation (default white)
 
+uniform bool uHasTexture;
+
 out vec4 outColor;
 
 void main()
 {   
+
+    if(!uHasTexture){
+        outColor = uTintColor;
+        return;
+    }
+
     // If tileIndex is negative, treat as a full texture sample (no atlas)
     if (uTileIndex < 0)
     {

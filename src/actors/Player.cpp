@@ -7,6 +7,7 @@
 #include "SynthEngine.hpp"
 #include "TestActors.hpp"
 
+#include "MainMenu.hpp"
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
 
@@ -25,7 +26,8 @@ Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
       mMoveRight(false), mRotateLeft(false), mRotateRight(false),
       mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ),
-      mFrontNote(-1) {
+      mFrontNote(-1), mHealth(100), mMaxHealth(100), mEnergy(100),
+      mMaxEnergy(100) {
   // Mark player as always active so it's always visible
   game->AddAlwaysActive(this);
 
@@ -36,7 +38,7 @@ Player::Player(Game *game)
                                                false); // Disable gravity
 
   mColliderComponent = new SphereCollider(this, ColliderLayer::Player,
-                                          Vector3::Zero, 0.5f, false);
+                                          Vector3::Zero, 0.4f, false);
 
   // mColliderComponent =
   //     new OBBCollider(this, ColliderLayer::Player, Vector3::Zero,
@@ -151,6 +153,39 @@ void Player::OnUpdate(float deltaTime) {
     mFrontNote = -1;
   }
 
+  // Calculate energy drain/recharge
+  int numNotesPlaying = 0;
+  for (bool notePlaying : newPlayingNotes) {
+    if (notePlaying) {
+      numNotesPlaying++;
+    }
+  }
+  if (numNotesPlaying > 0) {
+    mEnergy -= 20.0f * deltaTime * static_cast<float>(numNotesPlaying);
+    if (mEnergy < 0.0f) {
+      mEnergy = 0.0f;
+      for (int i = 0; i < 12; ++i) {
+        newPlayingNotes[i] = false;
+        if (mGame->GetBattleSystem()
+                    ->GetPlayerNotePlayer()
+                    ->GetActiveNotes()[i] != nullptr &&
+            mGame->GetBattleSystem()
+                    ->GetPlayerNotePlayer()
+                    ->GetActiveNotes()[i]
+                    ->GetMidiChannel() == 12) {
+
+          // Stop note
+          mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(i + 60);
+        }
+      }
+    }
+  } else {
+    mEnergy += 20.0f * deltaTime;
+    if (mEnergy > mMaxEnergy) {
+      mEnergy = mMaxEnergy;
+    }
+  }
+
   for (int i = 0; i < 12; ++i) {
     if (mPlayingNotes[i] && !newPlayingNotes[i]) {
       if (mGame->GetBattleSystem()
@@ -165,11 +200,11 @@ void Player::OnUpdate(float deltaTime) {
         mGame->GetBattleSystem()->GetPlayerNotePlayer()->EndNote(
             i + 60); // MIDI note offset
       }
-    } else if (newPlayingNotes[i] &&
-               (!mPlayingNotes[i] ||
-                mGame->GetBattleSystem()
-                        ->GetPlayerNotePlayer()
-                        ->GetActiveNotes()[i] == nullptr)) {
+    } else if (mEnergy > 0 && (newPlayingNotes[i] &&
+                               (!mPlayingNotes[i] ||
+                                mGame->GetBattleSystem()
+                                        ->GetPlayerNotePlayer()
+                                        ->GetActiveNotes()[i] == nullptr))) {
       // Play note
       mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(
           i + 60, 12); // MIDI note offset
@@ -257,13 +292,20 @@ void Player::OnUpdate(float deltaTime) {
 
   /*
   if (Input::WasKeyPressed(SDL_SCANCODE_Z) && mActiveAllies.size() < 8) {
-    mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(), 100));
-    mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f, 0.0f));
-    if (mGame->GetBattleSystem()->IsInBattle()) {
+    mActiveAllies.emplace_back(new Combatant(mGame, mActiveAllies.size(),
+  100)); mActiveAllies.back()->SetPosition(mPosition + Vector3(2.0f, 0.0f,
+  0.0f)); if (mGame->GetBattleSystem()->IsInBattle()) {
       MIDIPlayer::unmuteChannel(mActiveAllies.back()->GetChannel());
     }
   }
   */
+
+  // Die
+  if (mHealth <= 0) {
+
+    // Push Main Menu
+    mGame->LoadScene(new MainMenu(mGame));
+  }
 }
 
 void Player::OnProcessInput() {
@@ -294,10 +336,16 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
     return;
   }
 
-  if (other->GetLayer() == ColliderLayer::Note) {
+  if (other->GetLayer() == ColliderLayer::Note &&
+      mGame->GetBattleSystem()->IsInBattle()) {
     // Take Damage
     mSpriteComponent->SetColor(Color::Red);
     mSpriteComponent->SetBloomed(true);
+
+    mHealth -= 1;
+    if (mHealth < 0) {
+      mHealth = 0;
+    }
     return;
   }
 

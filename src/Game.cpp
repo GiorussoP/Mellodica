@@ -128,6 +128,9 @@ void Game::LoadScene(Scene *scene) {
     if (mCurrentScene) {
 
       // Clean up UI screens
+      for (auto uiScreen : mUIStack) {
+        uiScreen->Close();
+      }
       mUIStack.clear();
 
       mCurrentScene->Cleanup();
@@ -310,7 +313,8 @@ void Game::ProcessInput() {
       }
       break;
     case SDL_KEYDOWN:
-      if (!mUIStack.empty()) {
+      if (!mUIStack.empty() &&
+          mUIStack.back()->GetUIState() != UIScreen::UIState::Closing) {
         // SDL_Log("Key Pressed and Passed to some UI.");
         mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
       }
@@ -415,6 +419,9 @@ void Game::UpdateGame(float deltaTime) {
   if (mPendingScene) {
 
     // Clean up UI screens
+    for (auto uiScreen : mUIStack) {
+      uiScreen->Close();
+    }
     mUIStack.clear();
 
     // Cleanup current scene if present
@@ -426,6 +433,7 @@ void Game::UpdateGame(float deltaTime) {
     }
 
     MIDIPlayer::pause();
+    MIDIPlayer::clearEventQueue();
 
     mCurrentScene = mPendingScene;
     mPendingScene = nullptr;
@@ -443,6 +451,11 @@ void Game::UpdateGame(float deltaTime) {
 
   // Check collisions after all actors have been updated
   CheckCollisions();
+
+  if (mUIStack.size() > 0 &&
+      mUIStack.back()->GetUIState() != UIScreen::UIState::Closing) {
+    mUIStack.back()->Update(deltaTime);
+  }
 }
 
 void Game::CheckCollisions() {
