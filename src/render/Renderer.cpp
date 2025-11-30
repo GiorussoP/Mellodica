@@ -1273,3 +1273,19 @@ void Renderer::ApplyBloomBlur() {
   // Re-enable depth test
   glEnable(GL_DEPTH_TEST);
 }
+
+void Renderer::AddUIElement(HUDElement *comp) {
+  mUIComps.emplace_back(comp);
+  SDL_Log("Renderer::AddUIElement - Added UI element. Total UI elements: %zu",
+          mUIComps.size());
+  std::sort(mUIComps.begin(), mUIComps.end(), [](HUDElement *a, HUDElement *b) {
+    return a->GetPosition().z < b->GetPosition().z; // Example draw order
+  });
+}
+
+void Renderer::RemoveUIElement(HUDElement *comp) {
+  auto iter = std::find(mUIComps.begin(), mUIComps.end(), comp);
+  if (iter != mUIComps.end()) {
+    mUIComps.erase(iter);
+  }
+}

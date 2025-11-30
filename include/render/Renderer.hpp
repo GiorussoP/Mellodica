@@ -1,4 +1,5 @@
 #pragma once
+#include "../UI/HUDElement.hpp"
 #include "Math.hpp"
 #include "MeshComponent.hpp"
 #include "Shader.hpp"
@@ -8,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+class UIElement; // Forward declaration
 
 enum class RendererMode { TRIANGLES, LINES };
 
@@ -80,6 +83,9 @@ public:
   bool IsDark() const { return mIsDark; }
   void SetIsDark(bool isDark) { mIsDark = isDark; }
 
+  void AddUIElement(HUDElement *comp);
+  void RemoveUIElement(HUDElement *comp);
+
 private:
   bool LoadShaders();
   void CreateSpriteQuad();  // Create a simple quad for sprite rendering
@@ -135,4 +141,7 @@ private:
 
   // Atlases
   std::unordered_map<std::string, TextureAtlas *> mAtlasCache;
+
+  // UI Components
+  std::vector<HUDElement *> mUIComps;
 };

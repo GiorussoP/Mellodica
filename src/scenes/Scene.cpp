@@ -4,9 +4,22 @@
 #include <fstream>
 #include <iostream>
 
+#include "Renderer.hpp"
 #include "actors/TestActors.hpp"
 
 void Scene::Cleanup() {
+  // Remove all HUD elements from renderer
+  auto renderer = mGame->GetRenderer();
+  if (renderer) {
+    // Remove all HUDElements
+    for (auto actor : mActors) {
+      HUDElement *hud = dynamic_cast<HUDElement *>(actor);
+      if (hud) {
+        renderer->RemoveUIElement(hud);
+      }
+    }
+  }
+
   // Iterate over a copy since deletion modifies the set
   std::vector<Actor *> actorsToDelete(mActors.begin(), mActors.end());
 
