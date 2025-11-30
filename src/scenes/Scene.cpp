@@ -31,98 +31,54 @@ void Scene::Cleanup() {
   mActors.clear(); // Clear the set (should already be empty)
 }
 
-void Scene::LoadLevel(const std::string &levelPath, unsigned int width,
-                      unsigned int height) {
+void Scene::LoadLevel(const std::string &levelPath) {
 
-  // For now, we'll just print the level path
-  std::cout << "Loading level from: " << levelPath << std::endl;
+  MapReader mapReader(levelPath);
 
-  std::ifstream f(levelPath);
+  for (const auto actor : mapReader.GetMapActors()) {
 
-  int **levelData = new int *[height];
-  for (int i = 0; i < height; i++)
-    levelData[i] = new int[width];
+    unsigned int type = static_cast<int>(std::get<3>(actor));
 
-  if (!f.is_open()) {
-    SDL_Log("Erro lendo nível.");
-  }
+    float x = std::get<0>(actor).x;
+    float z = std::get<0>(actor).y;
 
-  std::string line;
-  int i = 0;
-  while (std::getline(f, line)) {
+    float size_x = std::get<1>(actor);
+    float size_y = std::get<2>(actor);
 
-    std::vector<int> row = CSVHelper::Split(line);
+    std::cout << "Scene::LoadLevel: Spawning actor of type " << type << " at ("
+              << x << ", " << z << ") with size (" << size_x << ", " << size_y
+              << ")" << std::endl;
 
-    int j = 0;
-    for (int n : row) {
-      levelData[i][j] = n;
-      j++;
+    switch (type) {
+    case 0: {
+      auto ground = new GroundActor(mGame, Color::White, 3);
+      ground->SetPosition(Vector3(x, 0.0f, z));
+      ground->SetScale(Vector3(size_x, 1.0f, size_y));
+      break;
     }
-    std::cout << '\n';
-    ++i;
-  }
-  f.close();
-
-  int y = 0;
-  for (int i = 0; i < height; ++i) {
-    int x = 0;
-    for (int j = 0; j < width; ++j) {
-      switch (levelData[i][j]) {
-      case -1:
-        break;
-      case 0: {
-        auto block = new GrassCubeActor(mGame);
-        block->SetPosition(
-            Vector3(static_cast<float>(x), static_cast<float>(y), 0.0f));
-        break;
-      }
-      case 1: {
-
-        break;
-      }
-      case 2: {
-
-        break;
-      }
-      case 4: {
-        break;
-      }
-      case 6: {
-
-        break;
-      }
-      case 8: {
-
-        break;
-      }
-      case 9: {
-
-        break;
-      }
-      case 10: {
-
-        break;
-      }
-      case 12: {
-
-        break;
-      }
-      case 13: {
-
-        break;
-      }
-      case 15: {
-
-        break;
-      }
-      case 16: {
-
-        break;
-      }
-
-      default:
-        break;
-      }
+    case 1: {
+      auto house = new HouseActor(mGame);
+      float vertical_size = (size_x + size_y) / 4.0f;
+      house->SetPosition(Vector3(x, 0.5f + vertical_size / 2.0f, z));
+      house->SetScale(Vector3(size_x / 1.5f, vertical_size, size_y / 1.5f));
+      break;
+    }
+    case 2: {
+      auto wall = new RockWall(mGame);
+      wall->SetPosition(Vector3(x, 2.0f, z));
+      wall->SetScale(Vector3(size_x, 1.0f, size_y));
+      break;
+    }
+    case 3: {
+      auto ground = new GroundActor(mGame, Color::White, 0);
+      ground->SetPosition(Vector3(x, 0.0f, z));
+      ground->SetScale(Vector3(size_x, 1.0f, size_y));
+      break;
+    }
+    default:
+      std::cerr << "Scene::LoadLevel: Unknown ActorMap type: " << type
+                << std::endl;
+      break;
     }
   }
 }

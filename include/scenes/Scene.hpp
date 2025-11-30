@@ -19,8 +19,7 @@ public:
   void RegisterActor(Actor *actor) { mActors.insert(actor); }
   void UnregisterActor(Actor *actor) { mActors.erase(actor); }
 
-  void LoadLevel(const std::string &levelPath, unsigned int width = 1000,
-                 unsigned int height = 1000);
+  void LoadLevel(const std::string &levelPath);
 
 private:
   std::unordered_set<Actor *> mActors;

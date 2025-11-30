@@ -129,6 +129,7 @@ void TestSceneB::Initialize() {
   mGame->SetPlayer(new Player(mGame));
   mGame->GetPlayer()->SetPosition(Vector3(0.0f, 1.0f, 0.0f));
   mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
+
   mGame->GetRenderer()->SetIsDark(false);
 
   // Load song before creating battle system
@@ -138,6 +139,9 @@ void TestSceneB::Initialize() {
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
 
+  LoadLevel("assets/levels/levelTeste.csv");
+
+  /*
   std::cout << MIDIPlayer::getChannels()[10].notes.size() << std::endl;
 
   auto grassCube = new GrassCubeActor(mGame);
@@ -283,4 +287,5 @@ void TestSceneB::Initialize() {
       new Ghost(mGame, 7, 1000), new RobotA(mGame, 8, 1000)};
   EnemyGroup *mixedEnemies = new EnemyGroup(mGame, mixedGroup);
   mixedEnemies->SetPosition(Vector3(10.0f, 1.0f, -5.0f));
+  */
 }

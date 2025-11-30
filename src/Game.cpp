@@ -99,8 +99,8 @@ bool Game::Initialize() {
   mTicksCount = SDL_GetTicks();
 
   // Create Chunk grid
-  mChunkGrid = new ChunkGrid(Vector3(-100.0f, -100.0f, -100.0f),
-                             Vector3(100.0f, 100.0f, 100.0f), 10.0f);
+  mChunkGrid = new ChunkGrid(Vector3(-1000.0f, -1000.0f, -1000.0f),
+                             Vector3(1000.0f, 1000.0f, 1000.0f), 100.0f);
 
   // Setting up SynthEngine
   SynthEngine::init();
