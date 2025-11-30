@@ -52,6 +52,10 @@ public:
     mBattleSystem = battleSystem;
   }
 
+  // UI Functions
+  void PushUI(class UIScreen *screen) { mUIStack.emplace_back(screen); }
+  const std::vector<class UIScreen *> &GetUIStack() { return mUIStack; }
+
 private:
   void ProcessInput();
   void UpdateGame(float deltaTime);
@@ -92,6 +96,9 @@ private:
 
   // Battle system
   BattleSystem *mBattleSystem;
+
+  // All UI screens in the game
+  std::vector<class UIScreen *> mUIStack;
 
   // Game state
   Uint32 mTicksCount;

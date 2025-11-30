@@ -1,6 +1,6 @@
 #include "Game.hpp"
+#include "../include/UI/HUDElement.hpp"
 #include "ChunkGrid.hpp"
-#include "HUDElement.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MIDI/SynthEngine.hpp"
 #include "Player.hpp"
@@ -24,6 +24,8 @@
 #include <cmath>
 #include <iostream>
 #include <unordered_set>
+
+#include "UI/Screen/UIScreen.hpp"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -124,7 +126,12 @@ void Game::LoadScene(Scene *scene) {
     // Cleanup current scene if present
     mPlayer = nullptr;
     if (mCurrentScene) {
+
+      // Clean up UI screens
+      mUIStack.clear();
+
       mCurrentScene->Cleanup();
+
       UpdateActors(0.0f);
       delete mCurrentScene;
 
@@ -302,8 +309,11 @@ void Game::ProcessInput() {
         SDL_SetWindowSize(mWindow, w, h);
       }
       break;
-    default:
-      break;
+    case SDL_KEYDOWN:
+      if (!mUIStack.empty()) {
+        // SDL_Log("Key Pressed and Passed to some UI.");
+        mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
+      }
     }
   }
 
@@ -403,8 +413,13 @@ void Game::FindActiveActors() {
 void Game::UpdateGame(float deltaTime) {
   // Handle pending scene change at the start of update (safe point)
   if (mPendingScene) {
+
+    // Clean up UI screens
+    mUIStack.clear();
+
     // Cleanup current scene if present
     if (mCurrentScene) {
+
       mPlayer = nullptr;
       mCurrentScene->Cleanup();
       delete mCurrentScene;
