@@ -1,12 +1,15 @@
 #include "Combatant.hpp"
+#include "../../include/actors/Combatant.hpp"
+
 #include "Game.hpp"
 #include "actors/NoteActor.hpp"
 #include "render/Renderer.hpp"
 
-Combatant::Combatant(Game *game, int channel, int health)
+Combatant::Combatant(Game *game, int channel, int health, CombatantType type)
     : Actor(game), mHealth(health), mMaxHealth(health), mChannel(channel % 8),
       mCombatantState(CombatantState::Idle), mTargetPosition(GetPosition()),
-      mMoveSpeed(COMBATANT_MOVE_SPEED), mSpriteComponent(nullptr) {
+      mMoveSpeed(COMBATANT_MOVE_SPEED), mSpriteComponent(nullptr),
+      mCombatantType(type){
   mGame->AddAlwaysActive(this);
   mColliderComponent = new SphereCollider(this, ColliderLayer::Entity,
                                           Vector3::Zero, 0.5f, false);
