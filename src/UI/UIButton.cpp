@@ -9,15 +9,19 @@ UIButton::UIButton(Game *game, std::function<void()> onClick, const std::string 
     : HUDElement(game, hudTexturePath, hudAtlasPath)
     , mOnClick(onClick)
     , mHighlighted(false)
+    , mAuxiliarScale(1.0f)
 {
+}
 
-
+UIButton::~UIButton() {
+    //delete mAuxiliarScale;
 }
 
 UIButton::UIButton(Game *game, std::function<void()> onClick, const std::string &singleImagePath)
     : HUDElement(game, singleImagePath)
     , mOnClick(onClick)
     , mHighlighted(false)
+    , mAuxiliarScale(1.0f)
 {
 
 

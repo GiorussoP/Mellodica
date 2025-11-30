@@ -10,7 +10,7 @@
 UIScreen::UIScreen(class Game *game, const std::string &fontName)
     :mGame(game)
     ,mState(UIState::Active)
-    ,mSelectedElement(-1)
+    ,mSelectedButton(-1)
 {
     mGame->PushUI(this);
     SDL_Log("UIScreen::UIScreen - Added UI to the Game UI Stack");
@@ -27,60 +27,36 @@ UIScreen::~UIScreen() {
     mHudButtons.clear();
 }
 
-HUDElement* UIScreen::AddImageOrElement(const std::string &hudTexturePath, const std::string &hudAtlasPath) {
-    auto hE = new HUDElement(mGame, hudTexturePath, hudAtlasPath);
-    mHudImages.push_back(hE);
-    return hE;
+void UIScreen::Update(float deltaTime)
+{
+
 }
 
-HUDElement* UIScreen::AddImageOrElement(const std::string &singleImagePath) {
-    auto hE = new HUDElement(mGame, singleImagePath);
-    mHudImages.push_back(hE);
-    return hE;
+void UIScreen::HandleKeyPress(int key)
+{
+
 }
 
 UIButton *UIScreen::AddButton(const std::string &hudTexturePath, const std::string &hudAtlasPath, std::function<void()> onClick) {
     auto hB = new UIButton(mGame, onClick, hudTexturePath, hudAtlasPath);
-    mHudButtons.push_back(hB);
+    mHudButtons.emplace_back(hB);
+
+    if (mHudButtons.size() == 1) {
+        mSelectedButton = 0;
+        hB->SetHighlighted(true);
+    }
+
     return hB;
 }
 
 UIButton *UIScreen::AddButton(const std::string &singleImagePath, std::function<void()> onClick) {
     auto hB = new UIButton(mGame, onClick, singleImagePath);
-    mHudButtons.push_back(hB);
+    mHudButtons.emplace_back(hB);
+
+    if (mHudButtons.size() == 1) {
+        mSelectedButton = 0;
+        hB->SetHighlighted(true);
+    }
+
     return hB;
 }
-
-/*
-void UIScreen::HandleKeyPress(int key)
-{
-    // Navigate between buttons with UP/DOWN arrows
-    if (key == SDLK_UP || key == SDLK_w)
-    {
-        // Move to previous button
-        if (mSelectedElement > 0)
-        {
-            mHudButtons[mSelectedElement]->SetHighlighted(false);
-            mSelectedElement--;
-            mHudButtons[mSelectedElement]->SetHighlighted(true);
-        }
-    }
-    else if (key == SDLK_DOWN || key == SDLK_s)
-    {
-        // Move to next button
-        if (mSelectedElement < static_cast<int>(mHudButtons.size()) - 1)
-        {
-            mHudButtons[mSelectedElement]->SetHighlighted(false);
-            mSelectedElement++;
-            mHudButtons[mSelectedElement]->SetHighlighted(true);
-        }
-    }
-    else if (key == SDLK_RETURN)
-    {
-        // Click the currently selected button
-        if (mSelectedElement >= 0 && mSelectedElement < static_cast<int>(mHudButtons.size()))
-        {
-            mHudButtons[mSelectedElement]->OnClick();
-        }
-    }
-}*/

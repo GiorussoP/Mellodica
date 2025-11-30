@@ -24,6 +24,8 @@
 #include <iostream>
 #include <unordered_set>
 
+#include "UI/Screen/UIScreen.hpp"
+
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 const int FPS = 60;
@@ -299,6 +301,11 @@ void Game::ProcessInput() {
         mRenderer->SetProjectionMatrix(orthoProjection);
       }
       break;
+    case SDL_KEYDOWN:
+      if (!mUIStack.empty()) {
+        //SDL_Log("Key Pressed and Passed to some UI.");
+        mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
+      }
     }
   }
 
@@ -336,6 +343,7 @@ void Game::ProcessInput() {
   for (auto &actor : mActiveActors) {
     actor->ProcessInput();
   }
+
 }
 
 void Game::UpdateActors(float deltaTime) {

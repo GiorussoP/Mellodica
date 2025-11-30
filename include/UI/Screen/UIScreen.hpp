@@ -17,18 +17,22 @@ public:
     };
 
     UIScreen(class Game *game, const std::string& fontName);
-    virtual ~UIScreen();
-
-    virtual void Update(float deltaTime);
-    virtual void HandleKeyPress(int key);
 
     void Close() {mState = UIState::Closing;}
 
     // HUDElements add
     HUDElement* AddImageOrElement(const std::string &hudTexturePath,
-                                  const std::string &hudAtlasPath);
+                                  const std::string &hudAtlasPath) {
+        auto hE = new HUDElement(mGame, hudTexturePath, hudAtlasPath);
+        mHudImages.push_back(hE);
+        return hE;
+    }
 
-    HUDElement* AddImageOrElement(const std::string &singleImagePath);
+    HUDElement* AddImageOrElement(const std::string &singleImagePath) {
+        auto hE = new HUDElement(mGame, singleImagePath);
+        mHudImages.push_back(hE);
+        return hE;
+    }
 
     // UI Buttons add
     UIButton* AddButton(const std::string &hudTexturePath,
@@ -38,6 +42,11 @@ public:
     UIButton* AddButton(const std::string &singleImagePath,
                         std::function<void()> onClick);
 
+    virtual ~UIScreen();
+
+    virtual void Update(float deltaTime);
+    virtual void HandleKeyPress(int key);
+
 
 protected:
     class Game* mGame;
@@ -45,7 +54,7 @@ protected:
 
     UIState mState;
 
-    int mSelectedElement;
+    int mSelectedButton;
     std::vector<HUDElement*> mHudImages;
     std::vector<UIButton*> mHudButtons;
 };
