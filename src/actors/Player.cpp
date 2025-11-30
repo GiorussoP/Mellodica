@@ -6,6 +6,7 @@
 #include "SpriteComponent.hpp"
 #include "SynthEngine.hpp"
 #include "TestActors.hpp"
+#include "TestScene.hpp"
 
 #include "MainMenu.hpp"
 #include "Texture.hpp"
@@ -26,7 +27,7 @@ Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
       mMoveRight(false), mRotateLeft(false), mRotateRight(false),
       mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ),
-      mFrontNote(-1), mHealth(100), mMaxHealth(100), mEnergy(100),
+      mFrontNote(-1), mHealth(500), mMaxHealth(500), mEnergy(100),
       mMaxEnergy(100) {
   // Mark player as always active so it's always visible
   game->AddAlwaysActive(this);
@@ -304,7 +305,7 @@ void Player::OnUpdate(float deltaTime) {
   if (mHealth <= 0) {
 
     // Push Main Menu
-    mGame->LoadScene(new MainMenu(mGame));
+    mGame->LoadScene(new TestSceneB(mGame));
   }
 }
 

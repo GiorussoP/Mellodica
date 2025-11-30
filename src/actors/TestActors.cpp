@@ -1,5 +1,7 @@
 #include "actors/TestActors.hpp"
 #include "MIDI/MIDIPlayer.hpp"
+#include "MainMenu.hpp"
+#include "TestScene.hpp"
 #include "components/ColliderComponent.hpp"
 #include "render/Mesh.hpp"
 #include "render/Renderer.hpp"
@@ -421,7 +423,7 @@ OBBTestActor::OBBTestActor(Game *game)
   // collider
   mColliderComponent =
       new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
-                      Vector3(0.5f, 1.5f, 0.5f), true);
+                      Vector3(0.5f, 0.5f, 0.5f), true);
 
   // Get texture from renderer cache
   Texture *texture =
@@ -429,10 +431,10 @@ OBBTestActor::OBBTestActor(Game *game)
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
-  Mesh *mesh = game->GetRenderer()->LoadMesh("wall");
+  Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
 
-  mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, 16);
-  SetScale(Vector3(7.0f, 1.0f, 1.0f));
+  mMeshComponent = new MeshComponent(this, *mesh, texture, atlas, 4);
+  SetScale(Vector3(1.0f, 1.0f, 1.0f));
 
   // Rotate 45 degrees around Y axis
   Quaternion rotation = Quaternion(Vector3::UnitY, Math::ToRadians(45.0f));
@@ -577,4 +579,18 @@ void MIDIControlActor::OnProcessInput() {
     std::cout << "===================================\n" << std::endl;
   }
   mPrevPPressed = pPressed;
+}
+
+TriggerActor::TriggerActor(Game *game) : Actor(game), mTriggered(false) {
+  // Register as always-active so it's included in collision detection
+  game->AddAlwaysActive(this);
+}
+
+void TriggerActor::OnUpdate(float deltaTime) {
+  if (!mTriggered &&
+      (mGame->GetPlayer()->GetPosition() - GetPosition()).Length() < 3.0f) {
+
+    mGame->LoadScene(new MainMenu(mGame));
+    mTriggered = true;
+  }
 }

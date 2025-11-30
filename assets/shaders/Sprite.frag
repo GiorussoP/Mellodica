@@ -22,6 +22,7 @@ out vec4 outColor;
 
 void main()
 {   
+
     // If fragTileIndex is negative (e.g. -1) treat this as a uniformly colored sprite
     if (fragTileIndex < 0.0)
     {

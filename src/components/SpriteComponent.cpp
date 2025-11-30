@@ -79,7 +79,7 @@ void SpriteComponent::AddAnimation(const std::string &name,
 
 int SpriteComponent::GetCurrentTileIndex() const {
   // Determine which tile index to use
-  int tileIndex = mTextureAtlas ? mTextureIndex : 0;
+  int tileIndex = mTextureAtlas ? mTextureIndex : -1;
 
   if (!mAnimations.empty() && !mAnimName.empty()) {
     // For animated sprites, get the tile index from the current animation frame

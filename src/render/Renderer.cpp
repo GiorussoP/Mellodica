@@ -714,9 +714,9 @@ void Renderer::ActivateMeshShader() {
   lightdir.Normalize();
   mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
   mMeshShader->SetVectorUniform("uDirectionalLightColor",
-                                Vector3(1.0f, 1.0f, 1.0f));
+                                Vector3(1.0f, 1.0f, 0.9f));
   mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.5f, 0.5f, 0.5f));
+                                Vector3(0.5f, 0.5f, 0.4f));
   mMeshShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
 }
 
@@ -747,9 +747,9 @@ void Renderer::ActivateMeshShaderForBloom() {
   lightdir.Normalize();
   mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
   mMeshShader->SetVectorUniform("uDirectionalLightColor",
-                                Vector3(1.0f, 1.0f, 1.0f));
+                                Vector3(1.0f, 1.0f, 0.9f));
   mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.5f, 0.5f, 0.5f));
+                                Vector3(0.5f, 0.5f, 0.4f));
   mMeshShader->SetIntegerUniform("uBloomPass", 1); // We're in bloom pass
 }
 

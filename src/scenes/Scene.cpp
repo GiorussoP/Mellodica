@@ -76,8 +76,8 @@ void Scene::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 4: {
-      auto wall = new GrassWall(mGame);
-      wall->SetPosition(Vector3(x, 2.0f, z));
+      auto wall = new RockCubeActor(mGame);
+      wall->SetPosition(Vector3(x, 1.0f, z));
       wall->SetScale(Vector3(size_x, 1.0f, size_y));
       break;
     }

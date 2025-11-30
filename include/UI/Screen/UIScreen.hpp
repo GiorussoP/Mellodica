@@ -22,13 +22,19 @@ public:
     }
     mState = UIState::Closing;
     for (auto img : mHudImages) {
-      img->SetState(ActorState::Destroy);
+      // button->SetState(ActorState::Destroy);
+      mGame->RemoveActor(img);
       mGame->GetRenderer()->RemoveUIElement(img);
+      // delete img;
     }
     for (auto button : mHudButtons) {
-      button->SetState(ActorState::Destroy);
+      // button->SetState(ActorState::Destroy);
+      mGame->RemoveActor(button);
       mGame->GetRenderer()->RemoveUIElement(button);
+      // delete button;
     }
+    mHudImages.clear();
+    mHudButtons.clear();
   }
 
   // HUDElements add

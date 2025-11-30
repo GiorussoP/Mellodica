@@ -10,16 +10,16 @@
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName) {
 
-  auto mB1 = AddButton("assets/textures/hud/hud.png",
-                       [this] { mGame->LoadScene(new TestSceneA(mGame)); });
+  auto mB1 = AddButton("assets/textures/hud/iniciar.png",
+                       [this] { mGame->LoadScene(new TestSceneB(mGame)); });
   SDL_Log("Button 1 Added!");
-  mB1->ButtonSetScale(Vector3(0.3f, 0.3f, 0.0f));
-  mB1->ButtonSetPosition(Vector3(0.0f, 0.5f, 0.0f));
+  mB1->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
+  mB1->ButtonSetPosition(Vector3(0.0f, 0.0f, 0.0f));
 
   auto mB2 =
-      AddButton("assets/textures/hud/hud.png", [this] { mGame->Quit(); });
+      AddButton("assets/textures/hud/sair.png", [this] { mGame->Quit(); });
   SDL_Log("Button 2 Added!");
-  mB2->ButtonSetScale(Vector3(0.3f, 0.3f, 0.0f));
+  mB2->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
   mB2->ButtonSetPosition(Vector3(0.0f, -0.5f, 0.0f));
 }
 

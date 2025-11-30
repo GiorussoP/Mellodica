@@ -27,7 +27,7 @@ public:
       mAuxiliarScale.x = mScale.x;
       mAuxiliarScale.y = mScale.y;
       mAuxiliarScale.z = mScale.z;
-      mScale *= 2;
+      mScale *= 1.1f;
     } else {
       mScale.x = mAuxiliarScale.x;
       mScale.y = mAuxiliarScale.y;

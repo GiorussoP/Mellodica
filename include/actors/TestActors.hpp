@@ -242,3 +242,13 @@ private:
   MeshComponent *mMeshComponent2;
   ColliderComponent *mColliderComponent;
 };
+
+// TODO: change to use collider
+class TriggerActor : public Actor {
+public:
+  TriggerActor(Game *game);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  bool mTriggered;
+};
