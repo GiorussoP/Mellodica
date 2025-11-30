@@ -191,22 +191,25 @@ void TestSceneB::Initialize() {
   std::cout << MIDIPlayer::getChannels()[10].notes.size() << std::endl;
 
   MIDIPlayer::play();
+  /*
+    auto testMario = new MarioActor(mGame);
+    testMario->SetPosition(Vector3(-5.0f, 1.0f, 0.0f));
 
-  auto testMario = new MarioActor(mGame);
-  testMario->SetPosition(Vector3(-5.0f, 1.0f, 0.0f));
+    auto testGoomba = new GoombaActor(mGame);
+    testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
 
-  auto testGoomba = new GoombaActor(mGame);
-  testGoomba->SetPosition(Vector3(4.0f, 1.0f, -12.0f));
+    auto obbTest1 = new OBBTestActor(mGame);
+    obbTest1->SetPosition(Vector3(5.0f, 1.0f, 12.0f));
+    obbTest1->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
 
-  auto obbTest1 = new OBBTestActor(mGame);
-  obbTest1->SetPosition(Vector3(5.0f, 1.0f, 12.0f));
-  obbTest1->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(45.0f)));
+    auto cube2 = new CubeActor(mGame, Color::Cyan, 0);
+    cube2->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+    cube2->SetScale(Vector3(32.0f, 1.0f, 32.0f));
+    mGame->AddAlwaysActive(cube2);
 
-  auto cube2 = new CubeActor(mGame, Color::Cyan, 0);
-  cube2->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-  cube2->SetScale(Vector3(32.0f, 1.0f, 32.0f));
-  mGame->AddAlwaysActive(cube2);
+    MultiDrawablesActor *multiDrawablesActor = new MultiDrawablesActor(mGame);
+    multiDrawablesActor->SetPosition(Vector3(-10.0f, 1.0f, 10.0f));
+    */
 
-  MultiDrawablesActor *multiDrawablesActor = new MultiDrawablesActor(mGame);
-  multiDrawablesActor->SetPosition(Vector3(-10.0f, 1.0f, 10.0f));
+  LoadLevel("assets/levels/levelTeste.csv");
 }
