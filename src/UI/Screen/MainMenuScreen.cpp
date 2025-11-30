@@ -14,13 +14,13 @@ MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
                        [this] { mGame->LoadScene(new TestSceneB(mGame)); });
   SDL_Log("Button 1 Added!");
   mB1->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
-  mB1->ButtonSetPosition(Vector3(0.0f, 0.0f, 0.0f));
+  mB1->ButtonSetPosition(Vector3(0.0f, 0.25f, 0.0f));
 
   auto mB2 =
       AddButton("assets/textures/hud/sair.png", [this] { mGame->Quit(); });
   SDL_Log("Button 2 Added!");
   mB2->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
-  mB2->ButtonSetPosition(Vector3(0.0f, -0.5f, 0.0f));
+  mB2->ButtonSetPosition(Vector3(0.0f, -0.2f, 0.0f));
 }
 
 MainMenuScreen::~MainMenuScreen() { UIScreen::~UIScreen(); }
