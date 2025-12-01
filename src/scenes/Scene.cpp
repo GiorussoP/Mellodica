@@ -37,6 +37,8 @@ void Scene::LoadLevel(const std::string &levelPath) {
 
   std::cout << "Loading level from: " << levelPath << std::endl;
 
+  int enemyCounter = 1;
+
   std::cout << "Loading terrain..." << std::endl;
   MapReader mapReader(levelPath + "_terrain.csv");
 
@@ -422,7 +424,6 @@ void Scene::LoadLevel(const std::string &levelPath) {
     }
 
     case 9: {
-      static int enemyCounter = 1;
       int enemyValue = enemyCounter++;
       std::vector<Combatant *> enemies;
       for (int i = 0; i < 8; i++) {
