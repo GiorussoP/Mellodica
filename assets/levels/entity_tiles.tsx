@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="Objetos/Entidades" tilewidth="64" tileheight="64" tilecount="10" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="Objetos/Entidades" tilewidth="64" tileheight="64" tilecount="11" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image source="../sprites/textures/bush-32x32.png" width="32" height="32"/>
@@ -30,5 +30,8 @@
  </tile>
  <tile id="10">
   <image source="../sprites/visualtree.png" width="64" height="64"/>
+ </tile>
+ <tile id="11">
+  <image source="../sprites/textures/HPitem.png" width="32" height="32"/>
  </tile>
 </tileset>

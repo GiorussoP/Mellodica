@@ -22,6 +22,13 @@ public:
   int getHealth() const { return mHealth; }
   int getMaxHealth() const { return mMaxHealth; }
 
+  void AddHealth(int amount) {
+    mHealth += amount;
+    if (mHealth > mMaxHealth) {
+      mHealth = mMaxHealth;
+    }
+  }
+
   float getEnergy() const { return mEnergy; }
   float getMaxEnergy() const { return mMaxEnergy; }
 

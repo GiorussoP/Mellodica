@@ -8,6 +8,7 @@
 #include "EnemyGroup.hpp"
 #include "Ghost.hpp"
 #include "Renderer.hpp"
+#include "actors/PuzzleActors.hpp"
 #include "actors/TestActors.hpp"
 
 void Scene::Cleanup() {
@@ -377,6 +378,11 @@ void Scene::LoadLevel(const std::string &levelPath) {
     case 10: {
       auto tree = new VisualTree(mGame);
       tree->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+    case 11: {
+      auto hpitem = new HPItemActor(mGame);
+      hpitem->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
     case 5: {

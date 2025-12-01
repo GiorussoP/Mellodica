@@ -6,6 +6,7 @@
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
 #include "actors/Player.hpp"
+#include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
 #include "actors/TestActors.hpp"
 

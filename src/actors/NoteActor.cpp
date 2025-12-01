@@ -64,8 +64,8 @@ void NoteActor::End() { mIsPlaying = false; }
 void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
   if (other->GetLayer() == ColliderLayer::Entity) {
-    Combatant *otherCombatant = static_cast<Combatant *>(other->GetOwner());
-    if (otherCombatant->GetCombatantState() == CombatantState::Dead)
+    Combatant *otherCombatant = dynamic_cast<Combatant *>(other->GetOwner());
+    if (otherCombatant && otherCombatant->GetCombatantState() == CombatantState::Dead)
       return;
   }
 
