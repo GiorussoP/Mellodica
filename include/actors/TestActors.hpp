@@ -169,14 +169,20 @@ public:
 
 class DoorWall : public SolidWallActor {
 public:
-  DoorWall(Game *game, const Vector3 &color = Color::White)
-      : SolidWallActor(game, color, 16) {}
+  DoorWall(Game *game, const Vector3 &color = Color::White);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  MeshComponent *mRoofComponent;
 };
 
 class WindowWall : public SolidWallActor {
 public:
-  WindowWall(Game *game, const Vector3 &color = Color::White)
-      : SolidWallActor(game, color, 12) {}
+  WindowWall(Game *game, const Vector3 &color = Color::White);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  MeshComponent *mRoofComponent;
 };
 
 class EntranceWall : public WallActor {

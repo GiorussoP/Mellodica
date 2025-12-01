@@ -79,6 +79,48 @@ void SolidWallActor::OnUpdate(float deltaTime) {
   WallActor::OnUpdate(deltaTime);
 }
 
+DoorWall::DoorWall(Game *game, const Vector3 &color)
+    : SolidWallActor(game, color, 16), mRoofComponent(nullptr) {
+  // Add roof MeshComponent - Pyramid
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
+    mRoofComponent = new MeshComponent(this, *mesh, texture, atlas, 50);
+    mRoofComponent->SetColor(Color::White);
+    mRoofComponent->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
+    mRoofComponent->SetScale(Vector3(1.5f, 0.5f, 1.5f));
+  }
+}
+
+void DoorWall::OnUpdate(float deltaTime) {
+  SolidWallActor::OnUpdate(deltaTime);
+}
+
+WindowWall::WindowWall(Game *game, const Vector3 &color)
+    : SolidWallActor(game, color, 12), mRoofComponent(nullptr) {
+  // Add roof MeshComponent - Pyramid
+  {
+    Texture *texture =
+        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+    TextureAtlas *atlas =
+        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+    atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+    Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
+    mRoofComponent = new MeshComponent(this, *mesh, texture, atlas, 50);
+    mRoofComponent->SetColor(Color::White);
+    mRoofComponent->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
+    mRoofComponent->SetScale(Vector3(1.5f, 0.5f, 1.5f));
+  }
+}
+
+void WindowWall::OnUpdate(float deltaTime) {
+  SolidWallActor::OnUpdate(deltaTime);
+}
+
 TreeActor::TreeActor(Game *game) : Actor(game) {
   Texture *texture =
       game->GetRenderer()->LoadTexture("./assets/sprites/tree.png");
