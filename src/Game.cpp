@@ -338,11 +338,11 @@ void Game::ProcessInput() {
       }
     }
   }
-  if (Input::WasKeyPressed(SDL_SCANCODE_F2)) {
+  if (Input::WasKeyPressed(SDL_SCANCODE_M)) {
     LoadScene(new TestSceneA(this));
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_F3)) {
-    LoadScene(new TestSceneB(this));
+    // LoadScene(new TestSceneB(this));
   }
 
   if (Input::WasKeyPressed(SDL_SCANCODE_F1)) {
