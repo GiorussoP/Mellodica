@@ -65,10 +65,13 @@ void main()
     vec3 lighting = uAmbientLightColor + (uDirectionalLightColor * lightIntensity);
 
     // Apply lighting to base color
-    baseColor *= lighting;
+    if(uBloomPass != 1){ 
+            baseColor *= lighting;
+    }
+
 
     // render as black to provide occlusion
-    if (uBloomPass == 1 && fragColor.r < 0.0)
+    if (uBloomPass == 1 && fragColor.r < 0.0 && baseColor.r < 0.7 && baseColor.g < 0.7 && baseColor.b < 0.7)
     {
         outColor = vec4(0.0, 0.0, 0.0, texColor.a);
         return;

@@ -3,6 +3,7 @@
 #include "Game.hpp"
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 
 #include "EnemyGroup.hpp"
 #include "Ghost.hpp"
@@ -364,13 +365,17 @@ void Scene::LoadLevel(const std::string &levelPath) {
   for (const auto actor : objMapReader.GetMapActors()) {
 
     int type = static_cast<int>(std::get<3>(actor));
-
     float x = std::get<0>(actor).y;
     float z = -std::get<0>(actor).x;
 
     switch (type) {
     case 6: {
       auto tree = new TreeActor(mGame);
+      tree->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+    case 10: {
+      auto tree = new VisualTree(mGame);
       tree->SetPosition(Vector3(x, 1.0f, z));
       break;
     }

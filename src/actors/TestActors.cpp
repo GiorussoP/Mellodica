@@ -141,6 +141,23 @@ TreeActor::TreeActor(Game *game) : Actor(game) {
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
 }
 
+VisualTree::VisualTree(Game *game) : Actor(game) {
+  Texture *texture =
+      game->GetRenderer()->LoadTexture("./assets/sprites/tree.png");
+  TextureAtlas *atlas =
+      game->GetRenderer()->LoadAtlas("./assets/sprites/tree.json");
+  atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
+
+  mSpriteComponent = new SpriteComponent(
+      this, game->GetRenderer()->GetTextureIndex(texture), atlas);
+  mSpriteComponent->SetColor(Color::White);
+  mSpriteComponent->SetOffset(Vector3(0.0f, 0.25f, 0.0f));
+  mSpriteComponent->SetScale(Vector3(1.5f, 1.5f, 1.0f));
+  mSpriteComponent->AddAnimation("idle", {"tree-64x64.png"});
+  mSpriteComponent->SetAnimFPS(0.0f);
+  mSpriteComponent->SetAnimation("idle");
+}
+
 SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
   Texture *texture =
       game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");

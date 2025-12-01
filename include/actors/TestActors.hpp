@@ -84,6 +84,14 @@ private:
   ColliderComponent *mColliderComponent;
 };
 
+class VisualTree : public Actor {
+public:
+  VisualTree(Game *game);
+
+private:
+  SpriteComponent *mSpriteComponent;
+};
+
 class SmallRockActor : public Actor {
 public:
   SmallRockActor(Game *game);
@@ -141,7 +149,7 @@ public:
             int startingIndex = -1);
   void OnUpdate(float deltaTime) override;
 
-private:
+protected:
   MeshComponent *mMeshComponent;
 };
 
