@@ -23,6 +23,7 @@ As mecânicas básicas do jogo envolvem andar livremente por um nível e atirar 
 Ao se aproximar de um inimigo (ou grupo de inimigos), a orientação da câmera é fixada em sua direção, e uma batalha se inicia. Em uma batalha, é possível movimentar-se lateralmente, para desviar das notas lançadas pelos inimigos, para frente, para se aproximar deles, ou para trás, para se afastar ou fugir do conflito. Tanto o jogador quanto os inimigos podem tocar notas musicais para causar dano ao oponente. Caso a vida de um inimigo chegue a zero, ele é derrotado e o jogador ganha pontos de experiência, que são traduzidos para um aumento na vida e na energia máximas. Além disso, é possível defender as notas lançadas pelos inimigos, ao tocar o mesmo semitom pela mesma duração, anulando-a. 
 
 ![Batalha](./screenshots/battle1.png)
+![Batalha](./screenshots/battle2.png)
 
 **OBS**: A mecanica abaixo ainda nao foi implementada, no momento os inimigos sao automaticamente capturados quando derrotados.
 Ao anular N notas seguidas de um inimigo (cujo N é específico para cada um) ele é “capturado” saindo da batalha e entrando no inventário do jogador. A batalha termina quando todos os inimigos tiverem sido eliminados ou capturados.
