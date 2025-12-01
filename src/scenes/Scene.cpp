@@ -358,6 +358,7 @@ void Scene::LoadLevel(const std::string &levelPath) {
   std::cout << "Loading objects..." << std::endl;
   MapReader objMapReader(levelPath + "_objects.csv", false);
 
+  short int enemy = 1;
   for (const auto actor : objMapReader.GetMapActors()) {
 
     int type = static_cast<int>(std::get<3>(actor));
@@ -421,7 +422,15 @@ void Scene::LoadLevel(const std::string &levelPath) {
     }
 
     case 9: {
-      auto enemy = new EnemyGroup(mGame, {new Ghost(mGame, 0, 1)});
+      static int enemyCounter = 1;
+      int enemyValue = enemyCounter++;
+      std::vector<Combatant *> enemies;
+      for (int i = 0; i < 8; i++) {
+        if (enemyValue & (1 << i)) {
+          enemies.push_back(new Ghost(mGame, i, 500));
+        }
+      }
+      auto enemy = new EnemyGroup(mGame, enemies);
       enemy->SetPosition(Vector3(x, 1.0f, z));
       break;
     }

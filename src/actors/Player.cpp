@@ -1,14 +1,13 @@
 #include "Player.hpp"
 #include "Game.hpp"
+#include "Level1.hpp"
 #include "MIDIPlayer.hpp"
+#include "MainMenu.hpp"
 #include "NoteActor.hpp"
 #include "Renderer.hpp"
 #include "SpriteComponent.hpp"
 #include "SynthEngine.hpp"
 #include "TestActors.hpp"
-#include "TestScene.hpp"
-
-#include "MainMenu.hpp"
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
 
@@ -305,7 +304,7 @@ void Player::OnUpdate(float deltaTime) {
   if (mHealth <= 0) {
 
     // Push Main Menu
-    mGame->LoadScene(new TestSceneB(mGame));
+    mGame->LoadScene(new Level1(mGame));
   }
 }
 
