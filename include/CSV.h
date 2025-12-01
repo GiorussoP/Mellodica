@@ -37,7 +37,7 @@ inline std::vector<int> Split(const std::string &str, char delim = ',') {
 // TODO: Rename this class
 class MapReader {
 public:
-  explicit MapReader(const std::string &filePath);
+  explicit MapReader(const std::string &filePath, bool merge = true);
 
   std::vector<std::tuple<Vector2, int, int, unsigned int>> &GetMapActors() {
     return mapActors;

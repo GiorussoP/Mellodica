@@ -188,32 +188,46 @@ void MapReader::PartitionGrid() {
   }
 }
 
-MapReader::MapReader(const std::string &filePath) {
-  // TODO: fix this function
-  height = numberOfLines(filePath) + 1;
-  grid.assign(height, {});
+MapReader::MapReader(const std::string &filePath, bool merge) {
   std::ifstream file(filePath);
   if (!file) {
     SDL_Log("[MapReader] Could not open file %s", filePath.c_str());
     exit(1);
   }
-  std::stringstream buffer;
-  buffer << file.rdbuf();
+  std::vector<std::string> lines;
+  std::string line;
+  while (std::getline(file, line)) {
+    if (!line.empty()) {
+      lines.push_back(line);
+    }
+  }
+  height = lines.size();
+  grid.assign(height, std::vector<int>());
   SDL_Log("[MapReader] Loading level %s\n", filePath.c_str());
   width = 0;
   for (unsigned i = 0; i < height; i++) {
-    std::string line;
-    buffer >> line;
-    auto entries = CSVHelper::Split(line);
+    auto entries = CSVHelper::Split(lines[i]);
     if (width == 0)
       width = entries.size();
-    for (int entry : entries) {
-      grid[i].push_back(entry);
-    }
+    grid[i] = entries;
   }
 
   SDL_Log("[MapReader] Loaded level with dimensions %d, %d", width, height);
 
-  SDL_Log("[MapReader] Getting partition...");
-  PartitionGrid();
+  if (merge) {
+    SDL_Log("[MapReader] Getting partition...");
+    PartitionGrid();
+    std::cout << "Read " << mapActors.size() << " actors from map."
+              << std::endl;
+  } else {
+    for (unsigned i = 0; i < height; i++) {
+      for (unsigned j = 0; j < grid[i].size(); j++) {
+        mapActors.emplace_back(Vector2((float)i, (float)j), 1, 1,
+                               static_cast<unsigned int>(grid[i][j]));
+      }
+    }
+
+    std::cout << "Read " << mapActors.size() << " actors from map."
+              << std::endl;
+  }
 }

@@ -5,13 +5,13 @@
 #include "../../../include/UI/Screen/MainMenuScreen.hpp"
 
 #include "Game.hpp"
-#include "TestScene.hpp"
+#include "Level1.hpp"
 
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName) {
 
   auto mB1 = AddButton("assets/textures/hud/iniciar.png",
-                       [this] { mGame->LoadScene(new TestSceneB(mGame)); });
+                       [this] { mGame->LoadScene(new Level1(mGame)); });
   SDL_Log("Button 1 Added!");
   mB1->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
   mB1->ButtonSetPosition(Vector3(0.0f, 0.25f, 0.0f));

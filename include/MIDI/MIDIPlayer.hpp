@@ -81,26 +81,58 @@ public:
   static void unregisterChannelForEvents(int channel);
   static void clearRegisteredChannels();
 
-  static void loadSong2() {
-    SynthEngine::setChannels({{0, 36}, // Slap Bass
-                              {0, 1},  // Piano
-                              {0, 50}, // Strings
-                              {0, 30}, // Distorted Guitar
-                              {0, 62}, // Synth Brass
-                              {0, 54}, // Soprano voice
-                              {0, 80}, // Square lead
-                              {0, 78}, // Whistle
-                              {0, 66},
-                              {128, 0},
-                              {0, 89},
-                              {0, 73},
-                              {0, 57},
-                              {0, 42},
-                              {0, 11},
-                              {0, 52}});
+  static void loadMainTheme() {
+
+    SynthEngine::setChannels({{0, 0},  // Grand Piano
+                              {0, 49}, // Slow Strings
+                              {0, 73}, // Flute
+                              {0, 10}, // Music box
+                              {0, 56}, // Trumpet
+                              {0, 32}, // Acoustic bass
+                              {0, 0},
+                              {0, 0},
+                              {0, 0},
+                              {128, 0}, // Drums 1
+                              {0, 0},
+                              {128, 1}, // Drums 2
+                              {0, 0},   // Player Channel: Piano
+                              {0, 0},
+                              {0, 0},
+                              {0, 0}});
 
     // Initializing MIDI Player
-    MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
+    MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+
+    MIDIPlayer::setChannelVolume(0, 127);
+    MIDIPlayer::setChannelVolume(1, 127);
+    MIDIPlayer::setChannelVolume(2, 127);
+    MIDIPlayer::setChannelVolume(3, 127);
+    MIDIPlayer::setChannelVolume(4, 127);
+    MIDIPlayer::setChannelVolume(5, 127);
+    MIDIPlayer::setChannelVolume(6, 127);
+
+    MIDIPlayer::setChannelVolume(9, 127);
+  }
+
+  static void loadSong0() {
+    SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
+                              {0, 40},  // Violin
+                              {0, 21},  // Accordion
+                              {0, 43},  // Contrabass
+                              {0, 73},  // Flute
+                              {0, 71},  // Clarinet
+                              {0, 56},  // Trumpet
+                              {0, 46},  // Harp
+                              {0, 0},   // Always active: Piano
+                              {128, 0}, // Battle drums
+                              {0, 49},  // Always active: Slow strings
+                              {128, 1}, // Always Active: song drums
+                              {0, 0},   // Player Channel: Piano
+                              {0, 42},  // SFX1
+                              {0, 11},  // SFX2
+                              {0, 0}}); // SFX3
+
+    MIDIPlayer::loadSong("assets/songs/a0.mid", true);
 
     MIDIPlayer::setChannelTranspose(11, -60);
   }
@@ -124,6 +156,30 @@ public:
                               {0, 0}}); // SFX3
 
     MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+
+    MIDIPlayer::setChannelTranspose(11, -60);
+  }
+
+  static void loadSong2() {
+    SynthEngine::setChannels({{0, 36}, // Slap Bass
+                              {0, 1},  // Piano
+                              {0, 50}, // Strings
+                              {0, 30}, // Distorted Guitar
+                              {0, 62}, // Synth Brass
+                              {0, 54}, // Soprano voice
+                              {0, 80}, // Square lead
+                              {0, 78}, // Whistle
+                              {0, 66},
+                              {128, 0},
+                              {0, 89},
+                              {0, 73},
+                              {0, 57},
+                              {0, 42},
+                              {0, 11},
+                              {0, 52}});
+
+    // Initializing MIDI Player
+    MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
 
     MIDIPlayer::setChannelTranspose(11, -60);
   }

@@ -69,6 +69,12 @@ public:
       : SolidCubeActor(game, color, 4) {}
 };
 
+class SandCubeActor : public SolidCubeActor {
+public:
+  SandCubeActor(Game *game, const Vector3 &color = Color::White)
+      : SolidCubeActor(game, color, 6) {}
+};
+
 class TreeActor : public Actor {
 public:
   TreeActor(Game *game);
@@ -129,14 +135,23 @@ private:
   SpriteComponent *mSpriteComponent;
 };
 
-class SolidWallActor : public Actor {
+class WallActor : public Actor {
+public:
+  WallActor(Game *game, const Vector3 &color = Color::White,
+            int startingIndex = -1);
+  void OnUpdate(float deltaTime) override;
+
+private:
+  MeshComponent *mMeshComponent;
+};
+
+class SolidWallActor : public WallActor {
 public:
   SolidWallActor(Game *game, const Vector3 &color = Color::White,
                  int startingIndex = -1);
   void OnUpdate(float deltaTime) override;
 
 private:
-  MeshComponent *mMeshComponent;
   ColliderComponent *mColliderComponent;
 };
 
@@ -155,7 +170,7 @@ public:
 class DoorWall : public SolidWallActor {
 public:
   DoorWall(Game *game, const Vector3 &color = Color::White)
-      : SolidWallActor(game, color, 8) {}
+      : SolidWallActor(game, color, 16) {}
 };
 
 class WindowWall : public SolidWallActor {
@@ -164,10 +179,10 @@ public:
       : SolidWallActor(game, color, 12) {}
 };
 
-class EntranceWall : public SolidWallActor {
+class EntranceWall : public WallActor {
 public:
   EntranceWall(Game *game, const Vector3 &color = Color::White)
-      : SolidWallActor(game, color, 16) {}
+      : WallActor(game, color, 8) {}
 };
 
 class MarioActor : public Actor {
@@ -247,7 +262,7 @@ private:
 class TriggerActor : public Actor {
 public:
   TriggerActor(Game *game);
-  void OnUpdate(float deltaTime) override;
+  void OnCollision(Vector3 penetration, ColliderComponent *other) override;
 
 private:
   bool mTriggered;

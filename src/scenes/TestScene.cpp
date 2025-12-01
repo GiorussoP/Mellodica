@@ -115,25 +115,18 @@ void TestSceneA::Initialize() {
 void TestSceneB::Initialize() {
   std::cout << "Initializing TestSceneB..." << std::endl;
 
-  // Creating the Player actor
-  mGame->SetPlayer(new Player(mGame));
-  mGame->GetPlayer()->SetPosition(Vector3(15.0f, 1.0f, 15.0f));
-  mGame->GetPlayer()->GetComponent<SpriteComponent>()->SetBloomed(false);
-
   mGame->GetRenderer()->SetIsDark(false);
-  mGame->GetCamera()->SetMode(CameraMode::Isometric);
-  mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
-  mGame->GetCamera()->SetIsometricDirection(IsometricDirections::NorthEast);
 
   // Load song before creating battle system
-  MIDIPlayer::loadSong1();
+  MIDIPlayer::loadSong0();
+
+  LoadLevel("assets/levels/level1");
 
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
 
-  LoadLevel("assets/levels/levelTeste.csv");
-
+  /*
   auto tree = new TreeActor(mGame);
   tree->SetPosition(Vector3(16.0f, 1.0f, 11.0f));
 

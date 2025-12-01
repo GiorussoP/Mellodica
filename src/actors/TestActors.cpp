@@ -43,15 +43,14 @@ void SolidCubeActor::OnUpdate(float deltaTime) {
   CubeActor::OnUpdate(deltaTime);
 }
 
-// SolidWallActor implementation
-SolidWallActor::SolidWallActor(Game *game, const Vector3 &color,
-                               int startingIndex)
-    : Actor(game), mMeshComponent(nullptr), mColliderComponent(nullptr) {
+// WallActor implementation
+WallActor::WallActor(Game *game, const Vector3 &color, int startingIndex)
+    : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/wall.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/wall.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -60,14 +59,24 @@ SolidWallActor::SolidWallActor(Game *game, const Vector3 &color,
   mMeshComponent =
       new MeshComponent(this, *mesh, texture, atlas, startingIndex);
   mMeshComponent->SetColor(color);
+}
 
+void WallActor::OnUpdate(float deltaTime) {
+  // No specific behavior for wall - just render
+}
+
+// SolidWallActor implementation
+SolidWallActor::SolidWallActor(Game *game, const Vector3 &color,
+                               int startingIndex)
+    : WallActor(game, color, startingIndex), mColliderComponent(nullptr) {
   // Add AABB collider (wall is 1x3x1 units, so half-extents 0.5, 1.5, 0.5)
   mColliderComponent = new AABBCollider(
       this, ColliderLayer::Ground, Vector3::Zero, Vector3(0.5f, 1.5f, 0.5f));
 }
 
 void SolidWallActor::OnUpdate(float deltaTime) {
-  // No specific behavior for wall - just render
+  // Call base class update
+  WallActor::OnUpdate(deltaTime);
 }
 
 TreeActor::TreeActor(Game *game) : Actor(game) {
@@ -219,7 +228,7 @@ GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
 }
 
 void GroundActor::OnUpdate(float deltaTime) {
-  // No specific behavior for ground - just render
+  // No specific behavior for ground - just rendere
 }
 
 MultiDrawablesActor::MultiDrawablesActor(Game *game)
@@ -229,12 +238,12 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // First MeshComponent - Cube
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/wall.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/wall.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
-    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 6);
+    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 5);
     mMeshComponent1->SetColor(Color::White);
     mMeshComponent1->SetScale(Vector3(1.5f, 2.0f, 1.5f));
     mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
@@ -324,7 +333,7 @@ HouseActor::HouseActor(Game *game)
         game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
-    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 6);
+    mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 5);
     mMeshComponent1->SetColor(Color::White);
     mMeshComponent1->SetScale(Vector3(1.5f, 2.0f, 1.5f));
     mMeshComponent1->SetOffset(Vector3(0.0f, 0.5f, 0.0f));
@@ -584,12 +593,14 @@ void MIDIControlActor::OnProcessInput() {
 TriggerActor::TriggerActor(Game *game) : Actor(game), mTriggered(false) {
   // Register as always-active so it's included in collision detection
   game->AddAlwaysActive(this);
+
+  // Add AABB collider
+  new AABBCollider(this, ColliderLayer::Entity, Vector3::Zero,
+                   Vector3(1.0f, 1.0f, 1.0f), true);
 }
 
-void TriggerActor::OnUpdate(float deltaTime) {
-  if (!mTriggered &&
-      (mGame->GetPlayer()->GetPosition() - GetPosition()).Length() < 3.0f) {
-
+void TriggerActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
+  if (!mTriggered && other->GetOwner() == mGame->GetPlayer()) {
     mGame->LoadScene(new MainMenu(mGame));
     mTriggered = true;
   }
