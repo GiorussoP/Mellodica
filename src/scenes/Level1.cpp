@@ -17,13 +17,10 @@ void Level1::Initialize() {
 
   LoadLevel("assets/levels/level1");
 
-  auto item = new HPItemActor(mGame);
-  item->SetPosition(mGame->GetPlayer()->GetPosition() +
-                    Vector3(5.0f, 0.0f, 0.0f));
-
+  // TODO: Colocar no editor de mapas
   auto musicButton = new MusicButtonActor(mGame, 60); // C4
   musicButton->SetPosition(mGame->GetPlayer()->GetPosition() +
-                           Vector3(-3.0f, 1.0f, 0.0f));
+                           Vector3(-3.0f, 0.5f, 0.0f));
 
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));

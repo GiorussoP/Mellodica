@@ -4,6 +4,7 @@
 #include "MIDIPlayer.hpp"
 #include "MainMenu.hpp"
 #include "NoteActor.hpp"
+#include "PlayerHud.hpp"
 #include "Renderer.hpp"
 #include "SpriteComponent.hpp"
 #include "SynthEngine.hpp"
@@ -43,6 +44,8 @@ Player::Player(Game *game)
   // mColliderComponent =
   //     new OBBCollider(this, ColliderLayer::Player, Vector3::Zero,
   //                    Vector3(0.5f, 0.5f, 0.5f), false);
+
+  new PlayerHud(mGame);
 
   // Get atlas from renderer cache
   TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(

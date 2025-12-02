@@ -452,9 +452,13 @@ void Game::UpdateGame(float deltaTime) {
   // Check collisions after all actors have been updated
   CheckCollisions();
 
-  if (mUIStack.size() > 0 &&
-      mUIStack.back()->GetUIState() != UIScreen::UIState::Closing) {
-    mUIStack.back()->Update(deltaTime);
+  if (mUIStack.size() > 0) {
+    for (size_t i = 0; i < mUIStack.size() - 1; i++) {
+      if (mUIStack[i]->GetUIState() == UIScreen::UIState::Closing) {
+        continue;
+      }
+      mUIStack[i]->Update(deltaTime);
+    }
   }
 }
 

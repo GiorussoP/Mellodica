@@ -12,9 +12,6 @@ public:
   void Update(float deltaTime);
 
 private:
-  HUDElement *mHPrect;
-  HUDElement *mENrect;
-
   std::vector<HUDElement *> mEnemyHPrects;
 
   std::vector<HUDElement *> mAllyHPrects;
