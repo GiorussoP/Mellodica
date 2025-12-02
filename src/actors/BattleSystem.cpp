@@ -26,7 +26,7 @@ BattleSystem::BattleSystem(Game *game)
 
   mEdge = new MeshComponent(this, *mesh);
   mEdge->SetColor(Color::White);
-  mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
+  mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
   mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
   mEdge->SetBloomed(true);
 

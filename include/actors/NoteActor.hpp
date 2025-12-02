@@ -35,6 +35,7 @@ public:
 
   unsigned int GetMidiChannel() const { return mMidiChannel; }
   unsigned int GetNote() const { return mMidiNote; }
+  Vector3 GetDirection() const { return mDirection; }
 
 private:
   unsigned int mMidiChannel;

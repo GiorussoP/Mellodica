@@ -339,12 +339,10 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
     return;
   }
 
-  if (other->GetLayer() == ColliderLayer::Note &&
-      mGame->GetBattleSystem()->IsInBattle()) {
+  if (other->GetLayer() == ColliderLayer::Note) {
     // Take Damage
     mSpriteComponent->SetColor(Color::Red);
     mSpriteComponent->SetBloomed(true);
-
     mHealth -= 1;
     if (mHealth < 0) {
       mHealth = 0;
