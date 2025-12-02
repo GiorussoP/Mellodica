@@ -92,6 +92,7 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
 
   mEdge->SetVisible(true);
   mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
+  mField->SetVisible(true);
   mField->SetScale(Vector3(1.0f, 1.0f, 0.0f));
   mPosition = mGame->GetPlayer()->GetPosition() + mBattleDir;
   mRotation = Math::LookRotation(mBattleDir);
@@ -466,6 +467,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
         }
       }
       mEdge->SetVisible(visible);
+      mField->SetVisible(visible);
 
     } else {
 
@@ -485,6 +487,9 @@ void BattleSystem::OnUpdate(float deltaTime) {
         mField->SetOffset(Vector3(0.0f, -0.9f, 0.0f));
         mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
         mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
+
+        mField->SetVisible(false);
+        mEdge->SetVisible(false);
 
         mPosition = pos;
         mRotation = mGame->GetPlayer()->GetRotation();
