@@ -7,6 +7,9 @@ PlayerHud::PlayerHud(class Game *game)
   // Add HUD elements here, e.g., health bar, energy bar, etc.
 
   // Player energy
+  auto energiaBackground = AddImageOrElement(Color::Black);
+  energiaBackground->SetPosition(Vector3(mLeftBarCenter, -0.9f, -1.0f));
+  energiaBackground->SetScale(mBarSize);
   auto energia =
       AddImageOrElement("./assets/sprites/textures/hud-energia-70x20.png");
   energia->SetPosition(Vector3(mLeftBarCenter, -0.9f, 1.0f));
@@ -16,6 +19,9 @@ PlayerHud::PlayerHud(class Game *game)
   mENrect->SetScale(mBarSize);
 
   // Player health
+  auto vidaBackground = AddImageOrElement(Color::Black);
+  vidaBackground->SetPosition(Vector3(mLeftBarCenter, -0.7f, -1.0f));
+  vidaBackground->SetScale(mBarSize);
   auto vida = AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
   vida->SetPosition(Vector3(mLeftBarCenter, -0.7f, 1.0f));
   vida->SetScale(mBorderSize);

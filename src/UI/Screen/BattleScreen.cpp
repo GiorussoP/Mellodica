@@ -11,6 +11,13 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
   // Enemy health bars
   for (auto &enemy :
        game->GetBattleSystem()->GetCurrentEnemyGroup()->GetEnemies()) {
+
+    auto enemyHPBackground = AddImageOrElement(Color::Black);
+    enemyHPBackground->SetPosition(
+        Vector3(mRightBarCenter,
+                0.9f - static_cast<float>(mEnemyHPrects.size()) * 0.2f, -1.0f));
+    enemyHPBackground->SetScale(mBarSize);
+
     auto enemyHPBorder =
         AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
     enemyHPBorder->SetPosition(
@@ -31,6 +38,13 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
 
   // Ally health bars
   for (auto &ally : game->GetPlayer()->GetActiveAllies()) {
+
+    auto allyHPBackground = AddImageOrElement(Color::Black);
+    allyHPBackground->SetPosition(
+        Vector3(mLeftBarCenter,
+                -0.5f + static_cast<float>(mAllyHPrects.size()) * 0.2f, -1.0f));
+    allyHPBackground->SetScale(mBarSize);
+
     auto allyHPBorder =
         AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
     allyHPBorder->SetPosition(
