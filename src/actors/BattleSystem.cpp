@@ -22,12 +22,12 @@ BattleSystem::BattleSystem(Game *game)
   mField = new MeshComponent(this, *mesh);
   mField->SetColor(Color::Black);
   mField->SetScale(Vector3(0.0f, 0.0f, 0.0f));
-  mField->SetOffset(Vector3(0.0f, -0.55f, 0.0f));
+  mField->SetOffset(Vector3(0.0f, -0.9f, 0.0f));
 
   mEdge = new MeshComponent(this, *mesh);
   mEdge->SetColor(Color::White);
   mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
-  mEdge->SetOffset(Vector3(0.0f, -0.6f, 0.0f));
+  mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
   mEdge->SetBloomed(true);
 
   for (int i = 0; i < 8; ++i) {
@@ -410,6 +410,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
       mField->SetScale(Vector3::Lerp(mField->GetScale(),
                                      Vector3(6.0f, 1.0f, dist.Length() + 0.5f),
                                      4.0f * deltaTime));
+
       mEdge->SetScale(mField->GetScale() + Vector3(0.25f, 0.0f, 0.25f));
 
       mRotation = Quaternion::Slerp(mRotation, Math::LookRotation(mBattleDir),
@@ -439,6 +440,9 @@ void BattleSystem::OnUpdate(float deltaTime) {
 
         mRotation = Math::LookRotation(mBattleDir);
         mPosition = mEnemyNotePlayer->GetPosition() + 0.5f * dist;
+
+        mField->SetOffset(Vector3(0.0f, -0.55f, 0.0f));
+        mEdge->SetOffset(Vector3(0.0f, -0.6f, 0.0f));
       }
     }
   } else {
@@ -468,6 +472,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
       // Is transitioning to outside battle
       mField->SetScale(Vector3::Lerp(
           mField->GetScale(), Vector3(1.0f, 1.0f, 0.0f), 4.0f * deltaTime));
+
       mEdge->SetScale(Vector3::Lerp(
           mEdge->GetScale(), Vector3(1.0f, 1.0f, 0.25f), 4.0f * deltaTime));
 
@@ -477,7 +482,10 @@ void BattleSystem::OnUpdate(float deltaTime) {
       if (mField->GetScale().z < 0.26f) {
         mIsTransitioning = false;
         mField->SetScale(Vector3(1.0f, 1.0f, 0.0f));
+        mField->SetOffset(Vector3(0.0f, -0.9f, 0.0f));
         mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
+        mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
+
         mPosition = pos;
         mRotation = mGame->GetPlayer()->GetRotation();
 

@@ -28,9 +28,12 @@ void ItemActor::OnUpdate(float deltaTime) {
   Quaternion inc = Quaternion(Vector3::UnitY, deltaTime * 2.0f);
   SetRotation(Quaternion::Concatenate(rot, inc));
 
-  Vector3 pos = GetPosition();
-  pos.y += sin(mAnimTime * 3.0f) * 0.01f;
-  SetPosition(pos);
+  if (mGame->GetBattleSystem()->IsInBattle()) {
+    mMeshComponent->SetOffset(Vector3(0.0f, 1.0f, 0.0f));
+  } else {
+    mMeshComponent->SetOffset(
+        Vector3(0.0f, sin(mAnimTime * 3.0f) * 0.5f, 0.0f));
+  }
 }
 
 void ItemActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
