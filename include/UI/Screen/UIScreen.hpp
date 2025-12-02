@@ -16,26 +16,7 @@ public:
 
   UIScreen(class Game *game, const std::string &fontName);
 
-  void Close() {
-    if (mState == UIState::Closing) {
-      return;
-    }
-    mState = UIState::Closing;
-    for (auto img : mHudImages) {
-      // button->SetState(ActorState::Destroy);
-      mGame->RemoveActor(img);
-      mGame->GetRenderer()->RemoveUIElement(img);
-      // delete img;
-    }
-    for (auto button : mHudButtons) {
-      // button->SetState(ActorState::Destroy);
-      mGame->RemoveActor(button);
-      mGame->GetRenderer()->RemoveUIElement(button);
-      // delete button;
-    }
-    mHudImages.clear();
-    mHudButtons.clear();
-  }
+  void Close() { mState = UIState::Closing; }
 
   // HUDElements add
   HUDElement *AddImageOrElement(const std::string &hudTexturePath,

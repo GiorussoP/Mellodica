@@ -16,6 +16,7 @@ Combatant::Combatant(Game *game, int channel, int health)
 Combatant::~Combatant() {}
 
 void Combatant::OnUpdate(float deltaTime) {
+  mSpriteComponent->SetColor(NOTE_COLORS[mChannel % 16]);
 
   if (mHealth <= 0.13f * mMaxHealth) {
     mHealth = 0;
@@ -77,6 +78,7 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
   if (other->GetLayer() == ColliderLayer::Note &&
       mGame->GetBattleSystem()->IsInBattle()) {
     mHealth -= 1; // Template damage value
+    mSpriteComponent->SetColor(Color::Red);
     return;
   }
 
@@ -107,6 +109,6 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
 void Combatant::SetSpriteColorByChannel() {
   if (mSpriteComponent) {
-    mSpriteComponent->SetColor(NOTE_COLORS[mChannel % 16]);
+    mSpriteComponent->SetColor(NOTE_COLORS[mChannel]);
   }
 }

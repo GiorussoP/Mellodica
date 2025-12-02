@@ -13,8 +13,10 @@ public:
 
 private:
   std::vector<HUDElement *> mEnemyHPrects;
+  std::vector<int> mEnemyLastHealths;
 
   std::vector<HUDElement *> mAllyHPrects;
+  std::vector<int> mAllyLastHealths;
 
   float mLeftBarCenter;
   float mRightBarCenter;

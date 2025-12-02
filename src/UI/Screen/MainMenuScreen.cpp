@@ -21,6 +21,10 @@ MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
   SDL_Log("Button 2 Added!");
   mB2->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
   mB2->ButtonSetPosition(Vector3(0.0f, -0.2f, 0.0f));
+
+  auto image = AddImageOrElement("assets/sprites/scenes/title-screen.png");
+  image->SetPosition(Vector3(0.0f, 0.0f, -1.0f));
+  image->SetScale(Vector3(2.0f, 2.0f, 1.0f));
 }
 
 MainMenuScreen::~MainMenuScreen() { UIScreen::~UIScreen(); }

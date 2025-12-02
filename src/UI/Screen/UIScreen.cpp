@@ -16,13 +16,13 @@ UIScreen::UIScreen(class Game *game, const std::string &fontName)
 
 UIScreen::~UIScreen() {
   for (auto img : mHudImages) {
+    mGame->RemoveActor(img);
     mGame->GetRenderer()->RemoveUIElement(img);
-    delete img;
   }
   mHudImages.clear();
   for (auto button : mHudButtons) {
+    mGame->RemoveActor(button);
     mGame->GetRenderer()->RemoveUIElement(button);
-    delete button;
   }
   mHudButtons.clear();
 }

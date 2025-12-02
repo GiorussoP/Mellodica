@@ -3,7 +3,9 @@
 PlayerHud::PlayerHud(class Game *game)
     : UIScreen(game, "./assets/fonts/PressStart2P-Regular.ttf"),
       mHPrect(nullptr), mENrect(nullptr), mBarSize(0.52f, 0.09f, 1.0f),
-      mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f) {
+      mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f), lastHealth(-1),
+      lastEnergy(-1) {
+
   // Add HUD elements here, e.g., health bar, energy bar, etc.
 
   // Player energy
@@ -31,10 +33,22 @@ PlayerHud::PlayerHud(class Game *game)
 }
 
 void PlayerHud::Update(float deltaTime) {
+
+  float newHealth = static_cast<float>(mGame->GetPlayer()->getHealth());
+
+  if (newHealth > lastHealth) {
+    mHPrect->GetSpriteComponent().SetColor(Color::Green);
+  } else if (newHealth < lastHealth) {
+    mHPrect->GetSpriteComponent().SetColor(Vector3(1.0f, 0.5f, 0.0f));
+  } else {
+    mHPrect->GetSpriteComponent().SetColor(Color::Red);
+  }
+  lastHealth = static_cast<int>(newHealth);
+
   // Player health bar
   mHPrect->SetScale(Vector3(
-      mBarSize.x * (static_cast<float>(mGame->GetPlayer()->getHealth()) /
-                    static_cast<float>(mGame->GetPlayer()->getMaxHealth())),
+      mBarSize.x *
+          (newHealth / static_cast<float>(mGame->GetPlayer()->getMaxHealth())),
       mBarSize.y, mBarSize.z));
 
   mHPrect->SetPosition(mHPrect->GetPosition() +

@@ -72,7 +72,7 @@ MusicButtonActor::MusicButtonActor(Game *game, int midiTarget)
   mMeshComp = new MeshComponent(this, *mesh);
   mMeshComp->SetColor(Vector3(0.5f, 0.5f, 0.5f));
 
-  mCollider = new OBBCollider(this, ColliderLayer::Entity, Vector3::Zero,
+  mCollider = new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
                               Vector3(0.5f, 0.5f, 0.5f), false);
 }
 

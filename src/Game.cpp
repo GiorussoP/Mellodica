@@ -374,6 +374,21 @@ void Game::UpdateActors(float deltaTime) {
       actor->Update(deltaTime);
     }
   }
+
+  // Updating UI screens
+  for (auto &ui : mUIStack) {
+    if (ui->GetUIState() != UIScreen::UIState::Closing) {
+      ui->Update(deltaTime);
+    }
+  }
+
+  while (!mUIStack.empty() &&
+         mUIStack.back()->GetUIState() == UIScreen::UIState::Closing) {
+    std::cout << "Popping UI Screen" << std::endl;
+    delete mUIStack.back();
+    mUIStack.pop_back();
+  }
+
   mUpdatingActors = false;
 
   // Move pending actors to active and register with chunk grid
@@ -451,15 +466,6 @@ void Game::UpdateGame(float deltaTime) {
 
   // Check collisions after all actors have been updated
   CheckCollisions();
-
-  if (mUIStack.size() > 0) {
-    for (size_t i = 0; i < mUIStack.size() - 1; i++) {
-      if (mUIStack[i]->GetUIState() == UIScreen::UIState::Closing) {
-        continue;
-      }
-      mUIStack[i]->Update(deltaTime);
-    }
-  }
 }
 
 void Game::CheckCollisions() {

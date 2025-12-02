@@ -12,6 +12,9 @@ private:
   HUDElement *mHPrect;
   HUDElement *mENrect;
 
+  int lastHealth;
+  int lastEnergy;
+
   float mLeftBarCenter;
 
   Vector3 mBarSize;

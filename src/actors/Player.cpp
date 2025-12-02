@@ -307,7 +307,7 @@ void Player::OnUpdate(float deltaTime) {
   if (mHealth <= 0) {
 
     // Push Main Menu
-    mGame->LoadScene(new Level1(mGame));
+    mGame->LoadScene(new MainMenu(mGame));
   }
 }
 

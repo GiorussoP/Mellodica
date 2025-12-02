@@ -11,6 +11,7 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
   // Enemy health bars
   for (auto &enemy :
        game->GetBattleSystem()->GetCurrentEnemyGroup()->GetEnemies()) {
+    mEnemyLastHealths.push_back(enemy->GetHealth());
 
     auto enemyHPBackground = AddImageOrElement(Color::Black);
     enemyHPBackground->SetPosition(
@@ -39,6 +40,8 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
   // Ally health bars
   for (auto &ally : game->GetPlayer()->GetActiveAllies()) {
 
+    mAllyLastHealths.push_back(ally->GetHealth());
+
     auto allyHPBackground = AddImageOrElement(Color::Black);
     allyHPBackground->SetPosition(
         Vector3(mLeftBarCenter,
@@ -64,13 +67,25 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
   }
 }
 
-BattleScreen::~BattleScreen() { UIScreen::~UIScreen(); }
+BattleScreen::~BattleScreen() {}
 
 void BattleScreen::Update(float deltaTime) {
   // Enemy health bars
   auto &enemies =
       mGame->GetBattleSystem()->GetCurrentEnemyGroup()->GetEnemies();
   for (size_t i = 0; i < enemies.size(); ++i) {
+
+    if (mEnemyLastHealths[i] > enemies[i]->GetHealth()) {
+      mEnemyHPrects[i]->GetSpriteComponent().SetColor(
+          Vector3(1.0f, 0.5f, 0.0f));
+    } else if (mEnemyLastHealths[i] < enemies[i]->GetHealth()) {
+      mEnemyHPrects[i]->GetSpriteComponent().SetColor(Color::Green);
+    } else {
+      mEnemyHPrects[i]->GetSpriteComponent().SetColor(
+          NOTE_COLORS[enemies[i]->GetChannel()]);
+    }
+    mEnemyLastHealths[i] = enemies[i]->GetHealth();
+
     mEnemyHPrects[i]->SetScale(
         Vector3(mBarSize.x * (static_cast<float>(enemies[i]->GetHealth()) /
                               static_cast<float>(enemies[i]->GetMaxHealth())),
@@ -85,6 +100,17 @@ void BattleScreen::Update(float deltaTime) {
   // Ally health bars
   auto &allies = mGame->GetPlayer()->GetActiveAllies();
   for (size_t i = 0; i < allies.size(); ++i) {
+
+    if (mAllyLastHealths[i] > allies[i]->GetHealth()) {
+      mAllyHPrects[i]->GetSpriteComponent().SetColor(Vector3(1.0f, 0.5f, 0.0f));
+    } else if (mAllyLastHealths[i] < allies[i]->GetHealth()) {
+      mAllyHPrects[i]->GetSpriteComponent().SetColor(Color::Green);
+    } else {
+      mAllyHPrects[i]->GetSpriteComponent().SetColor(
+          NOTE_COLORS[allies[i]->GetChannel()]);
+    }
+    mAllyLastHealths[i] = allies[i]->GetHealth();
+
     mAllyHPrects[i]->SetScale(
         Vector3(mBarSize.x * (static_cast<float>(allies[i]->GetHealth()) /
                               static_cast<float>(allies[i]->GetMaxHealth())),
