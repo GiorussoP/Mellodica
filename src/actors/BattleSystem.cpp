@@ -22,12 +22,12 @@ BattleSystem::BattleSystem(Game *game)
   mField = new MeshComponent(this, *mesh);
   mField->SetColor(Color::Black);
   mField->SetScale(Vector3(0.0f, 0.0f, 0.0f));
-  mField->SetOffset(Vector3(0.0f, -0.9f, 0.0f));
+  mField->SetOffset(Vector3(0.0f, -0.55f, 0.0f));
 
   mEdge = new MeshComponent(this, *mesh);
   mEdge->SetColor(Color::White);
   mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
-  mEdge->SetOffset(Vector3(0.0f, -0.95f, 0.0f));
+  mEdge->SetOffset(Vector3(0.0f, -0.6f, 0.0f));
   mEdge->SetBloomed(true);
 
   for (int i = 0; i < 8; ++i) {
