@@ -1,9 +1,11 @@
 #include "Scene.hpp"
 #include "CSV.h"
 #include "Game.hpp"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
+#include <vector>
 
 #include "EnemyGroup.hpp"
 #include "Ghost.hpp"
@@ -33,6 +35,49 @@ void Scene::Cleanup() {
   }
 
   mActors.clear(); // Clear the set (should already be empty)
+}
+
+int Scene::GetEnemyBitmask(int encounterNumber) {
+  // Ensure we're in valid range [0, 255]
+  encounterNumber = encounterNumber % 256;
+
+  // First 8 encounters are single enemy types (power of 2)
+  if (encounterNumber < 8) {
+    return 1
+           << encounterNumber; // 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
+  }
+
+  // For remaining encounters, generate all 256 combinations sorted by:
+  // 1. Number of bits set (Hamming weight)
+  // 2. Numerical value (for stable ordering within same bit count)
+  static std::vector<int> sortedCombinations;
+
+  // Initialize the sorted list only once
+  if (sortedCombinations.empty()) {
+    // Generate all 256 combinations (0-255)
+    for (int i = 0; i < 256; i++) {
+      sortedCombinations.push_back(i);
+    }
+
+    // Sort by Hamming weight (number of 1 bits), then by value
+    std::sort(sortedCombinations.begin(), sortedCombinations.end(),
+              [](int a, int b) {
+                // Count bits in each number
+                int bitsA = __builtin_popcount(a);
+                int bitsB = __builtin_popcount(b);
+
+                // Sort by bit count first
+                if (bitsA != bitsB) {
+                  return bitsA < bitsB;
+                }
+
+                // If same bit count, sort by value
+                return a < b;
+              });
+  }
+
+  // Return the combination at this encounter index
+  return sortedCombinations[encounterNumber];
 }
 
 void Scene::LoadLevel(const std::string &levelPath) {
@@ -81,7 +126,7 @@ void Scene::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 129: {
-      auto ground = new GroundActor(mGame, Color::White, 3);
+      auto ground = new GroundActor(mGame, Color::White, 24);
       ground->SetPosition(Vector3(x, 0.0f, z));
       ground->SetScale(Vector3(size_x, 1.0f, size_y));
       break;
@@ -148,7 +193,7 @@ void Scene::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 128: {
-      auto ground = new GroundActor(mGame, Color::White, 24);
+      auto ground = new GroundActor(mGame, Color::White, 3);
       ground->SetPosition(Vector3(x, 0.0f, z));
       ground->SetScale(Vector3(size_x, 1.0f, size_y));
       break;
@@ -435,7 +480,9 @@ void Scene::LoadLevel(const std::string &levelPath) {
     }
 
     case 9: {
-      int enemyValue = enemyCounter++;
+      int enemyValue = GetEnemyBitmask(enemyCounter - 1);
+      enemyCounter++;
+
       std::vector<Combatant *> enemies;
       for (int i = 0; i < 8; i++) {
         if (enemyValue & (1 << i)) {

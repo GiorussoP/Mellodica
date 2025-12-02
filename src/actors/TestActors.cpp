@@ -252,6 +252,15 @@ BushActor::BushActor(Game *game) : Actor(game) {
 
   mColliderComponent = new SphereCollider(
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void BushActor::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 2.0f + mSwayPhase) * 0.02f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {

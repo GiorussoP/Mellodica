@@ -117,10 +117,12 @@ private:
 class BushActor : public Actor {
 public:
   BushActor(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
   ColliderComponent *mColliderComponent;
+  float mSwayPhase;
 };
 
 class GrassActorA : public Actor {

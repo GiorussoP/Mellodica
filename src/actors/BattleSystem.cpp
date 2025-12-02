@@ -229,11 +229,14 @@ void BattleSystem::EndBattle() {
 
   mBattleScreen->Close();
   mBattleScreen = nullptr;
+  
+  // Clear the enemy group pointer to avoid accessing destroyed object
+  mCurrentEnemyGroup = nullptr;
 }
 
 void BattleSystem::OnUpdate(float deltaTime) {
   if (mInBattle) {
-    if (!mIsTransitioning) {
+    if (!mIsTransitioning && mCurrentEnemyGroup) {
       Vector3 enemyPos = mCurrentEnemyGroup->GetPosition();
       Vector3 playerPos = mGame->GetPlayer()->GetPosition();
       Vector3 toPlayer = playerPos - enemyPos;
@@ -249,7 +252,8 @@ void BattleSystem::OnUpdate(float deltaTime) {
       // Handle enemy notes
       std::array<bool, 8> channelActive = {false};
 
-      for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
+      if (mCurrentEnemyGroup) {
+        for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
         if (enemy->GetCombatantState() != CombatantState::Dead) {
           channelActive[enemy->GetChannel()] = true;
           for (auto note : notes) {
@@ -314,6 +318,7 @@ void BattleSystem::OnUpdate(float deltaTime) {
           }
         }
       }
+      } // End mCurrentEnemyGroup null check
 
       // Handle ally notes
       for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
@@ -426,17 +431,20 @@ void BattleSystem::OnUpdate(float deltaTime) {
         mIsTransitioning = false;
 
         auto &allies = mGame->GetPlayer()->GetActiveAllies();
-        auto &enemies = mCurrentEnemyGroup->GetEnemies();
+        
+        if (mCurrentEnemyGroup) {
+          auto &enemies = mCurrentEnemyGroup->GetEnemies();
 
-        std::cout << "Battle started with " << allies.size() << " allies and "
-                  << enemies.size() << " enemies." << std::endl;
+          std::cout << "Battle started with " << allies.size() << " allies and "
+                    << enemies.size() << " enemies." << std::endl;
 
-        // Unmute allies and enemies channels
-        for (auto ally : allies) {
-          MIDIPlayer::unmuteChannel(ally->GetChannel());
-        }
-        for (auto enemy : enemies) {
-          MIDIPlayer::unmuteChannel(enemy->GetChannel());
+          // Unmute allies and enemies channels
+          for (auto ally : allies) {
+            MIDIPlayer::unmuteChannel(ally->GetChannel());
+          }
+          for (auto enemy : enemies) {
+            MIDIPlayer::unmuteChannel(enemy->GetChannel());
+          }
         }
 
         mRotation = Math::LookRotation(mBattleDir);
