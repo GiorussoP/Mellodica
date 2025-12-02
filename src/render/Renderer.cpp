@@ -19,7 +19,30 @@ Renderer::Renderer(Game *game)
       mFramebufferWidth(480), mFramebufferHeight(270), mBloomFramebuffer(0),
       mBloomTexture(0), mBloomDepthStencil(0), mBlurTexture1(0),
       mBlurTexture2(0), mBlurFramebuffer1(0), mBlurFramebuffer2(0),
-      mIsDark(true) {}
+      mIsDark(true), mLightDir(Vector3(1.0f, -1.0f, 0.5f)),
+      mLightColor(Vector3::One), mAmbientColor(Vector3::One),
+      mBackgroundColor(Vector3::One) {}
+
+void Renderer::setNight() {
+  mBackgroundColor = Vector3(0.05f, 0.05f, 0.2f);
+  mLightDir = Vector3(1.0f, -1.0f, 0.5f);
+  mLightColor = Vector3(0.3f, 0.4f, 0.6f);
+  mAmbientColor = Vector3(0.3f, 0.4f, 0.6f);
+}
+
+void Renderer::setDay() {
+  mBackgroundColor = Vector3(0.365f, 0.6f, 0.75f);
+  mLightDir = Vector3(-1.0f, -1.0f, -0.5f);
+  mLightColor = Vector3::One;
+  mAmbientColor = Vector3(0.6f, 0.6f, 0.7f);
+}
+
+void Renderer::setEvening() {
+  mBackgroundColor = Vector3(0.8f, 0.5f, 0.2f);
+  mLightDir = Vector3(0.5f, -0.5f, -0.1f);
+  mLightColor = Vector3(1.0f, 0.7f, 0.4f);
+  mAmbientColor = Vector3(0.7f, 0.5f, 0.3f);
+}
 
 Renderer::~Renderer() {
   // Delete framebuffer objects
@@ -121,8 +144,9 @@ bool Renderer::Initialize(float width, float height) {
   // Create blur textures for ping-pong blur
   CreateBlurTextures();
 
-  // Set the clear color to light grey
-  glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
+  // Set the clear color to background color
+  glClearColor(mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z,
+               1.0f);
 
   // Enable depth testing
   glEnable(GL_DEPTH_TEST);
@@ -559,21 +583,30 @@ void Renderer::DrawSpritesInstanced(
       // is Y-axis, Row 2 is Z-axis, Row 3 is homogeneous
       Matrix4 billboard = Matrix4::Identity;
 
-      // Apply 2D rotation (around Z-axis in screen space)
+      // Apply 2D rotation (around Z-axis in screen space, in view space)
+      // The rotation pivot should be at the bottom of the sprite
       float cosR = Math::Cos(rotation);
       float sinR = Math::Sin(rotation);
+      float scaledWidth = size.x * ownerScale.x;
+      float scaledHeight = size.y * ownerScale.y;
+
+      // Rotation around bottom center in view space:
+      // In the quad mesh, the bottom is at Y = -0.5, center at Y = 0.5
+      // So we offset by 0.5 units down, rotate, then offset back up
 
       // Row 0: X-axis (scaled and rotated)
-      billboard.mat[0][0] = size.x * ownerScale.x * cosR;
-      billboard.mat[0][1] = size.x * ownerScale.x * sinR;
+      billboard.mat[0][0] = scaledWidth * cosR;
+      billboard.mat[0][1] = scaledWidth * sinR;
       billboard.mat[0][2] = 0.0f;
       billboard.mat[0][3] = 0.0f;
 
-      // Row 1: Y-axis (scaled and rotated)
-      billboard.mat[1][0] = -size.y * ownerScale.y * sinR;
-      billboard.mat[1][1] = size.y * ownerScale.y * cosR;
+      // Row 1: Y-axis (scaled and rotated, with pivot adjustment for bottom
+      // center) The pivot offset compensates for rotating around bottom instead
+      // of center
+      billboard.mat[1][0] = -scaledHeight * sinR;
+      billboard.mat[1][1] = scaledHeight * cosR;
       billboard.mat[1][2] = 0.0f;
-      billboard.mat[1][3] = 0.0f;
+      billboard.mat[1][3] = scaledHeight * 0.5f * (1.0f - cosR);
 
       // Row 2: Z-axis (no rotation)
       billboard.mat[2][0] = 0.0f;
@@ -715,14 +748,14 @@ void Renderer::ActivateMeshShader() {
   mMeshShader->SetActive();
 
   // Set frame-level uniforms (uniforms that don't change per mesh)
-  Vector3 lightdir = Vector3(1.0f, -1.0f, 0.5f);
+  Vector3 lightdir = mLightDir;
   lightdir.Normalize();
   mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
-  mMeshShader->SetVectorUniform("uDirectionalLightColor",
-                                Vector3(1.0f, 1.0f, 0.9f));
-  mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.5f, 0.5f, 0.4f));
+  mMeshShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mMeshShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mMeshShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
+  mMeshShader->SetIntegerUniform("uApplyLighting",
+                                 1); // Default: apply lighting
 }
 
 void Renderer::ActivateSpriteShader() {
@@ -735,7 +768,11 @@ void Renderer::ActivateSpriteShader() {
   mSpriteShader->SetActive();
 
   // Set frame-level uniforms (uniforms that don't change per sprite)
+  mSpriteShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mSpriteShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mSpriteShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
+  mSpriteShader->SetIntegerUniform("uApplyLighting",
+                                   1); // Default: apply lighting
 }
 
 void Renderer::ActivateMeshShaderForBloom() {
@@ -748,13 +785,11 @@ void Renderer::ActivateMeshShaderForBloom() {
   mMeshShader->SetActive();
 
   // Set frame-level uniforms (uniforms that don't change per mesh)
-  Vector3 lightdir = Vector3(1.0f, -1.0f, 1.0f);
+  Vector3 lightdir = mLightDir;
   lightdir.Normalize();
   mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
-  mMeshShader->SetVectorUniform("uDirectionalLightColor",
-                                Vector3(1.0f, 1.0f, 0.9f));
-  mMeshShader->SetVectorUniform("uAmbientLightColor",
-                                Vector3(0.5f, 0.5f, 0.4f));
+  mMeshShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mMeshShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mMeshShader->SetIntegerUniform("uBloomPass", 1); // We're in bloom pass
 }
 
@@ -768,7 +803,46 @@ void Renderer::ActivateSpriteShaderForBloom() {
   mSpriteShader->SetActive();
 
   // Set frame-level uniforms (uniforms that don't change per sprite)
+  mSpriteShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mSpriteShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mSpriteShader->SetIntegerUniform("uBloomPass", 1); // We're in bloom pass
+  mSpriteShader->SetIntegerUniform("uApplyLighting",
+                                   0); // No lighting in bloom pass
+}
+
+void Renderer::ActivateMeshShaderNoLighting() {
+  if (!mMeshShader) {
+    std::cerr << "Mesh shader not loaded" << std::endl;
+    return;
+  }
+
+  // Activate mesh shader program
+  mMeshShader->SetActive();
+
+  // Set frame-level uniforms (uniforms that don't change per mesh)
+  Vector3 lightdir = mLightDir;
+  lightdir.Normalize();
+  mMeshShader->SetVectorUniform("uDirectionalLightDir", lightdir);
+  mMeshShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mMeshShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
+  mMeshShader->SetIntegerUniform("uBloomPass", 0);     // Not bloom pass
+  mMeshShader->SetIntegerUniform("uApplyLighting", 0); // No lighting
+}
+
+void Renderer::ActivateSpriteShaderNoLighting() {
+  if (!mSpriteShader) {
+    std::cerr << "Sprite shader not loaded" << std::endl;
+    return;
+  }
+
+  // Activate sprite shader program
+  mSpriteShader->SetActive();
+
+  // Set frame-level uniforms (uniforms that don't change per sprite)
+  mSpriteShader->SetVectorUniform("uDirectionalLightColor", mLightColor);
+  mSpriteShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
+  mSpriteShader->SetIntegerUniform("uBloomPass", 0);     // Not bloom pass
+  mSpriteShader->SetIntegerUniform("uApplyLighting", 0); // No lighting
 }
 
 void Renderer::DrawSingleMesh(Mesh *mesh, const Vector3 &position,
@@ -923,8 +997,14 @@ void Renderer::BeginFramebuffer() {
   // Ensure depth test is enabled for 3D rendering
   glEnable(GL_DEPTH_TEST);
 
-  // Clear framebuffer with the game's clear color
-  glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
+  // Clear framebuffer with the background color
+  if (mGame->IsDebugging()) {
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // Dark gray for debugging
+  } else {
+    glClearColor(mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z,
+                 1.0f);
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -949,8 +1029,9 @@ void Renderer::EndFramebuffer() {
   // Set viewport to full window
   glViewport(0, 0, windowWidth, windowHeight);
 
-  // Clear screen to black (only color buffer, preserve depth)
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  // Clear screen to background color (only color buffer, preserve depth)
+  glClearColor(mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z,
+               1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Disable depth test for screen quad
@@ -990,7 +1071,8 @@ void Renderer::EndFramebuffer() {
   // HUD sprites will be drawn next, then depth will be re-enabled
 
   // Restore clear color (but keep depth test disabled for HUD)
-  glClearColor(0.419f, 0.549f, 1.0f, 1.0f);
+  glClearColor(mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z,
+               1.0f);
 }
 
 void Renderer::DrawHUDSprites(
@@ -1218,8 +1300,15 @@ void Renderer::BeginBloomPass() {
   // Ensure depth test is enabled for 3D rendering
   glEnable(GL_DEPTH_TEST);
 
-  // Clear bloom framebuffer to BLACK (important for bloom effect)
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  if (mGame->IsDebugging()) {
+    // Clear bloom framebuffer to dark gray in debugging mode
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+  } else {
+    // Clear bloom framebuffer to black for proper bloom effect
+    // Clear bloom framebuffer to background color
+    glClearColor(mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z,
+                 1.0f);
+  }
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

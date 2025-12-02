@@ -91,8 +91,8 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
   MIDIPlayer::setSpeed(1.0f);
 
   mEdge->SetVisible(true);
-  mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
-  mField->SetScale(Vector3(6.0f, 1.0f, 0.0f));
+  mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
+  mField->SetScale(Vector3(1.0f, 1.0f, 0.0f));
   mPosition = mGame->GetPlayer()->GetPosition() + mBattleDir;
   mRotation = Math::LookRotation(mBattleDir);
 
@@ -467,17 +467,17 @@ void BattleSystem::OnUpdate(float deltaTime) {
 
       // Is transitioning to outside battle
       mField->SetScale(Vector3::Lerp(
-          mField->GetScale(), Vector3(6.0f, 1.0f, 0.0f), 4.0f * deltaTime));
+          mField->GetScale(), Vector3(1.0f, 1.0f, 0.0f), 4.0f * deltaTime));
       mEdge->SetScale(Vector3::Lerp(
-          mEdge->GetScale(), Vector3(6.0f, 1.0f, 0.25f), 4.0f * deltaTime));
+          mEdge->GetScale(), Vector3(1.0f, 1.0f, 0.25f), 4.0f * deltaTime));
 
       mPosition = Vector3::Lerp(mPosition, pos, 4.0f * deltaTime);
       mRotation = Quaternion::Slerp(
           mRotation, mGame->GetPlayer()->GetRotation(), 4.0f * deltaTime);
       if (mField->GetScale().z < 0.26f) {
         mIsTransitioning = false;
-        mField->SetScale(Vector3(6.0f, 1.0f, 0.0f));
-        mEdge->SetScale(Vector3(6.0f, 1.0f, 0.25f));
+        mField->SetScale(Vector3(1.0f, 1.0f, 0.0f));
+        mEdge->SetScale(Vector3(1.0f, 1.0f, 0.25f));
         mPosition = pos;
         mRotation = mGame->GetPlayer()->GetRotation();
 

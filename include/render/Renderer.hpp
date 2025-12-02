@@ -56,6 +56,9 @@ public:
   void ActivateSpriteShader();
   void ActivateMeshShaderForBloom();   // Activate mesh shader for bloom pass
   void ActivateSpriteShaderForBloom(); // Activate sprite shader for bloom pass
+  void ActivateMeshShaderNoLighting(); // Activate mesh shader without lighting
+  void
+  ActivateSpriteShaderNoLighting(); // Activate sprite shader without lighting
 
   // Draw a single mesh without instancing (for debug drawing)
   void DrawSingleMesh(Mesh *mesh, const Vector3 &position, const Vector3 &scale,
@@ -85,6 +88,10 @@ public:
 
   void AddUIElement(HUDElement *comp);
   void RemoveUIElement(HUDElement *comp);
+
+  void setNight();
+  void setDay();
+  void setEvening();
 
 private:
   bool LoadShaders();
@@ -141,6 +148,14 @@ private:
 
   // Atlases
   std::unordered_map<std::string, TextureAtlas *> mAtlasCache;
+
+  // Lighting
+  Vector3 mLightDir;
+  Vector3 mLightColor;
+  Vector3 mAmbientColor;
+
+  // Background color
+  Vector3 mBackgroundColor;
 
   // UI Components
   std::vector<HUDElement *> mUIComps;

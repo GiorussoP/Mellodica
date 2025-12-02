@@ -12,6 +12,7 @@ in vec2 spriteSize;
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 uniform int uBloomPass;                 // 1 if rendering bloom pass, 0 otherwise
+uniform int uApplyLighting;             // 1 if lighting should be applied, 0 otherwise
 
 // Texture atlas uniforms
 uniform sampler2D uTextureAtlas;
@@ -58,8 +59,14 @@ void main()
 
     vec3 baseColor = texColor.rgb * fragColor;
     
-    // Sprites typically use full brightness or simple lighting
-    // TODO: Add sprite-specific lighting calculations here if needed
+    // Apply lighting to sprites (simple ambient + directional)
+    // Sprites are billboards, so we use a simple lighting model
+    if (uApplyLighting == 1) {
+        vec3 ambient = uAmbientLightColor * baseColor;
+        vec3 diffuse = uDirectionalLightColor * baseColor * 0.5; // Reduced intensity for sprites
+        vec3 litColor = ambient + diffuse;
+        baseColor = litColor;
+    }
     
     // If rendering bloom pass and object is not bloomed (indicated by fragColor.r < 0)
     // render as black to provide occlusion

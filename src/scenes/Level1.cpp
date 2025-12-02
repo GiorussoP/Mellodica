@@ -11,9 +11,10 @@ void Level1::Initialize() {
   std::cout << "Initializing TestSceneB..." << std::endl;
 
   mGame->GetRenderer()->SetIsDark(false);
+  mGame->GetRenderer()->setDay();
 
   // Load song before creating battle system
-  MIDIPlayer::loadSong0();
+  MIDIPlayer::loadSong1();
 
   LoadLevel("assets/levels/level1");
 

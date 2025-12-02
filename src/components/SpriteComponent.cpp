@@ -11,8 +11,7 @@ SpriteComponent::SpriteComponent(Actor *owner, int textureIndex,
                                  TextureAtlas *atlas, bool isHUD)
     : DrawComponent(owner), mTextureIndex(textureIndex), mAnimTimer(0.0f),
       mAnimFPS(24.0f), mIsPaused(false), mTextureAtlas(atlas), mIsHUD(isHUD),
-      mRotation(0.0f) {
-}
+      mRotation(0.0f) {}
 
 SpriteComponent::~SpriteComponent() {
   mAnimations.clear();

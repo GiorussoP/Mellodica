@@ -1,4 +1,6 @@
 #include "actors/NotePlayerActor.hpp"
+#include "BattleSystem.hpp"
+#include "Game.hpp"
 #include "SynthEngine.hpp"
 #include "actors/NoteActor.hpp"
 
@@ -25,8 +27,12 @@ bool NotePlayerActor::PlayNote(unsigned int note, unsigned int channel,
 
   float offset = 0.5f * MAX_NOTES * noteSpacing + noteSpacing / 2.0f;
 
-  mActiveNotes[noteIndex]->SetPosition(
-      position + right * (-offset + (noteIndex)*noteSpacing + noteSpacing));
+  if (mGame->GetBattleSystem()->IsInBattle()) {
+    mActiveNotes[noteIndex]->SetPosition(
+        position + right * (-offset + (noteIndex)*noteSpacing + noteSpacing));
+  } else {
+    mActiveNotes[noteIndex]->SetPosition(position);
+  }
 
   mActiveNotes[noteIndex]->Start();
   // std::cout << "Playing note " << noteIndex << " on channel " << channel

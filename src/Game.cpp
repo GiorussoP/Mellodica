@@ -100,7 +100,7 @@ bool Game::Initialize() {
 
   // Create Chunk grid
   mChunkGrid = new ChunkGrid(Vector3(-1000.0f, -1000.0f, -1000.0f),
-                             Vector3(1000.0f, 1000.0f, 1000.0f), 50.0f);
+                             Vector3(1000.0f, 1000.0f, 1000.0f), 32.0f);
 
   // Setting up SynthEngine
   SynthEngine::init();
@@ -526,8 +526,12 @@ void Game::GenerateOutput() {
 
   // Collect meshes and sprites from active actors
   std::vector<MeshComponent *> activeMeshes;
+  std::vector<MeshComponent *> bloomedMeshes;
+  std::vector<MeshComponent *> nonBloomedMeshes;
   std::vector<SpriteComponent *> activeSprites;
   std::vector<SpriteComponent *> worldSprites;
+  std::vector<SpriteComponent *> bloomedSprites;
+  std::vector<SpriteComponent *> nonBloomedSprites;
   std::vector<SpriteComponent *> hudSprites;
   bool hasBloom = false;
 
@@ -538,7 +542,10 @@ void Game::GenerateOutput() {
         if (mesh->IsVisible()) {
           activeMeshes.push_back(mesh);
           if (mesh->IsBloomed()) {
+            bloomedMeshes.push_back(mesh);
             hasBloom = true;
+          } else {
+            nonBloomedMeshes.push_back(mesh);
           }
         }
       } else if (auto sprite = dynamic_cast<SpriteComponent *>(component)) {
@@ -551,7 +558,10 @@ void Game::GenerateOutput() {
           } else {
             worldSprites.push_back(sprite);
             if (sprite->IsBloomed()) {
+              bloomedSprites.push_back(sprite);
               hasBloom = true;
+            } else {
+              nonBloomedSprites.push_back(sprite);
             }
           }
         }
@@ -616,9 +626,17 @@ void Game::GenerateOutput() {
   // Begin rendering to main framebuffer
   mRenderer->BeginFramebuffer();
 
-  // Render meshes with instancing (batch draw)
-  mRenderer->ActivateMeshShader();
-  mRenderer->DrawMeshesInstanced(activeMeshes, mode);
+  // Render non-bloomed meshes with lighting
+  if (!nonBloomedMeshes.empty()) {
+    mRenderer->ActivateMeshShader();
+    mRenderer->DrawMeshesInstanced(nonBloomedMeshes, mode);
+  }
+
+  // Render bloomed meshes without lighting
+  if (!bloomedMeshes.empty()) {
+    mRenderer->ActivateMeshShaderNoLighting();
+    mRenderer->DrawMeshesInstanced(bloomedMeshes, mode);
+  }
 
   if (mIsDebugging) {
     for (auto actor : mActiveActors) {
@@ -629,11 +647,17 @@ void Game::GenerateOutput() {
     }
   }
 
-  // Render sprites with instancing (batch draw)
-  mRenderer->ActivateSpriteShader();
+  // Render non-bloomed sprites with lighting
+  if (!nonBloomedSprites.empty()) {
+    mRenderer->ActivateSpriteShader();
+    mRenderer->DrawSpritesInstanced(nonBloomedSprites, mode);
+  }
 
-  // Draw world sprites in 3D space (already separated earlier)
-  mRenderer->DrawSpritesInstanced(worldSprites, mode);
+  // Render bloomed sprites without lighting
+  if (!bloomedSprites.empty()) {
+    mRenderer->ActivateSpriteShaderNoLighting();
+    mRenderer->DrawSpritesInstanced(bloomedSprites, mode);
+  }
 
   // End framebuffer rendering and display to screen
   mRenderer->EndFramebuffer();

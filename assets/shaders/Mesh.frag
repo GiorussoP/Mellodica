@@ -11,6 +11,7 @@ uniform vec3 uDirectionalLightDir;          // Directional light direction
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 uniform int uBloomPass;                 // 1 if rendering bloom pass, 0 otherwise
+uniform int uApplyLighting;             // 1 if lighting should be applied, 0 otherwise
 
 // Texture atlas uniforms
 uniform sampler2D uTextureAtlas;
@@ -65,7 +66,7 @@ void main()
     vec3 lighting = uAmbientLightColor + (uDirectionalLightColor * lightIntensity);
 
     // Apply lighting to base color
-    if(uBloomPass != 1){ 
+    if(uBloomPass != 1 && uApplyLighting == 1){ 
             baseColor *= lighting;
     }
 
@@ -73,7 +74,7 @@ void main()
     // render as black to provide occlusion
     if (uBloomPass == 1 && fragColor.r < 0.0 && baseColor.r < 0.7 && baseColor.g < 0.7 && baseColor.b < 0.7)
     {
-        outColor = vec4(0.0, 0.0, 0.0, texColor.a);
+        outColor = vec4(0.0,0.0,0.0, texColor.a);
         return;
     }
     

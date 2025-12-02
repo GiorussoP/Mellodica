@@ -280,7 +280,7 @@ GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {
 
   mSpriteComponent->SetScale(Vector3(width, height, 1.0f));
   mSpriteComponent->SetOffset(
-      Vector3(offsetX, (height - 1.0f) / 2.0f, offsetZ));
+      Vector3(offsetX, (height - 1.0f) / 2.0f - 0.1f, offsetZ));
 
   mSpriteComponent->AddAnimation("idle", {"grass1-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);

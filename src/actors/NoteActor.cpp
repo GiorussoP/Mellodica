@@ -65,8 +65,15 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
   if (other->GetLayer() == ColliderLayer::Entity) {
     Combatant *otherCombatant = dynamic_cast<Combatant *>(other->GetOwner());
-    if (otherCombatant && otherCombatant->GetCombatantState() == CombatantState::Dead)
+    if (otherCombatant &&
+        otherCombatant->GetCombatantState() == CombatantState::Dead)
       return;
+  } else if (other->GetLayer() == ColliderLayer::Note &&
+             !mGame->GetBattleSystem()->IsInBattle() &&
+             Vector3::Dot(
+                 dynamic_cast<NoteActor *>(other->GetOwner())->mDirection,
+                 mDirection) > 0.9f) {
+    return;
   }
 
   mShineActor->Start(SHINE_TIME);
