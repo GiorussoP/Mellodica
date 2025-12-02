@@ -42,6 +42,9 @@ public:
   // Debugging getter
   bool IsDebugging() const { return mIsDebugging; }
 
+  // Ticks count getter
+  Uint32 GetTicksCount() const { return mTicksCount; }
+
   // Player getter
   Player *GetPlayer() { return mPlayer; }
   void SetPlayer(Player *player) { mPlayer = player; }

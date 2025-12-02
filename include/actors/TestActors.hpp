@@ -78,18 +78,22 @@ public:
 class TreeActor : public Actor {
 public:
   TreeActor(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
   ColliderComponent *mColliderComponent;
+  float mSwayPhase;
 };
 
 class VisualTree : public Actor {
 public:
   VisualTree(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
+  float mSwayPhase;
 };
 
 class SmallRockActor : public Actor {
@@ -122,25 +126,31 @@ private:
 class GrassActorA : public Actor {
 public:
   GrassActorA(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
+  float mSwayPhase;
 };
 
 class GrassActorB : public Actor {
 public:
   GrassActorB(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
+  float mSwayPhase;
 };
 
 class GrassActorC : public Actor {
 public:
   GrassActorC(Game *game);
+  void OnUpdate(float deltaTime) override;
 
 private:
   SpriteComponent *mSpriteComponent;
+  float mSwayPhase;
 };
 
 class WallActor : public Actor {

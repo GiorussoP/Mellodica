@@ -7,6 +7,8 @@
 #include "render/Renderer.hpp"
 #include "render/Texture.hpp"
 #include "render/TextureAtlas.hpp"
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 
 // CubeActor implementation
@@ -139,6 +141,15 @@ TreeActor::TreeActor(Game *game) : Actor(game) {
 
   mColliderComponent = new SphereCollider(
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void TreeActor::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 2.0f + mSwayPhase) * 0.02f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 VisualTree::VisualTree(Game *game) : Actor(game) {
@@ -171,6 +182,16 @@ VisualTree::VisualTree(Game *game) : Actor(game) {
   mSpriteComponent->AddAnimation("idle", {"tree-64x64.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void VisualTree::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 2.0f + mSwayPhase) * 0.05f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
@@ -264,6 +285,15 @@ GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent->AddAnimation("idle", {"grass1-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void GrassActorA::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 3.0f + mSwayPhase) * 0.05f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 GrassActorB::GrassActorB(Game *game) : Actor(game), mSpriteComponent(nullptr) {
@@ -297,6 +327,15 @@ GrassActorB::GrassActorB(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent->AddAnimation("idle", {"grass2-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void GrassActorB::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 3.0f + mSwayPhase) * 0.05f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 GrassActorC::GrassActorC(Game *game) : Actor(game), mSpriteComponent(nullptr) {
@@ -328,6 +367,15 @@ GrassActorC::GrassActorC(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent->AddAnimation("idle", {"grass3-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
+
+  mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
+}
+
+void GrassActorC::OnUpdate(float deltaTime) {
+  Actor::OnUpdate(deltaTime);
+  float sway =
+      sin(mGame->GetTicksCount() / 1000.0f * 3.0f + mSwayPhase) * 0.05f;
+  mSpriteComponent->SetRotation(sway);
 }
 
 GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
@@ -410,7 +458,7 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
 
 void MultiDrawablesActor::OnUpdate(float deltaTime) {
   mRotation = Quaternion::Concatenate(
-      mRotation, Quaternion(Vector3::UnitY, deltaTime * 0.05));
+      mRotation, Quaternion(Vector3::UnitY, deltaTime * 0.2));
 
   mPosition.y = 2.0f - 1.0f * Math::Sin(4.0f * SDL_GetTicks() / 10000.0f);
 

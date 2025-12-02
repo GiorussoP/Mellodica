@@ -542,6 +542,7 @@ void Renderer::DrawSpritesInstanced(
 
       Vector3 ownerPos = spriteComp->GetOwner()->GetPosition();
       Vector3 ownerScale = spriteComp->GetOwner()->GetScale();
+      float rotation = spriteComp->GetRotation();
 
       // Create initial model matrix
       Matrix4 model =
@@ -558,15 +559,19 @@ void Renderer::DrawSpritesInstanced(
       // is Y-axis, Row 2 is Z-axis, Row 3 is homogeneous
       Matrix4 billboard = Matrix4::Identity;
 
-      // Row 0: X-axis (scaled, no rotation)
-      billboard.mat[0][0] = size.x * ownerScale.x;
-      billboard.mat[0][1] = 0.0f;
+      // Apply 2D rotation (around Z-axis in screen space)
+      float cosR = Math::Cos(rotation);
+      float sinR = Math::Sin(rotation);
+
+      // Row 0: X-axis (scaled and rotated)
+      billboard.mat[0][0] = size.x * ownerScale.x * cosR;
+      billboard.mat[0][1] = size.x * ownerScale.x * sinR;
       billboard.mat[0][2] = 0.0f;
       billboard.mat[0][3] = 0.0f;
 
-      // Row 1: Y-axis (scaled, no rotation)
-      billboard.mat[1][0] = 0.0f;
-      billboard.mat[1][1] = size.y * ownerScale.y;
+      // Row 1: Y-axis (scaled and rotated)
+      billboard.mat[1][0] = -size.y * ownerScale.y * sinR;
+      billboard.mat[1][1] = size.y * ownerScale.y * cosR;
       billboard.mat[1][2] = 0.0f;
       billboard.mat[1][3] = 0.0f;
 

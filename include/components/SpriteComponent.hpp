@@ -67,4 +67,11 @@ private:
 
   // HUD sprite flag (if true, rendered in screen space after framebuffer)
   bool mIsHUD;
+
+  // 2D rotation in radians (applied after billboarding, around camera's Z-axis)
+  float mRotation;
+
+public:
+  void SetRotation(float rotation) { mRotation = rotation; }
+  float GetRotation() const { return mRotation; }
 };
