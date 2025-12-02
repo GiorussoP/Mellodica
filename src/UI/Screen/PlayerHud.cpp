@@ -3,8 +3,8 @@
 PlayerHud::PlayerHud(class Game *game)
     : UIScreen(game, "./assets/fonts/PressStart2P-Regular.ttf"),
       mHPrect(nullptr), mENrect(nullptr), mBarSize(0.52f, 0.09f, 1.0f),
-      mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f), lastHealth(-1),
-      lastEnergy(-1) {
+      mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f),
+      lastHealth(INFINITY), lastEnergy(INFINITY) {
 
   // Add HUD elements here, e.g., health bar, energy bar, etc.
 

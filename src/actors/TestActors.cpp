@@ -151,8 +151,23 @@ VisualTree::VisualTree(Game *game) : Actor(game) {
   mSpriteComponent = new SpriteComponent(
       this, game->GetRenderer()->GetTextureIndex(texture), atlas);
   mSpriteComponent->SetColor(Color::White);
-  mSpriteComponent->SetOffset(Vector3(0.0f, 0.25f, 0.0f));
-  mSpriteComponent->SetScale(Vector3(1.5f, 1.5f, 1.0f));
+
+  // Random width and height between 1.0 and 2.0
+  float width = 1.0f + static_cast<float>(rand()) /
+                           (static_cast<float>(RAND_MAX / (2.0f - 1.0f)));
+  float height = 1.0f + static_cast<float>(rand()) /
+                            (static_cast<float>(RAND_MAX / (2.0f - 1.0f)));
+
+  // Random offset between -0.3 and 0.3
+  float offsetX = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  float offsetZ = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  mSpriteComponent->SetOffset(
+      Vector3(offsetX, (height - 1.0f) / 2.0f, offsetZ));
+  mSpriteComponent->SetScale(Vector3(width, height, 1.0f));
   mSpriteComponent->AddAnimation("idle", {"tree-64x64.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
@@ -228,8 +243,24 @@ GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent = new SpriteComponent(
       this, game->GetRenderer()->GetTextureIndex(texture), atlas);
   mSpriteComponent->SetColor(Color::White);
-  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
-  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+
+  // Random width and height between 0.25 and 0.75
+  float width = 0.25f + static_cast<float>(rand()) /
+                            (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+  float height = 0.25f + static_cast<float>(rand()) /
+                             (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+
+  // Random offset between -0.3 and 0.3
+  float offsetX = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  float offsetZ = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  mSpriteComponent->SetScale(Vector3(width, height, 1.0f));
+  mSpriteComponent->SetOffset(
+      Vector3(offsetX, (height - 1.0f) / 2.0f, offsetZ));
+
   mSpriteComponent->AddAnimation("idle", {"grass1-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
@@ -245,8 +276,24 @@ GrassActorB::GrassActorB(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent = new SpriteComponent(
       this, game->GetRenderer()->GetTextureIndex(texture), atlas);
   mSpriteComponent->SetColor(Color::White);
-  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
-  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+
+  // Random width and height between 0.25 and 0.75
+  float width = 0.25f + static_cast<float>(rand()) /
+                            (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+  float height = 0.25f + static_cast<float>(rand()) /
+                             (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+
+  // Random offset between -0.3 and 0.3
+  float offsetX = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  float offsetZ = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  mSpriteComponent->SetScale(Vector3(width, height, 1.0f));
+  mSpriteComponent->SetOffset(
+      Vector3(offsetX, (height - 1.0f) / 2.0f, offsetZ));
+
   mSpriteComponent->AddAnimation("idle", {"grass2-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
@@ -262,8 +309,22 @@ GrassActorC::GrassActorC(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   mSpriteComponent = new SpriteComponent(
       this, game->GetRenderer()->GetTextureIndex(texture), atlas);
   mSpriteComponent->SetColor(Color::White);
-  mSpriteComponent->SetOffset(Vector3(0.0f, -0.25f, 0.0f));
-  mSpriteComponent->SetScale(Vector3(0.5f, 0.5f, 1.0f));
+  // Random width and height between 0.25 and 0.75
+  float width = 0.25f + static_cast<float>(rand()) /
+                            (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+  float height = 0.25f + static_cast<float>(rand()) /
+                             (static_cast<float>(RAND_MAX / (0.75f - 0.25f)));
+
+  // Random offset between -0.3 and 0.3
+  float offsetX = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  float offsetZ = -0.3f + static_cast<float>(rand()) /
+                              (static_cast<float>(RAND_MAX / (0.6f)));
+
+  mSpriteComponent->SetScale(Vector3(width, height, 1.0f));
+  mSpriteComponent->SetOffset(
+      Vector3(offsetX, (height - 1.0f) / 2.0f, offsetZ));
   mSpriteComponent->AddAnimation("idle", {"grass3-16x16.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");

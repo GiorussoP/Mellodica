@@ -7,6 +7,7 @@
 #include "TextureAtlas.hpp"
 
 HUDElement::HUDElement(Game *game) : Actor(game) {
+  game->AddAlwaysActive(this);
   mSpriteComponent = new SpriteComponent(this, -1, nullptr, true);
 }
 
