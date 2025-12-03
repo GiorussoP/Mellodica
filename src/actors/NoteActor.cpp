@@ -4,6 +4,7 @@
 #include "SynthEngine.hpp"
 #include "components/ColliderComponent.hpp"
 
+#include "MIDIPlayer.hpp"
 #include "actors/ShineActor.hpp"
 
 const float SHINE_TIME = 0.5f;
@@ -85,6 +86,12 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
   } else {
     SetScale(mScale - Vector3(0.0f, 0.0f, mLastStepMovement));
     SetPosition(mPosition - mDirection * mLastStepMovement * 0.5f);
+  }
+
+  if (!mGame->GetBattleSystem()->IsInBattle()) {
+    MIDIPlayer::playSequence(
+        {{0.0f, 14, static_cast<int>(mMidiNote), true, 20},
+         {mLastStepMovement, 14, static_cast<int>(mMidiNote), false, 20}});
   }
 
   // Unused parameters

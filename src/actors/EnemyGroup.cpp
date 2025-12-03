@@ -1,6 +1,7 @@
 #include "EnemyGroup.hpp"
 
 #include "Game.hpp"
+#include "MIDIPlayer.hpp"
 
 EnemyGroup::EnemyGroup(class Game *game, std::vector<Combatant *> enemies,
                        float radius)
@@ -75,7 +76,24 @@ void EnemyGroup::OnUpdate(float deltaTime) {
       mGame->GetPlayer()->GetComponent<RigidBodyComponent>()->SetVelocity(
           velocity);
 
-      if (everyoneDead || flatDist.LengthSq() > mRadius * mRadius + 1.5f) {
+      if (everyoneDead) {
+        mGame->GetBattleSystem()->EndBattle();
+        // Play victory fanfare
+        MIDIPlayer::playSequence({{0.0f, 15, 72, true, 127},
+                                  {0.1f, 15, 76, true, 127},
+                                  {0.1f, 15, 79, true, 127},
+                                  {0.1f, 15, 79, false},
+                                  {0.0f, 15, 76, false},
+                                  {0.0f, 15, 72, false},
+                                  {0.0f, 15, 76, true, 127},
+                                  {0.1f, 15, 83, true, 127},
+                                  {0.1f, 15, 86, true, 127},
+                                  {0.3f, 15, 86, false},
+                                  {0.0f, 15, 83, false},
+                                  {0.0f, 15, 76, false}});
+
+      } else if (everyoneDead ||
+                 flatDist.LengthSq() > mRadius * mRadius + 1.5f) {
         mGame->GetBattleSystem()->EndBattle();
       }
     }

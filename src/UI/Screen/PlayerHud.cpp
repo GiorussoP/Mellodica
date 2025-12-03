@@ -6,8 +6,6 @@ PlayerHud::PlayerHud(class Game *game)
       mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f),
       lastHealth(INFINITY), lastEnergy(INFINITY) {
 
-  // Add HUD elements here, e.g., health bar, energy bar, etc.
-
   // Player energy
   auto energiaBackground = AddImageOrElement(Color::Black);
   energiaBackground->SetPosition(Vector3(mLeftBarCenter, -0.9f, -1.0f));

@@ -114,8 +114,15 @@ void Player::OnUpdate(float deltaTime) {
   camRight.Normalize();
 
   // player components in camera-space: x = right, z = forward
-  float x = Vector3::Dot(mFront, camRight);
-  float z = Vector3::Dot(mFront, camForward);
+  float x, z;
+
+  if (!mGame->GetBattleSystem()->IsInBattle()) {
+    x = Vector3::Dot(mFront, camRight);
+    z = Vector3::Dot(mFront, camForward);
+  } else {
+    x = 0.0f;
+    z = 1.0f;
+  }
 
   // angle measured from camera forward, positive toward camera right
   float angle = atan2(x, z);
@@ -347,6 +354,10 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
     if (mHealth < 0) {
       mHealth = 0;
     }
+
+    MIDIPlayer::playSequence(
+        {{0.0f, 13, 30, true, 100}, {0.1f, 13, 30, false, 100}});
+
     return;
   }
 

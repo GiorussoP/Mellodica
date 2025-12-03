@@ -50,6 +50,19 @@ struct Channel {
   int pitchBendPos = 0;
 };
 
+// Event for the manual note queue (independent from song playback)
+struct NoteQueueEvent {
+  double delay; // Time delay in seconds from previous event (cumulative)
+  int channel;  // MIDI channel (0-15)
+  int note;     // MIDI note number (0-127)
+  int velocity; // Note velocity (0-127), defaults to 100
+  bool noteOn;  // true = note on, false = note off
+
+  // Constructor with default velocity
+  NoteQueueEvent(double d, int ch, int n, bool on, int vel = 100)
+      : delay(d), channel(ch), note(n), velocity(vel), noteOn(on) {}
+};
+
 class MIDIPlayer {
 public:
   static std::vector<Channel> &getChannels() { return channels; }
@@ -81,114 +94,24 @@ public:
   static void unregisterChannelForEvents(int channel);
   static void clearRegisteredChannels();
 
-  static void loadMainTheme() {
+  // Manual note queue system (independent from song playback)
+  static void playSequence(const std::vector<NoteQueueEvent> &events);
+  static void clearNoteQueue();
+  static bool isNoteQueueEmpty();
 
-    SynthEngine::setChannels({{0, 0},  // Grand Piano
-                              {0, 49}, // Slow Strings
-                              {0, 73}, // Flute
-                              {0, 10}, // Music box
-                              {0, 56}, // Trumpet
-                              {0, 32}, // Acoustic bass
-                              {0, 0},
-                              {0, 0},
-                              {0, 0},
-                              {128, 0}, // Drums 1
-                              {0, 0},
-                              {128, 1}, // Drums 2
-                              {0, 0},   // Player Channel: Piano
-                              {0, 0},
-                              {0, 0},
-                              {0, 0}});
-
-    // Initializing MIDI Player
-    MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
-
-    MIDIPlayer::setChannelVolume(0, 127);
-    MIDIPlayer::setChannelVolume(1, 127);
-    MIDIPlayer::setChannelVolume(2, 127);
-    MIDIPlayer::setChannelVolume(3, 127);
-    MIDIPlayer::setChannelVolume(4, 127);
-    MIDIPlayer::setChannelVolume(5, 127);
-    MIDIPlayer::setChannelVolume(6, 127);
-
-    MIDIPlayer::setChannelVolume(9, 127);
-  }
-
-  static void loadSong0() {
-    SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
-                              {0, 40},  // Violin
-                              {0, 21},  // Accordion
-                              {0, 43},  // Contrabass
-                              {0, 73},  // Flute
-                              {0, 71},  // Clarinet
-                              {0, 56},  // Trumpet
-                              {0, 46},  // Harp
-                              {0, 0},   // Always active: Piano
-                              {128, 0}, // Battle drums
-                              {0, 49},  // Always active: Slow strings
-                              {128, 1}, // Always Active: song drums
-                              {0, 0},   // Player Channel: Piano
-                              {0, 42},  // SFX1
-                              {0, 11},  // SFX2
-                              {0, 0}}); // SFX3
-
-    MIDIPlayer::loadSong("assets/songs/a0.mid", true);
-
-    MIDIPlayer::setChannelTranspose(11, -60);
-  }
-
-  static void loadSong1() {
-    SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
-                              {0, 40},  // Violin
-                              {0, 21},  // Accordion
-                              {0, 43},  // Contrabass
-                              {0, 73},  // Flute
-                              {0, 71},  // Clarinet
-                              {0, 56},  // Trumpet
-                              {0, 46},  // Harp
-                              {0, 0},   // Always active: Piano
-                              {128, 0}, // Battle drums
-                              {0, 49},  // Always active: Slow strings
-                              {128, 1}, // Always Active: song drums
-                              {0, 0},   // Player Channel: Piano
-                              {0, 42},  // SFX1
-                              {0, 11},  // SFX2
-                              {0, 0}}); // SFX3
-
-    MIDIPlayer::loadSong("assets/songs/a1.mid", true);
-
-    MIDIPlayer::setChannelTranspose(11, -60);
-  }
-
-  static void loadSong2() {
-    SynthEngine::setChannels({{0, 36}, // Slap Bass
-                              {0, 1},  // Piano
-                              {0, 50}, // Strings
-                              {0, 30}, // Distorted Guitar
-                              {0, 62}, // Synth Brass
-                              {0, 54}, // Soprano voice
-                              {0, 80}, // Square lead
-                              {0, 78}, // Whistle
-                              {0, 66},
-                              {128, 0},
-                              {0, 89},
-                              {0, 73},
-                              {0, 57},
-                              {0, 42},
-                              {0, 11},
-                              {0, 52}});
-
-    // Initializing MIDI Player
-    MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
-
-    MIDIPlayer::setChannelTranspose(11, -60);
-  }
+  // Song loading methods
+  static void loadMainTheme();
+  static void loadSong0();
+  static void loadSong1();
+  static void loadSong2a();
+  static void loadSong2b();
 
 private:
   static void midiThreadFunction();
   static void pushNoteEvent(int channel, int note, int velocity, bool noteOn,
                             bool hasNextNote, int nextNote,
                             double nextNoteTime);
+  static void processNoteQueue(double dt);
 
   static std::vector<Channel> channels;
   static bool paused;
@@ -209,6 +132,18 @@ private:
   // Channel filtering - empty means all channels
   static std::vector<int> registeredChannels;
   static std::mutex registeredChannelsMutex;
+
+  // Note queue system
+  struct QueuedNoteWithTime {
+    double triggerTime; // Absolute time when this event should trigger
+    int channel;
+    int note;
+    int velocity;
+    bool noteOn;
+  };
+  static std::vector<QueuedNoteWithTime> noteQueue;
+  static std::mutex noteQueueMutex;
+  static double noteQueueTimer;
 };
 
 #endif

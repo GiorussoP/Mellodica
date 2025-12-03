@@ -3,6 +3,7 @@
 //
 
 #include "../../include/UI/UIButton.hpp"
+#include "MIDIPlayer.hpp"
 
 UIButton::UIButton(Game *game, std::function<void()> onClick,
                    const std::string &hudTexturePath,
@@ -19,6 +20,8 @@ UIButton::UIButton(Game *game, std::function<void()> onClick,
 
 void UIButton::OnClick() {
   if (mOnClick) {
+    MIDIPlayer::playSequence(
+        {{0.0f, 15, 90, true, 120}, {0.05f, 15, 90, false}});
     mOnClick();
   }
 }

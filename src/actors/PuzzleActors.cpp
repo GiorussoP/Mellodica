@@ -4,6 +4,7 @@
 
 #include "actors/PuzzleActors.hpp"
 #include "Game.hpp"
+#include "MIDIPlayer.hpp"
 #include "Renderer.hpp"
 #include "actors/Player.hpp"
 #include "actors/ShineActor.hpp"
@@ -63,6 +64,18 @@ void HPItemActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
       player->AddHealth(100);
     }
     ItemActor::OnCollision(penetration, other);
+
+    // Power-up sound effect
+    MIDIPlayer::playSequence({{0.0f, 15, 62, true, 100},
+                              {0.0f, 15, 66, true, 80},
+                              {0.1f, 15, 62, false},
+                              {0.0f, 15, 66, false},
+                              {0.0f, 15, 69, true, 100},
+                              {0.0f, 15, 74, true, 80},
+                              {0.1f, 15, 69, false},
+                              {0.0f, 15, 74, false},
+                              {0.0f, 15, 78, true, 120},
+                              {0.2f, 15, 78, false}});
   }
 }
 

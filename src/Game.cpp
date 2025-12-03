@@ -382,11 +382,16 @@ void Game::UpdateActors(float deltaTime) {
     }
   }
 
-  while (!mUIStack.empty() &&
-         mUIStack.back()->GetUIState() == UIScreen::UIState::Closing) {
-    std::cout << "Popping UI Screen" << std::endl;
-    delete mUIStack.back();
-    mUIStack.pop_back();
+  // Remove ALL closing UI screens, not just the ones at the back
+  auto it = mUIStack.begin();
+  while (it != mUIStack.end()) {
+    if ((*it)->GetUIState() == UIScreen::UIState::Closing) {
+      std::cout << "Deleting UI Screen" << std::endl;
+      delete *it;
+      it = mUIStack.erase(it);
+    } else {
+      ++it;
+    }
   }
 
   mUpdatingActors = false;

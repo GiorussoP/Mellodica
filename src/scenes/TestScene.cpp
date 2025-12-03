@@ -17,7 +17,7 @@ void TestSceneA::Initialize() {
   std::cout << "Initializing TestSceneA..." << std::endl;
   mGame->GetRenderer()->SetIsDark(true);
 
-  MIDIPlayer::loadSong2();
+  MIDIPlayer::loadSong2a();
 
   // Creating the battke system
   mGame->SetBattleSystem(new BattleSystem(mGame));

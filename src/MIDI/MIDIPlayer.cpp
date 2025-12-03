@@ -28,6 +28,11 @@ std::mutex MIDIPlayer::eventQueueMutex;
 std::vector<int> MIDIPlayer::registeredChannels;
 std::mutex MIDIPlayer::registeredChannelsMutex;
 
+// Note queue system
+std::vector<MIDIPlayer::QueuedNoteWithTime> MIDIPlayer::noteQueue;
+std::mutex MIDIPlayer::noteQueueMutex;
+double MIDIPlayer::noteQueueTimer = 0.0;
+
 void MIDIPlayer::loadSong(const char *filename, bool loop_enabled) {
   std::lock_guard<std::mutex> lock(midiMutex);
 
@@ -172,6 +177,9 @@ void MIDIPlayer::clearEventQueue() {
 }
 
 void MIDIPlayer::update(float dt) {
+  // Process note queue (independent of song playback)
+  processNoteQueue(dt);
+
   std::lock_guard<std::mutex> lock(midiMutex);
 
   if (!paused) {
@@ -475,4 +483,212 @@ void MIDIPlayer::unregisterChannelForEvents(int channel) {
 void MIDIPlayer::clearRegisteredChannels() {
   std::lock_guard<std::mutex> lock(registeredChannelsMutex);
   registeredChannels.clear();
+}
+
+// Note queue implementation
+void MIDIPlayer::playSequence(const std::vector<NoteQueueEvent> &events) {
+  std::lock_guard<std::mutex> lock(noteQueueMutex);
+
+  // Don't clear existing queue - allow multiple sequences to coexist
+  // Instead, add new events relative to current timer position
+
+  // Convert events with cumulative delays to absolute trigger times
+  double currentTime = noteQueueTimer; // Start from current timer position
+  for (const auto &event : events) {
+    currentTime += event.delay;
+
+    QueuedNoteWithTime queuedNote;
+    queuedNote.triggerTime = currentTime;
+    queuedNote.channel = event.channel;
+    queuedNote.note = event.note;
+    queuedNote.velocity = event.velocity;
+    queuedNote.noteOn = event.noteOn;
+
+    noteQueue.push_back(queuedNote);
+  }
+
+  // Sort the queue by trigger time to maintain order
+  std::sort(noteQueue.begin(), noteQueue.end(),
+            [](const QueuedNoteWithTime &a, const QueuedNoteWithTime &b) {
+              return a.triggerTime < b.triggerTime;
+            });
+}
+
+void MIDIPlayer::clearNoteQueue() {
+  std::lock_guard<std::mutex> lock(noteQueueMutex);
+  noteQueue.clear();
+  noteQueueTimer = 0.0;
+}
+
+bool MIDIPlayer::isNoteQueueEmpty() {
+  std::lock_guard<std::mutex> lock(noteQueueMutex);
+  return noteQueue.empty();
+}
+
+void MIDIPlayer::processNoteQueue(double dt) {
+  std::lock_guard<std::mutex> lock(noteQueueMutex);
+
+  if (noteQueue.empty()) {
+    return;
+  }
+
+  noteQueueTimer += dt;
+
+  // Process all events that should trigger by now
+  auto it = noteQueue.begin();
+  while (it != noteQueue.end()) {
+    if (it->triggerTime <= noteQueueTimer) {
+      // Trigger the note event
+      if (it->noteOn) {
+        fluid_synth_noteon(SynthEngine::synth, it->channel, it->note,
+                           it->velocity);
+      } else {
+        fluid_synth_noteoff(SynthEngine::synth, it->channel, it->note);
+      }
+
+      // Remove the processed event
+      it = noteQueue.erase(it);
+    } else {
+      // Events are sorted by time, so we can stop here
+      break;
+    }
+  }
+
+  // Reset timer if queue is now empty
+  if (noteQueue.empty()) {
+    noteQueueTimer = 0.0;
+  }
+}
+
+// Song loading method implementations
+void MIDIPlayer::loadMainTheme() {
+  SynthEngine::setChannels({{0, 0},  // Grand Piano
+                            {0, 49}, // Slow Strings
+                            {0, 73}, // Flute
+                            {0, 10}, // Music box
+                            {0, 56}, // Trumpet
+                            {0, 32}, // Acoustic bass
+                            {0, 0},
+                            {0, 0},
+                            {0, 0},
+                            {128, 0}, // Drums 1
+                            {0, 0},
+                            {128, 1},  // Drums 2
+                            {0, 0},    // Player Channel: Piano
+                            {128, 25}, // Chiptune sound (channel 13)
+                            {0, 88},   // Fantasia sound (channel 14)
+                            {1, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+
+  MIDIPlayer::setChannelVolume(0, 127);
+  MIDIPlayer::setChannelVolume(1, 127);
+  MIDIPlayer::setChannelVolume(2, 127);
+  MIDIPlayer::setChannelVolume(3, 127);
+  MIDIPlayer::setChannelVolume(4, 127);
+  MIDIPlayer::setChannelVolume(5, 127);
+  MIDIPlayer::setChannelVolume(6, 127);
+  MIDIPlayer::setChannelVolume(9, 127);
+
+  // SFX
+  MIDIPlayer::setChannelVolume(13, 127);
+  MIDIPlayer::setChannelVolume(14, 127);
+  MIDIPlayer::setChannelVolume(15, 127);
+}
+
+void MIDIPlayer::loadSong0() {
+  SynthEngine::setChannels({{0, 24}, // Acoustic Guitar (nylon)
+                            {0, 40}, // Violin
+                            {0, 21}, // Accordion
+                            {0, 43}, // Contrabass
+                            {0, 19}, // Organ
+                            {0, 71}, // Clarinet
+                            {0, 46}, // Harp
+                            {0, 45}, // Pizzicato
+
+                            {0, 0}, // Always active: Piano
+
+                            {128, 0}, // Battle drums
+
+                            {0, 32},  // Always active: Acoustic bass
+                            {0, 116}, // Always Active: taiko drums
+
+                            {0, 0}, // Player Channel: Piano
+
+                            {11, 28},   // Chiptune sound (channel 13)
+                            {0, 88},    // Fantasia sound (channel 14)
+                            {12, 80}}); // Square wave sound (channel 15)
+
+  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
+  MIDIPlayer::setChannelVolume(11, 100);
+  // MIDIPlayer::setChannelTranspose(11, -60);
+}
+
+void MIDIPlayer::loadSong1() {
+  SynthEngine::setChannels({{0, 24},     // Acoustic Guitar (nylon)
+                            {0, 40},     // Violin
+                            {0, 21},     // Accordion
+                            {0, 43},     // Contrabass
+                            {0, 73},     // Flute
+                            {0, 71},     // Clarinet
+                            {0, 56},     // Trumpet
+                            {0, 46},     // Harp
+                            {0, 0},      // Always active: Piano
+                            {128, 0},    // Battle drums
+                            {0, 49},     // Always active: Slow strings
+                            {128, 1},    // Always Active: song drums
+                            {0, 0},      // Player Channel: Piano
+                            {128, 25},   // Chiptune sound (channel 13)
+                            {0, 88},     // Fantasia sound (channel 14)
+                            {128, 80}}); // Square wave sound (channel 15)
+
+  MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+  MIDIPlayer::setChannelTranspose(11, -60);
+}
+
+void MIDIPlayer::loadSong2a() {
+  SynthEngine::setChannels({{0, 36}, // Slap Bass
+                            {0, 1},  // Piano
+                            {0, 50}, // Strings
+                            {0, 30}, // Distorted Guitar
+                            {0, 62}, // Synth Brass
+                            {0, 54}, // Soprano voice
+                            {0, 80}, // Square lead
+                            {0, 78}, // Whistle
+                            {0, 66},
+                            {128, 0},
+                            {0, 89},
+                            {0, 73},
+                            {0, 57},
+                            {128, 25},   // Chiptune sound (channel 13)
+                            {0, 88},     // Fantasia sound (channel 14)
+                            {128, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/a2a.mid", true);
+  MIDIPlayer::setChannelTranspose(11, -60);
+}
+
+void MIDIPlayer::loadSong2b() {
+  SynthEngine::setChannels({{0, 36}, // Slap Bass
+                            {0, 1},  // Piano
+                            {0, 50}, // Strings
+                            {0, 30}, // Distorted Guitar
+                            {0, 62}, // Synth Brass
+                            {0, 54}, // Soprano voice
+                            {0, 80}, // Square lead
+                            {0, 78}, // Whistle
+                            {0, 66},
+                            {128, 0},
+                            {0, 89},
+                            {0, 73},
+                            {0, 57},
+                            {128, 25}, // Chiptune sound (channel 13)
+                            {0, 88},   // Fantasia sound (channel 14)
+                            {1, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
+  MIDIPlayer::setChannelTranspose(11, -60);
 }

@@ -6,6 +6,7 @@
 
 #include "Game.hpp"
 #include "Level1.hpp"
+#include "MIDIPlayer.hpp"
 
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName) {
@@ -38,6 +39,9 @@ void MainMenuScreen::HandleKeyPress(int key) {
       mHudButtons[mSelectedButton]->SetHighlighted(false);
       mSelectedButton--;
       mHudButtons[mSelectedButton]->SetHighlighted(true);
+
+      MIDIPlayer::playSequence(
+          {{0.0f, 15, 92, true, 120}, {0.05f, 15, 92, false}});
     }
   } else if (key == SDLK_DOWN || key == SDLK_s) {
     // Move to next button
@@ -45,12 +49,26 @@ void MainMenuScreen::HandleKeyPress(int key) {
       mHudButtons[mSelectedButton]->SetHighlighted(false);
       mSelectedButton++;
       mHudButtons[mSelectedButton]->SetHighlighted(true);
+
+      MIDIPlayer::playSequence(
+          {{0.0f, 15, 92, true, 120}, {0.05f, 15, 92, false}});
     }
   } else if (key == SDLK_RETURN) {
     // Click the currently selected button
     if (mSelectedButton >= 0 &&
         mSelectedButton < static_cast<int>(mHudButtons.size())) {
       mHudButtons[mSelectedButton]->OnClick();
+
+      MIDIPlayer::playSequence({{0.0f, 14, 62, true, 100},
+                                {0.0f, 14, 66, true, 80},
+                                {0.2f, 14, 62, false},
+                                {0.0f, 14, 66, false},
+                                {0.0f, 14, 69, true, 100},
+                                {0.0f, 14, 74, true, 80},
+                                {0.2f, 14, 69, false},
+                                {0.0f, 14, 74, false},
+                                {0.0f, 14, 78, true, 120},
+                                {0.4f, 14, 78, false}});
     }
   }
 }

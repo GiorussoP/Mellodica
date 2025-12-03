@@ -120,6 +120,9 @@ void SynthEngine::setChannels(const std::vector<SoundPreset> &presets) {
 
 void SynthEngine::startNote(unsigned int ch, unsigned int note,
                             unsigned int velocity) {
+
+  int panning_shift = (note % 12) - 6; // Shift based on note within an octave
+  setPan(ch, 64 + panning_shift * 6);
   fluid_synth_noteon(synth, ch, note, velocity);
 }
 
