@@ -115,7 +115,7 @@ void BreakableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
       // Play destroying sound on drum channel 13
       MIDIPlayer::playSequence(
-          {{0.0f, 13, 38, true, 127}, {0.2f, 38, 81, false}});
+          {{0.0f, 13, 38, true, 127}, {0.2f, 13, 38, false}});
     }
   } else
     MovableBox::OnCollision(penetration, other);
@@ -142,7 +142,7 @@ void MovableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
 
     if (move.Length() > 0.001f) {
       MIDIPlayer::playSequence(
-          {{0.0f, 13, 29, true, 80}, {0.1f, 13, 29, false}});
+          {{0.0f, 13, 29, true, 20}, {0.1f, 13, 29, false}});
       mPosition += move;
     }
   } else if (other->GetLayer() == ColliderLayer::Hole) {
@@ -172,7 +172,7 @@ void MovableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
           int note = static_cast<int>(Math::Lerp(30.0f, 90.0f, mPosition.y));
           // Play falling sound on channel 15
           MIDIPlayer::playSequence(
-              {{0.0f, 15, note, true, 127}, {0.01f, 15, note, false}});
+              {{0.0f, 15, note, true, 100}, {0.01f, 15, note, false}});
         }
       }
     }
