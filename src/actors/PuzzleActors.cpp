@@ -79,6 +79,108 @@ void HPItemActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
   }
 }
 
+void BreakableBox::OnUpdate(float deltaTime) {
+  // Restore color to white when not being hit
+  if (auto meshComp = GetComponent<MeshComponent>()) {
+    meshComp->SetColor(Color::White);
+    meshComp->SetBloomed(false);
+  }
+}
+
+void BreakableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
+  if (other->GetLayer() == ColliderLayer::Note) {
+
+    // Turn red and bloom when hit
+    if (auto meshComp = GetComponent<MeshComponent>()) {
+      meshComp->SetColor(Color::Red);
+      meshComp->SetBloomed(true);
+    }
+
+    // Decrease health
+    mHealth -= 1;
+    if (mHealth < 0) {
+      mHealth = 0;
+    }
+
+    // Only destroy if health reaches 0
+    if (mHealth <= 0) {
+      auto shine = new ShineActor(mGame, Vector3(0.3f, 0.1f, 0.0f));
+
+      shine->SetPosition(mPosition);
+      shine->GetComponent<SpriteComponent>()->SetBloomed(false);
+      shine->Start(0.5f);
+      shine->SetScale(Vector3(1.5f, -1.5f, 1.5f));
+
+      SetState(ActorState::Destroy);
+
+      // Play destroying sound on drum channel 13
+      MIDIPlayer::playSequence(
+          {{0.0f, 13, 38, true, 127}, {0.2f, 38, 81, false}});
+    }
+  } else
+    MovableBox::OnCollision(penetration, other);
+}
+
+void MovableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
+  // Don't respond to collisions if box is already in a hole
+  if (other->GetLayer() != ColliderLayer::Hole &&
+      other->GetLayer() != ColliderLayer::Note &&
+      other->GetLayer() != ColliderLayer::Entity) {
+
+    if (mIsInHole)
+      return;
+
+    // Move Only on the strongest component direction
+    Vector3 move = penetration;
+    if (std::abs(penetration.x) > std::abs(penetration.z)) {
+      move.z = 0.0f;
+    } else {
+      move.x = 0.0f;
+    }
+
+    move.y = 0.0f;
+
+    if (move.Length() > 0.001f) {
+      MIDIPlayer::playSequence(
+          {{0.0f, 13, 29, true, 80}, {0.1f, 13, 29, false}});
+      mPosition += move;
+    }
+  } else if (other->GetLayer() == ColliderLayer::Hole) {
+
+    // Get hole's AABB bounds
+    const AABBCollider *holeCollider = static_cast<const AABBCollider *>(other);
+    Vector3 holeMin = holeCollider->GetMin();
+    Vector3 holeMax = holeCollider->GetMax();
+
+    // Check if box center is fully inside the hole's horizontal bounds
+    bool fullyInsideX = mPosition.x - mScale.x / 2.01f >= holeMin.x &&
+                        mPosition.x + mScale.x / 2.01f < holeMax.x;
+    bool fullyInsideZ = mPosition.z - mScale.z / 2.01f >= holeMin.z &&
+                        mPosition.z + mScale.z / 2.01f < holeMax.z;
+
+    if (fullyInsideX && fullyInsideZ) {
+      // Box is fully over hole - mark it and start falling
+      mIsInHole = true;
+
+      if (mPosition.y > 0.5f) {
+        mPosition.y = Math::Lerp(mPosition.y, 0.5f, 0.1f);
+
+        if (mPosition.y <= 0.6f) {
+          mPosition.y = 0.5f;
+        } else {
+          // Note pitch proportional to height
+          int note = static_cast<int>(Math::Lerp(30.0f, 90.0f, mPosition.y));
+          // Play falling sound on channel 15
+          MIDIPlayer::playSequence(
+              {{0.0f, 15, note, true, 127}, {0.01f, 15, note, false}});
+        }
+      }
+    }
+    // else: Box is not fully over the hole - ignore collision and let player
+    // keep pushing
+  }
+}
+
 MusicButtonActor::MusicButtonActor(Game *game, int midiTarget)
     : Actor(game), mTargetNote(midiTarget), mIsActivated(false) {
 

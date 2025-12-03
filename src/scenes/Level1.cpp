@@ -5,6 +5,7 @@
 #include "MIDI/MIDIPlayer.hpp"
 #include "Renderer.hpp"
 #include "actors/PuzzleActors.hpp"
+#include "actors/TestActors.hpp"
 #include <iostream>
 
 void Level1::Initialize() {

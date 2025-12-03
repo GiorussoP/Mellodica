@@ -5,8 +5,8 @@
 #include "components/SpriteComponent.hpp"
 #include <random>
 
-ShineActor::ShineActor(Game *game, Vector3 color)
-    : Actor(game), mLifetime(0.0f) {
+ShineActor::ShineActor(Game *game, Vector3 color, bool autoDestroy)
+    : Actor(game), mLifetime(0.0f), mAutoDestroy(autoDestroy) {
 
   // Get atlas from renderer cache
   TextureAtlas *atlas =
@@ -30,12 +30,20 @@ ShineActor::ShineActor(Game *game, Vector3 color)
 }
 
 void ShineActor::OnUpdate(float deltaTime) {
-  if (mLifetime <= 0.0f)
+  if (mLifetime <= 0.0f) {
+    // Animation finished - destroy if marked or auto-destroy enabled
+    if (mAutoDestroy || GetState() == ActorState::Destroy) {
+      SetState(ActorState::Destroy);
+    }
     return;
+  }
   mLifetime -= deltaTime;
   if (mLifetime <= 0.0f) {
     mSpriteComponent->SetVisible(false);
     mSpriteComponent->SetIsPaused(true);
+    if (mAutoDestroy) {
+      SetState(ActorState::Destroy);
+    }
   }
   mPosition += Vector3::UnitY * deltaTime * 0.5f;
   mScale -= Vector3::One * deltaTime * 0.5f;

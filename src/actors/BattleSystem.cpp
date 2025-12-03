@@ -40,7 +40,7 @@ BattleSystem::BattleSystem(Game *game)
     MIDIPlayer::setChannelVolume(i, (i == 12) ? 127 : 100);
   }
 
-  MIDIPlayer::setSpeed(0.9f);
+  MIDIPlayer::setSpeed(0.7f);
   SynthEngine::setPan(12, 64);
 }
 
@@ -167,7 +167,7 @@ void BattleSystem::EndBattle() {
   mGame->GetCamera()->SetMode(CameraMode::Isometric);
 
   MIDIPlayer::muteChannel(9); // END BATTLE DRUMS
-  MIDIPlayer::setSpeed(0.9f);
+  MIDIPlayer::setSpeed(0.7f);
 
   // Mute enemies
   for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {

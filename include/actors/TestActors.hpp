@@ -26,8 +26,22 @@ public:
               int startingIndex = -1);
   void OnUpdate(float deltaTime) override;
 
-private:
+protected:
   MeshComponent *mMeshComponent;
+};
+
+class Hole : public GroundActor {
+public:
+  Hole(Game *game, const Vector3 &color = Color::Black)
+      : GroundActor(game, color, -1) {
+    mMeshComponent->SetBloomed(true);
+    mColliderComponent =
+        new AABBCollider(this, ColliderLayer::Hole, Vector3(0.0f, 1.0f, 0.0f),
+                         Vector3(0.5f, 0.5f, 0.5f), true);
+  }
+
+private:
+  ColliderComponent *mColliderComponent;
 };
 
 // Simple pyramid actor with MeshComponent
@@ -47,7 +61,7 @@ public:
                  int startingIndex = -1);
   void OnUpdate(float deltaTime) override;
 
-private:
+protected:
   ColliderComponent *mColliderComponent;
 };
 

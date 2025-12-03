@@ -70,9 +70,14 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
 BattleScreen::~BattleScreen() {}
 
 void BattleScreen::Update(float deltaTime) {
+  // Check if battle has ended (enemy group is null)
+  auto *enemyGroup = mGame->GetBattleSystem()->GetCurrentEnemyGroup();
+  if (!enemyGroup) {
+    return; // Battle ended, skip update
+  }
+
   // Enemy health bars
-  auto &enemies =
-      mGame->GetBattleSystem()->GetCurrentEnemyGroup()->GetEnemies();
+  auto &enemies = enemyGroup->GetEnemies();
   for (size_t i = 0; i < enemies.size(); ++i) {
 
     if (mEnemyLastHealths[i] > enemies[i]->GetHealth()) {

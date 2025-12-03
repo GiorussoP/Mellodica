@@ -18,13 +18,11 @@ UIScreen::~UIScreen() {
   for (auto img : mHudImages) {
     mGame->RemoveActor(img);
     mGame->GetRenderer()->RemoveUIElement(img);
-    delete img;  // Actually delete the actor
   }
   mHudImages.clear();
   for (auto button : mHudButtons) {
     mGame->RemoveActor(button);
     mGame->GetRenderer()->RemoveUIElement(button);
-    delete button;  // Actually delete the actor
   }
   mHudButtons.clear();
 }

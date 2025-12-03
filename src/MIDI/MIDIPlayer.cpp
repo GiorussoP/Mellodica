@@ -668,6 +668,7 @@ void MIDIPlayer::loadSong2a() {
   // Initializing MIDI Player
   MIDIPlayer::loadSong("assets/songs/a2a.mid", true);
   MIDIPlayer::setChannelTranspose(11, -60);
+  MIDIPlayer::setSpeed(0.3f);
 }
 
 void MIDIPlayer::loadSong2b() {

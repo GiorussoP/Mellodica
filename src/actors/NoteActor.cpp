@@ -36,7 +36,7 @@ void NoteActor::Start() {
   mIsPlaying = true;
   mRigidBodyComponent->SetVelocity(Vector3::Normalize(mDirection) * mSpeed);
 
-  mShineActor = new ShineActor(mGame, mMeshComponent->GetColor());
+  mShineActor = new ShineActor(mGame, mMeshComponent->GetColor(), false);
   mShineActor->SetPosition(mPosition - mDirection * mScale.z * 0.5f);
   mShineActor->Start(SHINE_TIME);
 }
@@ -55,6 +55,10 @@ void NoteActor::OnUpdate(float deltaTime) {
       Vector3::Distance(mPosition, mGame->GetPlayer()->GetPosition()) > 50.0f) {
     mIsPlaying = false;
     SetState(ActorState::Destroy);
+    // Enable auto-destroy on shine - it will destroy after animation finishes
+    if (mShineActor) {
+      mShineActor->SetAutoDestroy(true);
+    }
     if (mNotePlayerActor)
       mNotePlayerActor->MarkNoteDead(this);
   }
@@ -63,6 +67,10 @@ void NoteActor::OnUpdate(float deltaTime) {
 void NoteActor::End() { mIsPlaying = false; }
 
 void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
+
+  if (other->GetLayer() == ColliderLayer::Hole) {
+    return;
+  }
 
   if (other->GetLayer() == ColliderLayer::Entity) {
     Combatant *otherCombatant = dynamic_cast<Combatant *>(other->GetOwner());

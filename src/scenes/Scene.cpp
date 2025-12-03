@@ -137,6 +137,12 @@ void Scene::LoadLevel(const std::string &levelPath) {
       ground->SetScale(Vector3(size_x, 1.0f, size_y));
       break;
     }
+    case 132: {
+      auto hole = new Hole(mGame);
+      hole->SetPosition(Vector3(x, 0.0f, z));
+      hole->SetScale(Vector3(size_x, 1.0f, size_y));
+      break;
+    }
     case 107: {
       auto ground = new GroundActor(mGame, Color::White, 10);
       ground->SetPosition(Vector3(x, 0.0f, z));
@@ -407,8 +413,7 @@ void Scene::LoadLevel(const std::string &levelPath) {
   std::cout << "Loading objects..." << std::endl;
   MapReader objMapReader(levelPath + "_objects.csv", false);
 
-  short int enemy = 1;
-  for (const auto actor : objMapReader.GetMapActors()) {
+  for (const auto &actor : objMapReader.GetMapActors()) {
 
     int type = static_cast<int>(std::get<3>(actor));
     float x = std::get<0>(actor).y;
@@ -476,6 +481,18 @@ void Scene::LoadLevel(const std::string &levelPath) {
         mGame->GetCamera()->SetIsometricDirection(
             IsometricDirections::NorthEast);
       }
+      break;
+    }
+
+    case 14: {
+      auto mbox = new MovableBox(mGame);
+      mbox->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+
+    case 15: {
+      auto box = new BreakableBox(mGame);
+      box->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
 

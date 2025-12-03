@@ -422,7 +422,15 @@ void Game::UpdateActors(float deltaTime) {
 }
 
 void Game::FindActiveActors() {
-  mActiveActors = mChunkGrid->GetVisibleActors(mCamera->GetPosition());
+  // During battle transitions, use player position instead of camera position
+  // to ensure the game world around the player remains visible
+  Vector3 queryPosition = mCamera->GetPosition();
+
+  if (mBattleSystem && mBattleSystem->IsTransitioning() && mPlayer) {
+    queryPosition = mPlayer->GetPosition();
+  }
+
+  mActiveActors = mChunkGrid->GetVisibleActors(queryPosition);
 
   // Add always-active actors (but avoid duplicates if they're already active
   std::unordered_set<Actor *> actorSet(mActiveActors.begin(),

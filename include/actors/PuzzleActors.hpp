@@ -4,6 +4,7 @@
 #pragma once
 #include "actors/Actor.hpp"
 #include "actors/NoteActor.hpp"
+#include "actors/TestActors.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
@@ -27,6 +28,31 @@ class HPItemActor : public ItemActor {
 public:
   HPItemActor(class Game *game);
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
+};
+
+class MovableBox : public SolidCubeActor {
+public:
+  MovableBox(Game *game, const Vector3 &color = Vector3(0.5f))
+      : SolidCubeActor(game, color, 8), mIsInHole(false) {
+    mColliderComponent->SetStatic(false);
+  };
+  void OnCollision(Vector3 penetration, ColliderComponent *other) override;
+
+protected:
+  bool mIsInHole;
+};
+
+class BreakableBox : public MovableBox {
+public:
+  BreakableBox(Game *game, const Vector3 &color = Color::White)
+      : MovableBox(game, color), mHealth(50) {
+    mColliderComponent->SetStatic(false);
+  };
+  void OnUpdate(float deltaTime) override;
+  void OnCollision(Vector3 penetration, ColliderComponent *other) override;
+
+private:
+  int mHealth;
 };
 
 class MusicButtonActor : public Actor {

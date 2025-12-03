@@ -83,7 +83,7 @@ void Combatant::OnCollision(Vector3 penetration, ColliderComponent *other) {
     mSpriteComponent->SetBloomed(true);
     // Player hurt sound
     MIDIPlayer::playSequence(
-        {{0.0f, 13, 38, true, 30}, {0.1f, 13, 38, false, 30}});
+        {{0.0f, 13, 38, true, 30}, {0.016f, 13, 38, false, 30}});
     return;
   }
 

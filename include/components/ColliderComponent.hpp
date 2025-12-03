@@ -6,7 +6,7 @@
 
 enum class ColliderType { AABB, OBB, Sphere };
 
-enum class ColliderLayer { Player, Ground, Entity, Enemy, Note };
+enum class ColliderLayer { Player, Ground, Hole, Entity, Enemy, Note };
 
 // Collider component interface
 class ColliderComponent : public Component {
@@ -30,6 +30,7 @@ public:
   ColliderLayer GetLayer() const { return mLayer; }
   ColliderType GetType() const { return mType; }
   bool IsStatic() const { return mIsStatic; }
+  void SetStatic(bool isStatic) { mIsStatic = isStatic; }
 
 protected:
   ColliderLayer mLayer;

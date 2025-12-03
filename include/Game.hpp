@@ -59,12 +59,6 @@ public:
   // UI Functions
   void PushUI(class UIScreen *screen) { mUIStack.emplace_back(screen); }
   const std::vector<class UIScreen *> &GetUIStack() { return mUIStack; }
-  void RemoveUI(class UIScreen *screen) {
-    auto it = std::find(mUIStack.begin(), mUIStack.end(), screen);
-    if (it != mUIStack.end()) {
-      mUIStack.erase(it);
-    }
-  }
 
 private:
   void ProcessInput();

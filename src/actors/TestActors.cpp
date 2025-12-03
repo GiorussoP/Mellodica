@@ -1,6 +1,7 @@
 #include "actors/TestActors.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MainMenu.hpp"
+#include "ShineActor.hpp"
 #include "TestScene.hpp"
 #include "components/ColliderComponent.hpp"
 #include "render/Mesh.hpp"

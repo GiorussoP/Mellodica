@@ -356,7 +356,7 @@ void Player::OnCollision(Vector3 penetration, ColliderComponent *other) {
     }
 
     MIDIPlayer::playSequence(
-        {{0.0f, 13, 30, true, 100}, {0.1f, 13, 30, false, 100}});
+        {{0.0f, 13, 30, true, 100}, {0.016f, 13, 30, false, 100}});
 
     return;
   }
