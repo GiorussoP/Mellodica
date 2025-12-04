@@ -24,6 +24,9 @@ public:
   class NotePlayerActor *GetPlayerNotePlayer() { return mPlayerNotePlayer; }
   class NotePlayerActor *GetEnemyNotePlayer() { return mEnemyNotePlayer; }
 
+  class MeshComponent *GetFieldMesh() { return mField; }
+  class MeshComponent *GetEdgeMesh() { return mEdge; }
+
   unsigned int GetPlayerPositionNote();
 
 private:

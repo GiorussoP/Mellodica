@@ -15,14 +15,14 @@ void Level1::Initialize() {
   mGame->GetRenderer()->setNight();
 
   // Load song before creating battle system
-  MIDIPlayer::loadSong0();
+  MIDIPlayer::loadSong1();
 
   LoadLevel("assets/levels/level1");
 
   // TODO: Colocar no editor de mapas
-  auto musicButton = new MusicButtonActor(mGame, 60); // C4
-  musicButton->SetPosition(mGame->GetPlayer()->GetPosition() +
-                           Vector3(-3.0f, 0.5f, 0.0f));
+  // auto musicButton = new MusicButtonActor(mGame, 60); // C4
+  // musicButton->SetPosition(mGame->GetPlayer()->GetPosition() +
+  //                        Vector3(-3.0f, 0.5f, 0.0f));
 
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));

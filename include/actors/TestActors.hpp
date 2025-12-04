@@ -32,16 +32,13 @@ protected:
 
 class Hole : public GroundActor {
 public:
-  Hole(Game *game, const Vector3 &color = Color::Black)
-      : GroundActor(game, color, -1) {
-    mMeshComponent->SetBloomed(true);
-    mColliderComponent =
-        new AABBCollider(this, ColliderLayer::Hole, Vector3(0.0f, 1.0f, 0.0f),
-                         Vector3(0.5f, 0.5f, 0.5f), true);
-  }
+  Hole(Game *game, const Vector3 &color = Color::Black);
+
+  void OnUpdate(float deltaTime) override;
 
 private:
   ColliderComponent *mColliderComponent;
+  MeshComponent *mBorder;
 };
 
 // Simple pyramid actor with MeshComponent

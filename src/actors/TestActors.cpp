@@ -500,6 +500,42 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
   mMeshComponent->SetBloomed(true);
 }
 
+Hole::Hole(Game *game, const Vector3 &color) : GroundActor(game, color, -1) {
+  mMeshComponent->SetBloomed(true);
+  mColliderComponent =
+      new AABBCollider(this, ColliderLayer::Hole, Vector3(0.0f, 1.0f, 0.0f),
+                       Vector3(0.5f, 0.5f, 0.5f), true);
+
+  Mesh *mesh = game->GetRenderer()->LoadMesh("plane");
+  mBorder = new MeshComponent(this, *mesh, nullptr, nullptr, -1);
+  mBorder->SetColor(Color::Red);
+
+  mBorder->SetOffset(Vector3(0.0f, 0.46f, 0.0f));
+  mBorder->SetBloomed(true);
+  mBorder->SetVisible(false);
+}
+
+void Hole::OnUpdate(float deltaTime) {
+  if (mGame->GetBattleSystem()->IsInBattle() &&
+      !mGame->GetBattleSystem()->IsTransitioning()) {
+    if (mBorder->IsVisible() == false) {
+      mBorder->SetScale(
+          Vector3(0.1f / mScale.x + 1.0, 1.0f, 0.1f / mScale.z + 1.0));
+      mBorder->SetVisible(true);
+      mBorder->SetOffset(Vector3(0.0f, 0.46f, 0.0f));
+      mMeshComponent->SetOffset(Vector3(0.0f, 0.47f, 0.0f));
+    }
+
+  } else {
+    if (mBorder->IsVisible()) {
+      Vector3 offset = mMeshComponent->GetOffset();
+      offset.y = 0.0f;
+      mMeshComponent->SetOffset(offset);
+      mBorder->SetVisible(false);
+    }
+  }
+}
+
 HouseActor::HouseActor(Game *game)
     : Actor(game), mMeshComponent1(nullptr), mMeshComponent2(nullptr) {
 
