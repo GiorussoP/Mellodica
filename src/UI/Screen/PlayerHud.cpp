@@ -4,7 +4,7 @@ PlayerHud::PlayerHud(class Game *game)
     : UIScreen(game, "./assets/fonts/MedodicaRegular.otf"), mHPrect(nullptr),
       mENrect(nullptr), mHPText(nullptr), mENText(nullptr),
       mBarSize(0.52f, 0.09f, 1.0f), mBorderSize(0.6f, 0.2f, 1.0f),
-      mLeftBarCenter(-0.7f), lastHealth(-1), lastEnergy(-1) {
+      mLeftBarCenter(-0.7f), lastHealth(500), lastEnergy(200) {
 
   // Player energy
   auto energiaBackground = AddImageOrElement(Color::Black);
@@ -42,7 +42,9 @@ PlayerHud::PlayerHud(class Game *game)
 
 void PlayerHud::Update(float deltaTime) {
 
-  float newHealth = static_cast<float>(mGame->GetPlayer()->getHealth());
+  float targetHealth = static_cast<float>(mGame->GetPlayer()->getHealth());
+  int newHealth = std::round(Math::Lerp(static_cast<float>(lastHealth),
+                                        targetHealth, deltaTime * 10.0f));
 
   if (newHealth > lastHealth) {
     mHPrect->GetSpriteComponent().SetColor(Color::Green);
@@ -51,7 +53,7 @@ void PlayerHud::Update(float deltaTime) {
   } else {
     mHPrect->GetSpriteComponent().SetColor(Color::White);
   }
-  lastHealth = static_cast<int>(newHealth);
+  lastHealth = newHealth;
 
   // Player health bar
   mHPrect->SetScale(Vector3(

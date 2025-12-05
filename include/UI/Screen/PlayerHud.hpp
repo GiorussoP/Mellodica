@@ -17,6 +17,7 @@ private:
 
   int lastHealth;
   int lastEnergy;
+  int targetHealth;
 
   float mLeftBarCenter;
 

@@ -78,25 +78,25 @@ protected:
 
 class DirtCubeActor : public SolidCubeActor {
 public:
-  DirtCubeActor(Game *game, const Vector3 &color = Color::White)
+  DirtCubeActor(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidCubeActor(game, color, 0) {}
 };
 
 class GrassCubeActor : public SolidCubeActor {
 public:
-  GrassCubeActor(Game *game, const Vector3 &color = Color::White)
+  GrassCubeActor(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidCubeActor(game, color, 2) {}
 };
 
 class RockCubeActor : public SolidCubeActor {
 public:
-  RockCubeActor(Game *game, const Vector3 &color = Color::White)
+  RockCubeActor(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidCubeActor(game, color, 4) {}
 };
 
 class SandCubeActor : public SolidCubeActor {
 public:
-  SandCubeActor(Game *game, const Vector3 &color = Color::White)
+  SandCubeActor(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidCubeActor(game, color, 6) {}
 };
 
@@ -202,19 +202,19 @@ private:
 
 class GrassWall : public SolidWallActor {
 public:
-  GrassWall(Game *game, const Vector3 &color = Color::White)
+  GrassWall(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidWallActor(game, color, 0) {}
 };
 
 class RockWall : public SolidWallActor {
 public:
-  RockWall(Game *game, const Vector3 &color = Color::White)
+  RockWall(Game *game, const Vector3 &color = Vector3(0.9f))
       : SolidWallActor(game, color, 4) {}
 };
 
 class DoorWall : public SolidWallActor {
 public:
-  DoorWall(Game *game, const Vector3 &color = Color::White);
+  DoorWall(Game *game, const Vector3 &color = Vector3(0.9f));
   void OnUpdate(float deltaTime) override;
 
 private:
@@ -223,7 +223,7 @@ private:
 
 class WindowWall : public SolidWallActor {
 public:
-  WindowWall(Game *game, const Vector3 &color = Color::White);
+  WindowWall(Game *game, const Vector3 &color = Vector3(0.9f));
   void OnUpdate(float deltaTime) override;
 
 private:
@@ -232,7 +232,7 @@ private:
 
 class EntranceWall : public WallActor {
 public:
-  EntranceWall(Game *game, const Vector3 &color = Color::White)
+  EntranceWall(Game *game, const Vector3 &color = Vector3(0.9f))
       : WallActor(game, color, 8) {}
 };
 
