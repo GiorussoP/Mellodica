@@ -7,6 +7,7 @@ class Level1 : public Scene {
 public:
   Level1(class Game *game) : Scene(game) {}
   void Initialize() override;
+  void LoadLevel(const std::string &levelPath) override;
 };
 
 #endif

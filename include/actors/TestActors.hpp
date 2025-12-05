@@ -41,6 +41,20 @@ private:
   MeshComponent *mBorder;
 };
 
+class Water : public Hole {
+public:
+  Water(Game *game, const Vector3 &color = Vector3(0.0f, 0.5f, 1.0f))
+      : Hole(game, color), mAnimTimer(0.0f), mCurrentFrame(0) {
+    mMeshComponent->SetBloomed(false);
+  }
+
+  void OnUpdate(float deltaTime) override;
+
+private:
+  float mAnimTimer;
+  unsigned int mCurrentFrame;
+};
+
 // Simple pyramid actor with MeshComponent
 class PyramidActor : public Actor {
 public:

@@ -536,6 +536,18 @@ void Hole::OnUpdate(float deltaTime) {
   }
 }
 
+void Water::OnUpdate(float deltaTime) {
+  // Change texture with animtimer
+  mAnimTimer += deltaTime;
+  if (mAnimTimer >= 0.25f) {
+    mAnimTimer = 0.0f;
+    mCurrentFrame = (mCurrentFrame + 1) % 2;
+    mMeshComponent->SetTextureIndex(51 + mCurrentFrame);
+  }
+
+  Hole::OnUpdate(deltaTime);
+}
+
 HouseActor::HouseActor(Game *game)
     : Actor(game), mMeshComponent1(nullptr), mMeshComponent2(nullptr) {
 

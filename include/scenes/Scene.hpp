@@ -19,7 +19,7 @@ public:
   void RegisterActor(Actor *actor) { mActors.insert(actor); }
   void UnregisterActor(Actor *actor) { mActors.erase(actor); }
 
-  void LoadLevel(const std::string &levelPath);
+  virtual void LoadLevel(const std::string &levelPath);
 
   // Generate enemy bitmask for encounter N (0-255)
   // First 8 are single enemies, rest are sorted by complexity

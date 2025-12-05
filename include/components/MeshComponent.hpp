@@ -14,6 +14,7 @@ public:
   Mesh &GetMesh() const { return mMesh; }
   TextureAtlas *GetTextureAtlas() const { return mTextureAtlas; }
   int GetStartingIndex() const { return mStartingIndex; }
+  void SetTextureIndex(int index) { mStartingIndex = index; }
 
   void SetRelativeRotation(Quaternion relRot) { mRelativeRotation = relRot; }
   Quaternion &GetRelativeRotation() { return mRelativeRotation; }
