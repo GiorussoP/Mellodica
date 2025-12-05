@@ -6,7 +6,7 @@ Uma mistura de jogo de ritmo com Shoot'em Up.
 
 ## Membros do grupo
 
-- Giovanni Russo Paschoa (Full Stack, foco em engine/mecânicas/shaders)
+- Giovanni Russo Paschoal (Full Stack, foco em engine/mecânicas/shaders)
 - Luis Henrique Gomes Higino (Full Stack, foco em engine)
 - Luisa Lopes Carvalhaes (Artes/Animações e outros assets)
 - Luiza Sodre Salgado (Full Stack, foco em itens e puzzles)
