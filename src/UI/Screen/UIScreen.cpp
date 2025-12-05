@@ -25,6 +25,10 @@ UIScreen::~UIScreen() {
     mGame->GetRenderer()->RemoveUIElement(button);
   }
   mHudButtons.clear();
+  for (auto text : mTextElements) {
+    mGame->RemoveActor(text);
+  }
+  mTextElements.clear();
 }
 
 void UIScreen::Update(float deltaTime) {}

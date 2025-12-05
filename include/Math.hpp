@@ -1240,6 +1240,9 @@ constexpr Vector3 LightYellow(1.0f, 1.0f, 0.88f);
 constexpr Vector3 LightBlue(0.68f, 0.85f, 0.9f);
 constexpr Vector3 LightPink(1.0f, 0.71f, 0.76f);
 constexpr Vector3 LightGreen(0.56f, 0.93f, 0.56f);
+constexpr Vector3 DarkGray(0.25f, 0.25f, 0.25f);
+constexpr Vector3 Gray(0.5f, 0.5f, 0.5f);
+constexpr Vector3 LightGray(0.75f, 0.75f, 0.75f);
 // NOLINTEND
 } // namespace Color
 

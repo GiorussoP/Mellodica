@@ -12,6 +12,9 @@ private:
   HUDElement *mHPrect;
   HUDElement *mENrect;
 
+  TextElement *mHPText;
+  TextElement *mENText;
+
   int lastHealth;
   int lastEnergy;
 

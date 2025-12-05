@@ -6,7 +6,8 @@
 #include "MIDI/MIDIPlayer.hpp"
 
 void MainMenu::Initialize() {
-  auto mMMScreen = new MainMenuScreen(mGame, "randomstring");
+  auto mMMScreen =
+      new MainMenuScreen(mGame, "./assets/fonts/MedodicaRegular.otf");
 
   MIDIPlayer::loadMainTheme();
 

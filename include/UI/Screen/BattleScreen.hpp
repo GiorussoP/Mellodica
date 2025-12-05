@@ -14,9 +14,11 @@ public:
 private:
   std::vector<HUDElement *> mEnemyHPrects;
   std::vector<int> mEnemyLastHealths;
+  std::vector<TextElement *> mEnemyHPTexts;
 
   std::vector<HUDElement *> mAllyHPrects;
   std::vector<int> mAllyLastHealths;
+  std::vector<TextElement *> mAllyHPTexts;
 
   float mLeftBarCenter;
   float mRightBarCenter;

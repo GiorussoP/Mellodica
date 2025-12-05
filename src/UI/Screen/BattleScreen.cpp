@@ -35,6 +35,16 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
     enemyHPRect->SetScale(mBarSize);
 
     mEnemyHPrects.push_back(enemyHPRect);
+
+    // Enemy HP text counter
+    auto enemyHPText =
+        AddText("HP: 100/100", NOTE_COLORS[enemy->GetChannel()] * 0.5f,
+                Color::Black, 0.0f);
+    enemyHPText->SetPosition(
+        Vector3(mRightBarCenter,
+                0.9f - static_cast<float>(mEnemyHPTexts.size()) * 0.2f, 2.0f));
+    enemyHPText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
+    mEnemyHPTexts.push_back(enemyHPText);
   }
 
   // Ally health bars
@@ -64,6 +74,16 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
     allyHPRect->SetScale(mBarSize);
 
     mAllyHPrects.push_back(allyHPRect);
+
+    // Ally HP text counter
+    auto allyHPText =
+        AddText("HP: 100/100", NOTE_COLORS[ally->GetChannel()] * 0.5f,
+                Color::Black, 0.0f);
+    allyHPText->SetPosition(
+        Vector3(mLeftBarCenter,
+                -0.5f + static_cast<float>(mAllyHPTexts.size()) * 0.2f, 2.0f));
+    allyHPText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
+    mAllyHPTexts.push_back(allyHPText);
   }
 }
 
@@ -100,6 +120,12 @@ void BattleScreen::Update(float deltaTime) {
         Vector3(-mEnemyHPrects[i]->GetPosition().x + mRightBarCenter -
                     (mBarSize.x - mEnemyHPrects[i]->GetScale().x) / 2.0f,
                 0.0f, 0.0f));
+
+    // Update enemy HP text
+    int currentHP = enemies[i]->GetHealth();
+    int maxHP = enemies[i]->GetMaxHealth();
+    mEnemyHPTexts[i]->SetText("HP: " + std::to_string(currentHP) + "/" +
+                              std::to_string(maxHP));
   }
 
   // Ally health bars
@@ -125,5 +151,11 @@ void BattleScreen::Update(float deltaTime) {
         Vector3(-mAllyHPrects[i]->GetPosition().x + mLeftBarCenter -
                     (mBarSize.x - mAllyHPrects[i]->GetScale().x) / 2.0f,
                 0.0f, 0.0f));
+
+    // Update ally HP text
+    int currentHP = allies[i]->GetHealth();
+    int maxHP = allies[i]->GetMaxHealth();
+    mAllyHPTexts[i]->SetText("HP: " + std::to_string(currentHP) + "/" +
+                             std::to_string(maxHP));
   }
 }

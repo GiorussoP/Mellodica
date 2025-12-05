@@ -443,6 +443,22 @@ Texture *Renderer::LoadTexture(const std::string &fileName) {
   return texture;
 }
 
+int Renderer::RegisterTexture(Texture *texture) {
+  if (!texture) {
+    return -1;
+  }
+
+  // Check if already registered
+  int existingIndex = GetTextureIndex(texture);
+  if (existingIndex != -1) {
+    return existingIndex;
+  }
+
+  // Add to texture list
+  mTextures.push_back(texture);
+  return static_cast<int>(mTextures.size() - 1);
+}
+
 int Renderer::GetTextureIndex(Texture *texture) const {
   for (size_t i = 0; i < mTextures.size(); i++) {
     if (mTextures[i] == texture) {

@@ -6,6 +6,7 @@
 #define MELLODICA_UISCREEN_H
 
 #include "../HUDElement.hpp"
+#include "../TextElement.hpp"
 #include "../UIButton.hpp"
 #include "Game.hpp"
 #include "Renderer.hpp"
@@ -39,7 +40,13 @@ public:
     return hE;
   }
 
-  // UI Buttons add
+  // Text elements add
+  TextElement *AddText(const std::string &text, const Vector3 &color,
+                       const Vector3 &bgColor, float bgAlpha = 1.0f) {
+    auto textElem = new TextElement(mGame, text, color, bgColor, bgAlpha);
+    mTextElements.push_back(textElem);
+    return textElem;
+  } // UI Buttons add
   UIButton *AddButton(const std::string &hudTexturePath,
                       const std::string &hudAtlasPath,
                       std::function<void()> onClick);
@@ -63,6 +70,7 @@ protected:
   int mSelectedButton;
   std::vector<HUDElement *> mHudImages;
   std::vector<UIButton *> mHudButtons;
+  std::vector<TextElement *> mTextElements;
 };
 
 #endif // MELLODICA_UISCREEN_H

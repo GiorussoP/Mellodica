@@ -11,7 +11,7 @@ SDL_LDFLAGS = $(shell sdl2-config --libs)
 CXXFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -std=c++17 -g $(SDL_CFLAGS)
 CFLAGS = -Wall -Wextra -O$(OPTIMIZATION_LEVEL) -g $(SDL_CFLAGS)
 
-LDFLAGS = $(SDL_LDFLAGS) -lSDL2 -lSDL2_image -lGLEW -lGL -lfluidsynth
+LDFLAGS = $(SDL_LDFLAGS) -lSDL2 -lSDL2_image -lSDL2_ttf -lGLEW -lGL -lfluidsynth
 
 # Directories
 EXEC_NAME = a.out

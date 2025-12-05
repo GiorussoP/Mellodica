@@ -24,6 +24,7 @@ public:
 
   // Texture management
   Texture *LoadTexture(const std::string &fileName);
+  int RegisterTexture(Texture *texture); // Register dynamically created texture
 
   int GetTextureIndex(Texture *texture) const;
 

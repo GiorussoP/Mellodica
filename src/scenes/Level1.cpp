@@ -15,7 +15,7 @@ void Level1::Initialize() {
   mGame->GetRenderer()->setNight();
 
   // Load song before creating battle system
-  MIDIPlayer::loadSong1();
+  MIDIPlayer::loadSong0();
 
   LoadLevel("assets/levels/level1");
 

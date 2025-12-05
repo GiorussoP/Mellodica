@@ -1,10 +1,10 @@
 #include "PlayerHud.hpp"
 
 PlayerHud::PlayerHud(class Game *game)
-    : UIScreen(game, "./assets/fonts/PressStart2P-Regular.ttf"),
-      mHPrect(nullptr), mENrect(nullptr), mBarSize(0.52f, 0.09f, 1.0f),
-      mBorderSize(0.6f, 0.2f, 1.0f), mLeftBarCenter(-0.7f),
-      lastHealth(INFINITY), lastEnergy(INFINITY) {
+    : UIScreen(game, "./assets/fonts/MedodicaRegular.otf"), mHPrect(nullptr),
+      mENrect(nullptr), mHPText(nullptr), mENText(nullptr),
+      mBarSize(0.52f, 0.09f, 1.0f), mBorderSize(0.6f, 0.2f, 1.0f),
+      mLeftBarCenter(-0.7f), lastHealth(-1), lastEnergy(-1) {
 
   // Player energy
   auto energiaBackground = AddImageOrElement(Color::Black);
@@ -28,6 +28,16 @@ PlayerHud::PlayerHud(class Game *game)
   mHPrect = AddImageOrElement(Color::Red);
   mHPrect->SetPosition(Vector3(mLeftBarCenter, -0.7f, 0.0f));
   mHPrect->SetScale(mBarSize);
+
+  // HP counter text
+  mHPText = AddText("HP: 100/100", Color::Red * 0.5f, Color::Black, 0.0f);
+  mHPText->SetPosition(Vector3(mLeftBarCenter, -0.7f, 1.0f));
+  mHPText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
+
+  // Energy counter text
+  mENText = AddText("EN: 100/100", Color::Gray, Color::Black, 0.0f);
+  mENText->SetPosition(Vector3(mLeftBarCenter, -0.91f, 1.0f));
+  mENText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
 }
 
 void PlayerHud::Update(float deltaTime) {
@@ -63,4 +73,16 @@ void PlayerHud::Update(float deltaTime) {
                        Vector3(-mENrect->GetPosition().x + mLeftBarCenter -
                                    (mBarSize.x - mENrect->GetScale().x) / 2.0f,
                                0.0f, 0.0f));
+
+  // Update HP text
+  int currentHP = mGame->GetPlayer()->getHealth();
+  int maxHP = mGame->GetPlayer()->getMaxHealth();
+  mHPText->SetText("HP: " + std::to_string(currentHP) + "/" +
+                   std::to_string(maxHP));
+
+  // Update Energy text
+  int currentEN = static_cast<int>(mGame->GetPlayer()->getEnergy());
+  int maxEN = static_cast<int>(mGame->GetPlayer()->getMaxEnergy());
+  mENText->SetText("EN: " + std::to_string(currentEN) + "/" +
+                   std::to_string(maxEN));
 }

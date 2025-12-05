@@ -141,7 +141,7 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
                             {0.0f, 15, 60, false},
                             {0.0f, 15, 63, false}});
   // Screen
-  mBattleScreen = new BattleScreen(mGame, "randomstring");
+  mBattleScreen = new BattleScreen(mGame, "./assets/fonts/MedodicaRegular.otf");
 }
 
 void BattleSystem::EndBattle() {
