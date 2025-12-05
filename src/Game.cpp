@@ -17,6 +17,7 @@
 #include "Input.hpp"
 
 #include "scenes/MainMenu.hpp"
+#include "scenes/OpeningScene.hpp"
 #include "scenes/TestScene.hpp"
 
 #include <GL/glew.h>
@@ -109,7 +110,7 @@ bool Game::Initialize() {
   MIDIPlayer::startMIDIThread();
 
   // Initialize game actors
-  LoadScene(new MainMenu(this));
+  LoadScene(new OpeningScene(this));
 
   return true;
 }

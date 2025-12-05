@@ -650,6 +650,41 @@ void MIDIPlayer::loadGameOverTheme() {
   MIDIPlayer::setChannelVolume(15, 127);
 }
 
+void MIDIPlayer::loadOpeningTheme() {
+  SynthEngine::setChannels({{0, 40}, // Violin
+                            {0, 73}, // Flute
+                            {0, 46}, // Orchestral Harp
+                            {0, 52}, // Concert Choir
+                            {0, 56}, // Trumpet
+                            {0, 32}, // Acoustic bass
+                            {0, 0},
+                            {0, 0},
+                            {0, 0},
+                            {128, 0}, // Drums 1
+                            {0, 0},
+                            {128, 1},  // Drums 2
+                            {0, 0},    // Player Channel: Piano
+                            {128, 25}, // Chiptune sound (channel 13)
+                            {0, 88},   // Fantasia sound (channel 14)
+                            {1, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+
+  // Slow down the song
+  MIDIPlayer::setSpeed(0.8);
+
+  for (int i = 0; i < 16; i++) {
+    if (i != 2) {
+      MIDIPlayer::muteChannel(i);
+    } else {
+
+      MIDIPlayer::unmuteChannel(i);
+      MIDIPlayer::setChannelVolume(i, 127);
+    }
+  }
+}
+
 void MIDIPlayer::loadSong0() {
   SynthEngine::setChannels({{0, 24}, // Acoustic Guitar (nylon)
                             {0, 40}, // Violin
@@ -672,10 +707,6 @@ void MIDIPlayer::loadSong0() {
                             {11, 28},   // Chiptune sound (channel 13)
                             {0, 88},    // Fantasia sound (channel 14)
                             {12, 80}}); // Square wave sound (channel 15)
-
-  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
-  MIDIPlayer::setChannelVolume(11, 100);
-  // MIDIPlayer::setChannelTranspose(11, -60);
 }
 
 void MIDIPlayer::loadSong1() {
