@@ -315,8 +315,8 @@ void Player::OnUpdate(float deltaTime) {
   if (mHealth <= 0) {
 
     // Play death sound
-    MIDIPlayer::playSequence({{0.0f, 15, 70, true, 127},
-                              {0.5f, 15, 70, false},
+    MIDIPlayer::playSequence({{0.0f, 13, 30, true, 127},
+                              {0.5f, 13, 30, false},
                               {0.0f, 15, 60, true, 127},
                               {0.5f, 15, 60, false},
                               {0.0f, 15, 50, true, 127},

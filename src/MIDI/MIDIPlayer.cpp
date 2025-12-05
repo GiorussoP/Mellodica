@@ -707,6 +707,9 @@ void MIDIPlayer::loadSong0() {
                             {11, 28},   // Chiptune sound (channel 13)
                             {0, 88},    // Fantasia sound (channel 14)
                             {12, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
 }
 
 void MIDIPlayer::loadSong1() {

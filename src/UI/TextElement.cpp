@@ -165,8 +165,8 @@ void TextElement::RenderTextToTexture() {
     return;
   }
 
-  SDL_Log("TextElement: Rendered text '%s' to %dx%d surface", mText.c_str(),
-          textSurface->w, textSurface->h);
+  // SDL_Log("TextElement: Rendered text '%s' to %dx%d surface", mText.c_str(),
+  //        textSurface->w, textSurface->h);
 
   // Load texture from surface (this will handle unloading old texture
   // internally)
@@ -176,13 +176,15 @@ void TextElement::RenderTextToTexture() {
     return;
   }
 
-  SDL_Log("TextElement: Loaded texture successfully (GL ID: %d)",
-          mTextTexture->GetTextureID());
+  // SDL_Log("TextElement: Loaded texture successfully (GL ID: %d)",
+  //       mTextTexture->GetTextureID());
 
   // Register texture with renderer and get index
-  int textureIndex = mGame->GetRenderer()->RegisterTexture(mTextTexture);
-  SDL_Log("TextElement: Registered texture with index %d (GL ID: %d)",
-          textureIndex, mTextTexture->GetTextureID());
+  // int textureIndex =
+  mGame->GetRenderer()->RegisterTexture(mTextTexture);
+  // SDL_Log("TextElement: Registered texture with index %d (GL ID:
+  // %d)",
+  //         textureIndex, mTextTexture->GetTextureID());
 
   // Set sprite scale based on text dimensions
   // Keep aspect ratio and make text a reasonable size
@@ -197,10 +199,11 @@ void TextElement::RenderTextToTexture() {
     Actor::SetScale(Vector3(width, height, 1.0f));
   }
 
-  SDL_Log("TextElement: Text size %dx%d pixels, scale %fx%f at position (%f, "
-          "%f, %f)",
-          textSurface->w, textSurface->h, GetScale().x, GetScale().y,
-          GetPosition().x, GetPosition().y, GetPosition().z);
+  // SDL_Log("TextElement: Text size %dx%d pixels, scale %fx%f at "
+  //        "position (%f, "
+  //        "%f, %f)",
+  //        textSurface->w, textSurface->h, GetScale().x, GetScale().y,
+  //        GetPosition().x, GetPosition().y, GetPosition().z);
 
   SDL_FreeSurface(textSurface);
 }

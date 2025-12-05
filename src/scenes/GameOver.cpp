@@ -9,5 +9,6 @@ void GameOver::Initialize() {
       new GameOverScreen(mGame, "./assets/fonts/MedodicaRegular.otf");
 
   MIDIPlayer::loadGameOverTheme();
+  MIDIPlayer::jumpTo(-1.5f);
   MIDIPlayer::play();
 }

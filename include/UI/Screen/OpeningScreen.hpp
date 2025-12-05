@@ -16,6 +16,8 @@ public:
   void Update(float deltaTime) override;
 
 private:
+  Actor *mStory;
+  float mStoryPosition;
   float mTimer;
 };
 

@@ -9,7 +9,8 @@
 #include "scenes/MainMenu.hpp"
 
 OpeningScreen::OpeningScreen(class Game *game, const std::string &fontName)
-    : UIScreen(game, fontName), mTimer(0.0f) {
+    : UIScreen(game, fontName), mTimer(0.0f), mStoryPosition(1.0f),
+      mStory(nullptr) {
 
   // Add black rectangle background
   auto background = AddImageOrElement(Vector3(0.0f, 0.0f, 0.0f));
@@ -17,11 +18,11 @@ OpeningScreen::OpeningScreen(class Game *game, const std::string &fontName)
   background->SetScale(Vector3(3.0f, 3.0f, 1.0f));
 
   // Add centered text "Abertura Template"
-  auto openingText = AddText("Abertura Template", Vector3(1.0f, 1.0f, 1.0f),
-                             Vector3(0.0f, 0.0f, 0.0f),
-                             0.0f); // White text, transparent background
-  openingText->SetPosition(Vector3(0.0f, 0.0f, 0.0f)); // Center
-  openingText->SetScale(Vector3(0.5f, 0.5f, 1.0f));    // Scale it appropriately
+  mStory = AddText("Abertura Template", Vector3(1.0f, 1.0f, 1.0f),
+                   Vector3(0.0f, 0.0f, 0.0f),
+                   0.0f); // White text, transparent background
+  mStory->SetPosition(Vector3(1.0f, 0.0f, 0.0f)); // Right
+  mStory->SetScale(Vector3(0.5f, 0.5f, 1.0f));    // Scale it appropriately
 }
 
 OpeningScreen::~OpeningScreen() { UIScreen::~UIScreen(); }
@@ -42,4 +43,8 @@ void OpeningScreen::Update(float deltaTime) {
     // Load Main Menu
     mGame->LoadScene(new MainMenu(mGame));
   }
+
+  mStory->SetPosition(Vector3(mStoryPosition, 0.0f, 0.0f));
+  mStoryPosition -=
+      deltaTime * (2.0f / 28.0f); // Move from 1.0 to -1.0 in 28 seconds
 }

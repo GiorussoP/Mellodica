@@ -99,8 +99,8 @@ bool Texture::LoadFromSurface(SDL_Surface *surface) {
 
   SDL_FreeSurface(convertedSurface);
 
-  std::cout << "Loaded texture from surface: " << mWidth << "x" << mHeight
-            << " (GL ID: " << mTextureID << ")" << std::endl;
+  // std::cout << "Loaded texture from surface: " << mWidth << "x" << mHeight
+  //           << " (GL ID: " << mTextureID << ")" << std::endl;
 
   return true;
 }

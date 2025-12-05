@@ -25,6 +25,7 @@ void Level1::Initialize() {
   //                        Vector3(-3.0f, 0.5f, 0.0f));
 
   // Creating the battle system
+
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
 }
