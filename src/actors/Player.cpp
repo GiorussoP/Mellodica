@@ -218,7 +218,8 @@ void Player::OnUpdate(float deltaTime) {
                                         ->GetActiveNotes()[i] == nullptr))) {
       // Play note
       mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(
-          i + 60, 12); // MIDI note offset
+          i + 60, 12,
+          mGame->GetBattleSystem()->IsInBattle()); // MIDI note offset
     }
 
     mPlayingNotes[i] = newPlayingNotes[i];

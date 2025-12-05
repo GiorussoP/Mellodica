@@ -685,7 +685,38 @@ void MIDIPlayer::loadOpeningTheme() {
   }
 }
 
+void MIDIPlayer::loadCreditsTheme() {
+  SynthEngine::setChannels({{0, 58},   // Violin
+                            {0, 41},   // Viola
+                            {0, 42},   // Cello
+                            {0, 43},   // Double Bass
+                            {0, 73},   // Flute
+                            {0, 68},   // Oboe
+                            {0, 71},   // Clarinet
+                            {0, 70},   // Bassoon
+                            {0, 56},   // Trumpet
+                            {0, 60},   // French Horn
+                            {0, 57},   // Trombone
+                            {0, 40},   // Tuba
+                            {0, 47},   // Timpani
+                            {0, 46},   // Orchestral Harp
+                            {0, 52},   // Choir Aahs
+                            {0, 53}}); // Voice Oohs
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/main_theme.mid", false);
+
+  // Slow down the song for orchestral feel
+  MIDIPlayer::setSpeed(0.9);
+
+  // Set volumes for all orchestral channels
+  for (int i = 0; i < 16; i++) {
+    MIDIPlayer::setChannelVolume(i, 127);
+  }
+}
+
 void MIDIPlayer::loadSong0() {
+
   SynthEngine::setChannels({{0, 24}, // Acoustic Guitar (nylon)
                             {0, 40}, // Violin
                             {0, 21}, // Accordion

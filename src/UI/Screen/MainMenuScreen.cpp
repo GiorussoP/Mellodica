@@ -7,6 +7,7 @@
 #include "Game.hpp"
 #include "Level1.hpp"
 #include "MIDIPlayer.hpp"
+#include "scenes/CreditsScene.hpp"
 
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName) {
@@ -26,6 +27,13 @@ MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
   auto image = AddImageOrElement("assets/sprites/scenes/title-screen.png");
   image->SetPosition(Vector3(0.0f, 0.0f, -1.0f));
   image->SetScale(Vector3(2.0f, 2.0f, 1.0f));
+
+  auto instructionText = AddText("Pressione 'C' para "
+                                 "ver os créditos",
+                                 Color::White, Vector3(0.0f, 0.0f, 0.0f), 0.0f);
+
+  instructionText->SetPosition(Vector3(0.5f, -0.9f, 0.0f));
+  instructionText->SetScale(Vector3(1.0f, 0.15f, 1.0f));
 }
 
 MainMenuScreen::~MainMenuScreen() { UIScreen::~UIScreen(); }
@@ -70,5 +78,8 @@ void MainMenuScreen::HandleKeyPress(int key) {
                                 {0.0f, 14, 78, true, 120},
                                 {0.4f, 14, 78, false}});
     }
+  } else if (key == SDLK_c) {
+    // Go to credits
+    mGame->LoadScene(new CreditsScene(mGame));
   }
 }

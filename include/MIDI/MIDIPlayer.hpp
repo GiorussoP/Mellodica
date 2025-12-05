@@ -103,6 +103,7 @@ public:
   static void loadMainTheme();
   static void loadGameOverTheme();
   static void loadOpeningTheme();
+  static void loadCreditsTheme();
   static void loadSong0();
   static void loadSong1();
   static void loadSong2a();

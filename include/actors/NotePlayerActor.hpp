@@ -17,7 +17,8 @@ public:
     mActiveNotes.fill(nullptr);
   };
   ~NotePlayerActor() {};
-  bool PlayNote(unsigned int note, unsigned int channel, float speed = 1.0f);
+  bool PlayNote(unsigned int note, unsigned int channel, bool in_battle = true,
+                float speed = 1.0f);
   bool EndNote(unsigned int note);
 
   Vector3 GetNotePosition(unsigned int noteIndex);

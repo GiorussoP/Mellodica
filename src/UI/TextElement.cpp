@@ -3,6 +3,7 @@
 #include "../../include/render/Renderer.hpp"
 #include "../../include/render/Texture.hpp"
 #include <SDL2/SDL_ttf.h>
+#include <vector>
 
 // Static font members
 TTF_Font *TextElement::sFont = nullptr;
@@ -146,18 +147,119 @@ void TextElement::RenderTextToTexture() {
 
   SDL_Surface *textSurface = nullptr;
 
-  // Use different rendering modes based on background alpha
-  if (mBackgroundAlpha > 0.0f) {
-    // Render with background color
-    SDL_Color bgColor = {static_cast<Uint8>(mBackgroundColor.x * 255),
-                         static_cast<Uint8>(mBackgroundColor.y * 255),
-                         static_cast<Uint8>(mBackgroundColor.z * 255),
-                         static_cast<Uint8>(mBackgroundAlpha * 255)};
-    textSurface =
-        TTF_RenderText_Shaded(sFont, mText.c_str(), textColor, bgColor);
+  // Check if text contains newlines
+  if (mText.find('\n') != std::string::npos) {
+    // Multi-line rendering
+    std::vector<std::string> lines;
+    std::string currentLine;
+    for (char c : mText) {
+      if (c == '\n') {
+        lines.push_back(currentLine);
+        currentLine.clear();
+      } else {
+        currentLine += c;
+      }
+    }
+    if (!currentLine.empty()) {
+      lines.push_back(currentLine);
+    }
+
+    // Render each line and calculate total dimensions
+    std::vector<SDL_Surface *> lineSurfaces;
+    int maxWidth = 0;
+    int totalHeight = 0;
+    int lineSkip =
+        TTF_FontLineSkip(sFont); // Use line skip for consistent spacing
+
+    for (const auto &line : lines) {
+      SDL_Surface *lineSurface = nullptr;
+      if (line.empty()) {
+        // For empty lines, create a blank surface with just the line height
+        lineSurface = SDL_CreateRGBSurface(0, 1, lineSkip, 32, 0x000000FF,
+                                           0x0000FF00, 0x00FF0000, 0xFF000000);
+        SDL_FillRect(lineSurface, nullptr,
+                     SDL_MapRGBA(lineSurface->format, 0, 0, 0, 0));
+      } else {
+        if (mBackgroundAlpha > 0.0f) {
+          SDL_Color bgColor = {static_cast<Uint8>(mBackgroundColor.x * 255),
+                               static_cast<Uint8>(mBackgroundColor.y * 255),
+                               static_cast<Uint8>(mBackgroundColor.z * 255),
+                               static_cast<Uint8>(mBackgroundAlpha * 255)};
+          lineSurface =
+              TTF_RenderUTF8_Shaded(sFont, line.c_str(), textColor, bgColor);
+        } else {
+          lineSurface = TTF_RenderUTF8_Blended(sFont, line.c_str(), textColor);
+        }
+      }
+
+      if (lineSurface) {
+        lineSurfaces.push_back(lineSurface);
+        if (lineSurface->w > maxWidth) {
+          maxWidth = lineSurface->w;
+        }
+        totalHeight += lineSkip; // Use consistent line spacing
+      }
+    }
+
+    if (lineSurfaces.empty()) {
+      SDL_Log("Failed to render any text lines");
+      return;
+    }
+
+    // Create composite surface
+    textSurface = SDL_CreateRGBSurface(0, maxWidth, totalHeight, 32, 0x000000FF,
+                                       0x0000FF00, 0x00FF0000, 0xFF000000);
+
+    if (!textSurface) {
+      SDL_Log("Failed to create composite surface: %s", SDL_GetError());
+      for (auto *surf : lineSurfaces) {
+        SDL_FreeSurface(surf);
+      }
+      return;
+    }
+
+    // Enable alpha blending on the composite surface
+    SDL_SetSurfaceBlendMode(textSurface, SDL_BLENDMODE_BLEND);
+
+    // Fill with transparent or background color
+    if (mBackgroundAlpha > 0.0f) {
+      SDL_FillRect(textSurface, nullptr,
+                   SDL_MapRGBA(textSurface->format,
+                               static_cast<Uint8>(mBackgroundColor.x * 255),
+                               static_cast<Uint8>(mBackgroundColor.y * 255),
+                               static_cast<Uint8>(mBackgroundColor.z * 255),
+                               static_cast<Uint8>(mBackgroundAlpha * 255)));
+    } else {
+      SDL_FillRect(textSurface, nullptr,
+                   SDL_MapRGBA(textSurface->format, 0, 0, 0, 0));
+    }
+
+    // Blit each line onto the composite surface
+    int yOffset = 0;
+    for (auto *lineSurf : lineSurfaces) {
+      // Center the line surface vertically within the line skip space
+      int yPos = yOffset + (lineSkip - lineSurf->h) / 2;
+      SDL_Rect destRect = {0, yPos, lineSurf->w, lineSurf->h};
+      // Enable alpha blending for proper transparency
+      SDL_SetSurfaceBlendMode(lineSurf, SDL_BLENDMODE_BLEND);
+      SDL_BlitSurface(lineSurf, nullptr, textSurface, &destRect);
+      yOffset += lineSkip; // Use consistent spacing
+      SDL_FreeSurface(lineSurf);
+    }
   } else {
-    // Render with transparent background
-    textSurface = TTF_RenderText_Blended(sFont, mText.c_str(), textColor);
+    // Single-line rendering (original code)
+    if (mBackgroundAlpha > 0.0f) {
+      // Render with background color
+      SDL_Color bgColor = {static_cast<Uint8>(mBackgroundColor.x * 255),
+                           static_cast<Uint8>(mBackgroundColor.y * 255),
+                           static_cast<Uint8>(mBackgroundColor.z * 255),
+                           static_cast<Uint8>(mBackgroundAlpha * 255)};
+      textSurface =
+          TTF_RenderUTF8_Shaded(sFont, mText.c_str(), textColor, bgColor);
+    } else {
+      // Render with transparent background
+      textSurface = TTF_RenderUTF8_Blended(sFont, mText.c_str(), textColor);
+    }
   }
 
   if (!textSurface) {

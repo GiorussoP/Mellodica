@@ -51,8 +51,10 @@ void NoteActor::OnUpdate(float deltaTime) {
     SetPosition(mPosition - 0.5f * mDirection * mLastStepMovement);
   }
 
-  if (mScale.z < 0.1f ||
-      Vector3::Distance(mPosition, mGame->GetPlayer()->GetPosition()) > 50.0f) {
+  if (mGame->GetPlayer() &&
+      (mScale.z < 0.1f ||
+       Vector3::Distance(mPosition, mGame->GetPlayer()->GetPosition()) >
+           50.0f)) {
     mIsPlaying = false;
     SetState(ActorState::Destroy);
     // Enable auto-destroy on shine - it will destroy after animation finishes
@@ -78,7 +80,8 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
         otherCombatant->GetCombatantState() == CombatantState::Dead)
       return;
   } else if (other->GetLayer() == ColliderLayer::Note &&
-             !mGame->GetBattleSystem()->IsInBattle() &&
+             (!mGame->GetBattleSystem() ||
+              !mGame->GetBattleSystem()->IsInBattle()) &&
              Vector3::Dot(
                  dynamic_cast<NoteActor *>(other->GetOwner())->mDirection,
                  mDirection) > 0.9f) {
@@ -96,7 +99,7 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
     SetPosition(mPosition - mDirection * mLastStepMovement * 0.5f);
   }
 
-  if (!mGame->GetBattleSystem()->IsInBattle()) {
+  if (!mGame->GetBattleSystem() || !mGame->GetBattleSystem()->IsInBattle()) {
     MIDIPlayer::playSequence(
         {{0.0f, 14, static_cast<int>(mMidiNote), true, 20},
          {mLastStepMovement, 14, static_cast<int>(mMidiNote), false, 20}});
