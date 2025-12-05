@@ -30,9 +30,9 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
 
     auto enemyHPRect = AddImageOrElement(NOTE_COLORS[enemy->GetChannel()]);
     enemyHPRect->SetPosition(
-        Vector3(mRightBarCenter,
+        Vector3(mRightBarCenter + 0.09f,
                 0.9f - static_cast<float>(mEnemyHPrects.size()) * 0.2f, 0.0f));
-    enemyHPRect->SetScale(mBarSize);
+    enemyHPRect->SetScale(mBarSize - Vector3(0.09f, 0.0f, 0.0f));
 
     mEnemyHPrects.push_back(enemyHPRect);
 
@@ -69,9 +69,9 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
 
     auto allyHPRect = AddImageOrElement(NOTE_COLORS[ally->GetChannel()]);
     allyHPRect->SetPosition(
-        Vector3(mLeftBarCenter,
+        Vector3(mLeftBarCenter + 0.09f,
                 -0.5f + static_cast<float>(mAllyHPrects.size()) * 0.2f, 0.0f));
-    allyHPRect->SetScale(mBarSize);
+    allyHPRect->SetScale(mBarSize - Vector3(0.09f, 0.0f, 0.0f));
 
     mAllyHPrects.push_back(allyHPRect);
 
@@ -111,13 +111,13 @@ void BattleScreen::Update(float deltaTime) {
     }
     mEnemyLastHealths[i] = enemies[i]->GetHealth();
 
-    mEnemyHPrects[i]->SetScale(
-        Vector3(mBarSize.x * (static_cast<float>(enemies[i]->GetHealth()) /
-                              static_cast<float>(enemies[i]->GetMaxHealth())),
-                mBarSize.y, mBarSize.z));
+    mEnemyHPrects[i]->SetScale(Vector3(
+        (mBarSize.x - 0.09f) * (static_cast<float>(enemies[i]->GetHealth()) /
+                                static_cast<float>(enemies[i]->GetMaxHealth())),
+        mBarSize.y, mBarSize.z));
     mEnemyHPrects[i]->SetPosition(
         mEnemyHPrects[i]->GetPosition() +
-        Vector3(-mEnemyHPrects[i]->GetPosition().x + mRightBarCenter -
+        Vector3(-mEnemyHPrects[i]->GetPosition().x + 0.09f + mRightBarCenter -
                     (mBarSize.x - mEnemyHPrects[i]->GetScale().x) / 2.0f,
                 0.0f, 0.0f));
 
@@ -142,13 +142,13 @@ void BattleScreen::Update(float deltaTime) {
     }
     mAllyLastHealths[i] = allies[i]->GetHealth();
 
-    mAllyHPrects[i]->SetScale(
-        Vector3(mBarSize.x * (static_cast<float>(allies[i]->GetHealth()) /
-                              static_cast<float>(allies[i]->GetMaxHealth())),
-                mBarSize.y, mBarSize.z));
+    mAllyHPrects[i]->SetScale(Vector3(
+        (mBarSize.x - 0.09f) * (static_cast<float>(allies[i]->GetHealth()) /
+                                static_cast<float>(allies[i]->GetMaxHealth())),
+        mBarSize.y, mBarSize.z));
     mAllyHPrects[i]->SetPosition(
         mAllyHPrects[i]->GetPosition() +
-        Vector3(-mAllyHPrects[i]->GetPosition().x + mLeftBarCenter -
+        Vector3(-mAllyHPrects[i]->GetPosition().x + 0.09f + mLeftBarCenter -
                     (mBarSize.x - mAllyHPrects[i]->GetScale().x) / 2.0f,
                 0.0f, 0.0f));
 

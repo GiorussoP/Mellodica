@@ -19,7 +19,7 @@ Combatant::~Combatant() {}
 void Combatant::OnUpdate(float deltaTime) {
   mSpriteComponent->SetColor(NOTE_COLORS[mChannel % 16]);
 
-  if (mHealth <= 0.13f * mMaxHealth) {
+  if (mHealth <= 0) {
     mHealth = 0;
     mCombatantState = CombatantState::Dead;
   }

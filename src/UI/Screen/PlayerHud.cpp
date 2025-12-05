@@ -55,22 +55,25 @@ void PlayerHud::Update(float deltaTime) {
 
   // Player health bar
   mHPrect->SetScale(Vector3(
-      mBarSize.x *
+      (mBarSize.x - 0.09) *
           (newHealth / static_cast<float>(mGame->GetPlayer()->getMaxHealth())),
       mBarSize.y, mBarSize.z));
 
   mHPrect->SetPosition(mHPrect->GetPosition() +
-                       Vector3(-mHPrect->GetPosition().x + mLeftBarCenter -
+                       Vector3(-mHPrect->GetPosition().x + 0.09f +
+                                   mLeftBarCenter -
                                    (mBarSize.x - mHPrect->GetScale().x) / 2.0f,
                                0.0f, 0.0f));
 
   // Player energy bar
-  mENrect->SetScale(Vector3(mBarSize.x * (mGame->GetPlayer()->getEnergy() /
-                                          mGame->GetPlayer()->getMaxEnergy()),
-                            mBarSize.y, mBarSize.z));
+  mENrect->SetScale(
+      Vector3((mBarSize.x - 0.07) * (mGame->GetPlayer()->getEnergy() /
+                                     mGame->GetPlayer()->getMaxEnergy()),
+              mBarSize.y, mBarSize.z));
 
   mENrect->SetPosition(mENrect->GetPosition() +
-                       Vector3(-mENrect->GetPosition().x + mLeftBarCenter -
+                       Vector3(-mENrect->GetPosition().x + 0.07f +
+                                   mLeftBarCenter -
                                    (mBarSize.x - mENrect->GetScale().x) / 2.0f,
                                0.0f, 0.0f));
 
