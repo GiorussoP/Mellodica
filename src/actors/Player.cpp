@@ -1,5 +1,6 @@
 #include "Player.hpp"
 #include "Game.hpp"
+#include "GameOver.hpp"
 #include "Level1.hpp"
 #include "MIDIPlayer.hpp"
 #include "MainMenu.hpp"
@@ -27,8 +28,8 @@ Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
       mMoveRight(false), mRotateLeft(false), mRotateRight(false),
       mRotateUp(false), mRotateDown(false), mFront(Vector3::UnitZ),
-      mFrontNote(-1), mHealth(500), mMaxHealth(500), mEnergy(100),
-      mMaxEnergy(100) {
+      mFrontNote(-1), mHealth(500), mMaxHealth(500), mEnergy(200),
+      mMaxEnergy(200) {
   // Mark player as always active so it's always visible
   game->AddAlwaysActive(this);
 
@@ -313,8 +314,16 @@ void Player::OnUpdate(float deltaTime) {
   // Die
   if (mHealth <= 0) {
 
-    // Push Main Menu
-    mGame->LoadScene(new MainMenu(mGame));
+    // Play death sound
+    MIDIPlayer::playSequence({{0.0f, 15, 70, true, 127},
+                              {0.5f, 15, 70, false},
+                              {0.0f, 15, 60, true, 127},
+                              {0.5f, 15, 60, false},
+                              {0.0f, 15, 50, true, 127},
+                              {0.5f, 15, 50, false}});
+
+    // Push Game Over
+    mGame->LoadScene(new GameOver(mGame));
   }
 }
 

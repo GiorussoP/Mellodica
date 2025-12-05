@@ -14,7 +14,7 @@ PlayerHud::PlayerHud(class Game *game)
       AddImageOrElement("./assets/sprites/textures/hud-energia-70x20.png");
   energia->SetPosition(Vector3(mLeftBarCenter, -0.9f, 1.0f));
   energia->SetScale(mBorderSize);
-  mENrect = AddImageOrElement(Color::White);
+  mENrect = AddImageOrElement(Color::DarkGray);
   mENrect->SetPosition(Vector3(mLeftBarCenter, -0.9f, 0.0f));
   mENrect->SetScale(mBarSize);
 
@@ -25,17 +25,17 @@ PlayerHud::PlayerHud(class Game *game)
   auto vida = AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
   vida->SetPosition(Vector3(mLeftBarCenter, -0.7f, 1.0f));
   vida->SetScale(mBorderSize);
-  mHPrect = AddImageOrElement(Color::Red);
+  mHPrect = AddImageOrElement(Color::White);
   mHPrect->SetPosition(Vector3(mLeftBarCenter, -0.7f, 0.0f));
   mHPrect->SetScale(mBarSize);
 
   // HP counter text
-  mHPText = AddText("HP: 100/100", Color::Red * 0.5f, Color::Black, 0.0f);
+  mHPText = AddText("HP: 100/100", Color::Gray, Color::Black, 0.0f);
   mHPText->SetPosition(Vector3(mLeftBarCenter, -0.7f, 1.0f));
   mHPText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
 
   // Energy counter text
-  mENText = AddText("EN: 100/100", Color::Gray, Color::Black, 0.0f);
+  mENText = AddText("EN: 100/100", Color::White, Color::Black, 0.0f);
   mENText->SetPosition(Vector3(mLeftBarCenter, -0.91f, 1.0f));
   mENText->SetScale(Vector3(0.25f, 0.08f, 1.0f));
 }
@@ -49,7 +49,7 @@ void PlayerHud::Update(float deltaTime) {
   } else if (newHealth < lastHealth) {
     mHPrect->GetSpriteComponent().SetColor(Vector3(1.0f, 0.5f, 0.0f));
   } else {
-    mHPrect->GetSpriteComponent().SetColor(Color::Red);
+    mHPrect->GetSpriteComponent().SetColor(Color::White);
   }
   lastHealth = static_cast<int>(newHealth);
 

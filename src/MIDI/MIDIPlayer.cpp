@@ -597,6 +597,59 @@ void MIDIPlayer::loadMainTheme() {
   MIDIPlayer::setChannelVolume(15, 127);
 }
 
+void MIDIPlayer::loadGameOverTheme() {
+  SynthEngine::setChannels({{0, 49}, // Slow Strings
+                            {0, 49}, // Slow Strings
+                            {0, 52}, // Concert Choir
+                            {0, 53}, // Voice Oohs
+                            {0, 49}, // Slow Strings
+                            {0, 32}, // Acoustic bass
+                            {0, 0},
+                            {0, 0},
+                            {0, 0},
+                            {128, 0}, // Drums 1
+                            {0, 0},
+                            {128, 1},  // Drums 2
+                            {0, 0},    // Player Channel: Piano
+                            {128, 25}, // Chiptune sound (channel 13)
+                            {0, 88},   // Fantasia sound (channel 14)
+                            {1, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+
+  // Slow down the song
+  MIDIPlayer::setSpeed(0.8);
+
+  MIDIPlayer::setChannelVolume(0, 127);
+  MIDIPlayer::setChannelVolume(1, 127);
+  MIDIPlayer::setChannelVolume(2, 127);
+  MIDIPlayer::setChannelVolume(3, 127);
+  MIDIPlayer::setChannelVolume(4, 127);
+  MIDIPlayer::setChannelVolume(5, 127);
+  MIDIPlayer::setChannelVolume(6, 127);
+  MIDIPlayer::setChannelVolume(9, 127);
+
+  // Mute drums
+  MIDIPlayer::muteChannel(9);
+  MIDIPlayer::muteChannel(11);
+
+  // Mute channel 1
+  MIDIPlayer::muteChannel(1);
+
+  // make the voices deeper
+  MIDIPlayer::setChannelTranspose(0, -12);
+  MIDIPlayer::setChannelTranspose(1, -12);
+  MIDIPlayer::setChannelTranspose(2, -12);
+  MIDIPlayer::setChannelTranspose(3, -12);
+  MIDIPlayer::setChannelTranspose(4, -12);
+
+  // SFX
+  MIDIPlayer::setChannelVolume(13, 127);
+  MIDIPlayer::setChannelVolume(14, 127);
+  MIDIPlayer::setChannelVolume(15, 127);
+}
+
 void MIDIPlayer::loadSong0() {
   SynthEngine::setChannels({{0, 24}, // Acoustic Guitar (nylon)
                             {0, 40}, // Violin
