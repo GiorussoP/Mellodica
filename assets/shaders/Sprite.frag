@@ -65,11 +65,17 @@ void main()
     
     // Apply lighting to sprites (simple ambient + directional)
     // Sprites are billboards, so we use a simple lighting model
-    if (uApplyLighting == 1) {
+    if (uApplyLighting == 1 && uBloomPass != 1) {
         vec3 ambient = uAmbientLightColor * baseColor;
         vec3 diffuse = uDirectionalLightColor * baseColor * 0.5; // Reduced intensity for sprites
         vec3 litColor = ambient + diffuse;
         baseColor = litColor;
+
+        // Apply 
+        float distance = length(fragWorldPos);
+        float fogFactor = exp(-distance * 2.0f * uFogDensity);
+        fogFactor = clamp(fogFactor, 0.0, 1.0);
+        baseColor = mix(uFogColor, baseColor, fogFactor);
     }
     
     // If rendering bloom pass and object is not bloomed (indicated by fragColor.r < 0)
@@ -78,16 +84,6 @@ void main()
     {
         outColor = vec4(0.0, 0.0, 0.0, texColor.a);
         return;
-    }
-    
-    // Apply exponential fog for non-bloomed objects
-    // Sprites use view space coordinates (billboarded), so use view-space distance
-    if (uBloomPass != 1)
-    {
-        float distance = length(fragWorldPos);
-        float fogFactor = exp(-distance * 2.0f * uFogDensity);
-        fogFactor = clamp(fogFactor, 0.0, 1.0);
-        baseColor = mix(uFogColor, baseColor, fogFactor);
     }
     
     outColor = vec4(baseColor, texColor.a);

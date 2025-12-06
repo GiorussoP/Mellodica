@@ -45,6 +45,7 @@ void NoteActor::Start() {
   mShineActor = new ShineActor(mGame, mMeshComponent->GetColor(), false);
   mShineActor->SetPosition(mPosition - mDirection * mScale.z * 0.5f);
   mShineActor->Start(SHINE_TIME);
+  mShineActor->GetComponent<SpriteComponent>()->SetBloomed(true);
 }
 
 //
