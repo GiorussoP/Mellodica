@@ -101,7 +101,7 @@ bool Game::Initialize() {
 
   // Create Chunk grid
   mChunkGrid = new ChunkGrid(Vector3(-1000.0f, -1000.0f, -1000.0f),
-                             Vector3(1000.0f, 1000.0f, 1000.0f), 32.0f);
+                             Vector3(1000.0f, 1000.0f, 1000.0f), 48.0f);
 
   // Setting up SynthEngine
   SynthEngine::init();

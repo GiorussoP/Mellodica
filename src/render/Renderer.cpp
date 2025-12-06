@@ -31,7 +31,7 @@ void Renderer::setNight() {
 }
 
 void Renderer::setDay() {
-  mBackgroundColor = Vector3(0.365f, 0.6f, 0.75f);
+  mBackgroundColor = Vector3(0.48f, 0.8f, 1.0f);
   mLightDir = Vector3(-1.0f, -1.0f, -0.5f);
   mLightColor = Vector3::One;
   mAmbientColor = Vector3(0.6f, 0.6f, 0.7f);
@@ -772,6 +772,14 @@ void Renderer::ActivateMeshShader() {
   mMeshShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
   mMeshShader->SetIntegerUniform("uApplyLighting",
                                  1); // Default: apply lighting
+
+  // Fog uniforms
+  Vector3 cameraPos = mGame->GetCamera()->GetPosition();
+  mMeshShader->SetVectorUniform(
+      "uCameraPosition",
+      cameraPos - 20.0f * mGame->GetCamera()->GetCameraForward());
+  mMeshShader->SetVectorUniform("uFogColor", mBackgroundColor);
+  mMeshShader->SetFloatUniform("uFogDensity", 0.02f);
 }
 
 void Renderer::ActivateSpriteShader() {
@@ -789,6 +797,14 @@ void Renderer::ActivateSpriteShader() {
   mSpriteShader->SetIntegerUniform("uBloomPass", 0); // Default: not bloom pass
   mSpriteShader->SetIntegerUniform("uApplyLighting",
                                    1); // Default: apply lighting
+
+  // Fog uniforms
+  Vector3 cameraPos = mGame->GetCamera()->GetPosition();
+  mSpriteShader->SetVectorUniform(
+      "uCameraPosition",
+      cameraPos - 20.0f * mGame->GetCamera()->GetCameraForward());
+  mSpriteShader->SetVectorUniform("uFogColor", mBackgroundColor);
+  mSpriteShader->SetFloatUniform("uFogDensity", 0.02f);
 }
 
 void Renderer::ActivateMeshShaderForBloom() {
@@ -843,6 +859,14 @@ void Renderer::ActivateMeshShaderNoLighting() {
   mMeshShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mMeshShader->SetIntegerUniform("uBloomPass", 0);     // Not bloom pass
   mMeshShader->SetIntegerUniform("uApplyLighting", 0); // No lighting
+
+  // Fog uniforms
+  Vector3 cameraPos = mGame->GetCamera()->GetPosition();
+  mMeshShader->SetVectorUniform(
+      "uCameraPosition",
+      cameraPos - 20.0f * mGame->GetCamera()->GetCameraForward());
+  mMeshShader->SetVectorUniform("uFogColor", mBackgroundColor);
+  mMeshShader->SetFloatUniform("uFogDensity", 0.02f);
 }
 
 void Renderer::ActivateSpriteShaderNoLighting() {
@@ -859,6 +883,14 @@ void Renderer::ActivateSpriteShaderNoLighting() {
   mSpriteShader->SetVectorUniform("uAmbientLightColor", mAmbientColor);
   mSpriteShader->SetIntegerUniform("uBloomPass", 0);     // Not bloom pass
   mSpriteShader->SetIntegerUniform("uApplyLighting", 0); // No lighting
+
+  // Fog uniforms
+  Vector3 cameraPos = mGame->GetCamera()->GetPosition();
+  mSpriteShader->SetVectorUniform(
+      "uCameraPosition",
+      cameraPos - 20.0f * mGame->GetCamera()->GetCameraForward());
+  mSpriteShader->SetVectorUniform("uFogColor", mBackgroundColor);
+  mSpriteShader->SetFloatUniform("uFogDensity", 0.02f);
 }
 
 void Renderer::DrawSingleMesh(Mesh *mesh, const Vector3 &position,

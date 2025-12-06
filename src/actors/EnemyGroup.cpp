@@ -77,7 +77,7 @@ void EnemyGroup::OnUpdate(float deltaTime) {
           velocity);
 
       if (everyoneDead) {
-        mGame->GetBattleSystem()->EndBattle();
+        mGame->GetBattleSystem()->EndBattle(true);
         // Play victory fanfare
         MIDIPlayer::playSequence({{0.0f, 15, 72, true, 127},
                                   {0.1f, 15, 76, true, 127},
@@ -92,9 +92,8 @@ void EnemyGroup::OnUpdate(float deltaTime) {
                                   {0.0f, 15, 83, false},
                                   {0.0f, 15, 76, false}});
 
-      } else if (everyoneDead ||
-                 flatDist.LengthSq() > mRadius * mRadius + 1.5f) {
-        mGame->GetBattleSystem()->EndBattle();
+      } else if (flatDist.LengthSq() > mRadius * mRadius + 1.5f) {
+        mGame->GetBattleSystem()->EndBattle(false);
       }
     }
   }

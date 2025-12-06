@@ -21,11 +21,16 @@ flat out float fragTexIndex;
 out vec3 fragColor;
 flat out float fragTileIndex;
 out vec2 spriteSize;
+out vec3 fragWorldPos;
 
 void main()
 {
-    // Transform position by instance model then view-projection
-    gl_Position = uViewProjection * inInstanceModel * vec4(inPosition, 1.0);
+    // Transform position to world space
+    vec4 worldPos = inInstanceModel * vec4(inPosition, 1.0);
+    fragWorldPos = worldPos.xyz;
+    
+    // Transform position by view-projection
+    gl_Position = uViewProjection * worldPos;
     
     // Transform normal to world space using instance normal matrix
     fragNormal = mat3(inInstanceNormal) * inNormal;

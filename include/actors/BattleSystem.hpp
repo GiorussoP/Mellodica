@@ -9,7 +9,7 @@ public:
   ~BattleSystem();
 
   void StartBattle(class EnemyGroup *enemyGroup);
-  void EndBattle();
+  void EndBattle(bool won = false);
 
   bool IsInBattle() { return mInBattle; }
   bool IsTransitioning() { return mIsTransitioning; }

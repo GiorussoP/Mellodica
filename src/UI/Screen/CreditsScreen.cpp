@@ -6,6 +6,7 @@
 
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
+#include "TestActors.hpp"
 #include "scenes/MainMenu.hpp"
 
 CreditsScreen::CreditsScreen(class Game *game, const std::string &fontName)

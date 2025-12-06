@@ -144,7 +144,7 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
   mBattleScreen = new BattleScreen(mGame, "./assets/fonts/MedodicaRegular.otf");
 }
 
-void BattleSystem::EndBattle() {
+void BattleSystem::EndBattle(bool won) {
   mInBattle = false;
   mIsTransitioning = true;
 
@@ -193,6 +193,7 @@ void BattleSystem::EndBattle() {
   }
 
   // Destroy dead allies
+
   for (auto it = mGame->GetPlayer()->GetActiveAllies().begin();
        it != mGame->GetPlayer()->GetActiveAllies().end();) {
     if ((*it)->GetCombatantState() == CombatantState::Dead) {
@@ -204,7 +205,7 @@ void BattleSystem::EndBattle() {
     }
   }
 
-  // Transfer new dead enemies to player allies
+  // Transfer new dead enemies to player allies if won
   for (auto it = mCurrentEnemyGroup->GetEnemies().begin();
        it != mCurrentEnemyGroup->GetEnemies().end();) {
     if ((*it)->GetCombatantState() == CombatantState::Dead) {
@@ -218,7 +219,7 @@ void BattleSystem::EndBattle() {
         }
       }
 
-      if (!hasChannel) {
+      if (won && !hasChannel) {
         deadEnemy->SetCombatantState(CombatantState::Idle);
         deadEnemy->SetMaxHealth(100);
         deadEnemy->SetHealth(100);

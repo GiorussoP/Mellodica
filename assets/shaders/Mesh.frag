@@ -6,12 +6,16 @@ in vec2 fragTexCoord;
 flat in float fragTexIndex;         // Per vertex texturing
 in vec3 fragColor;                  // Per instance color
 flat in float fragTileIndex;        // Per instance tile index
+in vec3 fragWorldPos;               // World position for fog
 
 uniform vec3 uDirectionalLightDir;          // Directional light direction
 uniform vec3 uDirectionalLightColor;    // Directional light color
 uniform vec3 uAmbientLightColor;        // Ambient light color
 uniform int uBloomPass;                 // 1 if rendering bloom pass, 0 otherwise
 uniform int uApplyLighting;             // 1 if lighting should be applied, 0 otherwise
+uniform vec3 uCameraPosition;           // Camera world position for fog
+uniform vec3 uFogColor;                 // Fog color
+uniform float uFogDensity;              // Fog density
 
 // Texture atlas uniforms
 uniform sampler2D uTextureAtlas;
@@ -76,6 +80,15 @@ void main()
     {
         outColor = vec4(0.0,0.0,0.0, texColor.a);
         return;
+    }
+    
+    // Apply exponential fog for non-bloomed objects
+    if (uBloomPass != 1)
+    {
+        float distance = length(fragWorldPos - uCameraPosition);
+        float fogFactor = exp(-distance * uFogDensity);
+        fogFactor = clamp(fogFactor, 0.0, 1.0);
+        baseColor = mix(uFogColor, baseColor, fogFactor);
     }
     
     outColor = vec4(baseColor, texColor.a);
