@@ -221,8 +221,8 @@ void BattleSystem::EndBattle(bool won) {
 
       if (won && !hasChannel) {
         deadEnemy->SetCombatantState(CombatantState::Idle);
-        deadEnemy->SetMaxHealth(100);
-        deadEnemy->SetHealth(100);
+        deadEnemy->SetMaxHealth(deadEnemy->GetMaxHealth() / 2);
+        deadEnemy->SetHealth(deadEnemy->GetMaxHealth());
         mGame->GetPlayer()->GetActiveAllies().push_back(deadEnemy);
       } else {
         deadEnemy->SetState(ActorState::Destroy);
