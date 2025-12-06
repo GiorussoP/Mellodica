@@ -95,8 +95,11 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
     return;
   }
 
-  mShineActor->Start(SHINE_TIME);
-  mShineActor->SetPosition(mPosition + mDirection * mScale.z * 0.5f);
+  // Check if ShineActor still exists before accessing it
+  if (mShineActor && mShineActor->GetState() != ActorState::Destroy) {
+    mShineActor->Start(SHINE_TIME);
+    mShineActor->SetPosition(mPosition + mDirection * mScale.z * 0.5f);
+  }
 
   if (mIsPlaying) {
     SetScale(mScale - Vector3(0.0f, 0.0f, mLastStepMovement));

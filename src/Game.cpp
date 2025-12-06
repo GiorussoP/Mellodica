@@ -366,7 +366,7 @@ void Game::UpdateActors(float deltaTime) {
   mUpdatingActors = true;
 
   // Update player first if it exists
-  if (mPlayer) {
+  if (mPlayer && mPlayer->GetState() != ActorState::Destroy) {
     auto it = std::find(mActiveActors.begin(), mActiveActors.end(), mPlayer);
     if (it != mActiveActors.end()) {
       mPlayer->Update(deltaTime);
@@ -375,7 +375,7 @@ void Game::UpdateActors(float deltaTime) {
 
   // Update all other active actors
   for (auto actor : mActiveActors) {
-    if (actor != mPlayer) {
+    if (actor != mPlayer && actor->GetState() != ActorState::Destroy) {
       actor->Update(deltaTime);
     }
   }
