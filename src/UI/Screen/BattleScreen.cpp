@@ -11,7 +11,8 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
   // Enemy health bars
   for (auto &enemy :
        game->GetBattleSystem()->GetCurrentEnemyGroup()->GetEnemies()) {
-    if (!enemy || enemy->GetState() == ActorState::Destroy) continue;
+    if (!enemy || enemy->GetState() == ActorState::Destroy)
+      continue;
     mEnemyLastHealths.push_back(enemy->GetHealth());
 
     auto enemyHPBackground = AddImageOrElement(Color::Black);
@@ -50,7 +51,8 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
 
   // Ally health bars
   for (auto &ally : game->GetPlayer()->GetActiveAllies()) {
-    if (!ally || ally->GetState() == ActorState::Destroy) continue;
+    if (!ally || ally->GetState() == ActorState::Destroy)
+      continue;
     mAllyLastHealths.push_back(ally->GetHealth());
 
     auto allyHPBackground = AddImageOrElement(Color::Black);

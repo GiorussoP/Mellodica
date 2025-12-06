@@ -87,7 +87,7 @@ void Level3::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 132: {
-      auto hole = new Water(mGame);
+      auto hole = new MagicWater(mGame);
       hole->SetPosition(Vector3(x, 0.0f, z));
       hole->SetScale(Vector3(size_x, 1.0f, size_y));
       break;

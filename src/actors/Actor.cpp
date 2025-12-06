@@ -12,8 +12,8 @@ Actor::Actor(Game *game)
 }
 
 Actor::~Actor() {
-  // Don't call RemoveActor if we're already being destroyed during game shutdown
-  // or if the game is null
+  // Don't call RemoveActor if we're already being destroyed during game
+  // shutdown or if the game is null
   if (mGame) {
     mGame->RemoveActor(this);
   }
@@ -21,7 +21,7 @@ Actor::~Actor() {
   // Delete components - make a copy to avoid iterator invalidation
   std::vector<Component *> componentsToDelete = mComponents;
   mComponents.clear();
-  
+
   for (auto comp : componentsToDelete) {
     delete comp;
   }

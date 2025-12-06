@@ -55,6 +55,14 @@ private:
   unsigned int mCurrentFrame;
 };
 
+class MagicWater : public Water {
+public:
+  MagicWater(Game *game, const Vector3 &color = Vector3(0.5f, 0.0f, 1.0f))
+      : Water(game, color) {
+    mMeshComponent->SetBloomed(true);
+  }
+};
+
 // Simple pyramid actor with MeshComponent
 class PyramidActor : public Actor {
 public:
