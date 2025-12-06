@@ -8,7 +8,7 @@
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
-#include "actors/TestActors.hpp"
+#include "actors/SceneActors.hpp"
 
 #include <iostream>
 

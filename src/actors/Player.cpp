@@ -7,9 +7,9 @@
 #include "NoteActor.hpp"
 #include "PlayerHud.hpp"
 #include "Renderer.hpp"
+#include "SceneActors.hpp"
 #include "SpriteComponent.hpp"
 #include "SynthEngine.hpp"
-#include "TestActors.hpp"
 #include "Texture.hpp"
 #include "TextureAtlas.hpp"
 

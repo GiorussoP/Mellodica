@@ -686,32 +686,42 @@ void MIDIPlayer::loadOpeningTheme() {
 }
 
 void MIDIPlayer::loadCreditsTheme() {
-  SynthEngine::setChannels({{0, 58},   // Violin
-                            {0, 41},   // Viola
-                            {0, 42},   // Cello
-                            {0, 43},   // Double Bass
-                            {0, 73},   // Flute
-                            {0, 68},   // Oboe
-                            {0, 71},   // Clarinet
-                            {0, 70},   // Bassoon
-                            {0, 56},   // Trumpet
-                            {0, 60},   // French Horn
-                            {0, 57},   // Trombone
-                            {0, 40},   // Tuba
-                            {0, 47},   // Timpani
-                            {0, 46},   // Orchestral Harp
-                            {0, 52},   // Choir Aahs
-                            {0, 53}}); // Voice Oohs
+  SynthEngine::setChannels({{8, 24}, // Ukulele
+                            {0, 82}, // Calliope
+                            {0, 60}, // French horn
+
+                            {0, 24},  // Nylon guitar
+                            {8, 21},  // Italian accordion
+                            {8, 14},  // Church bells
+                            {0, 108}, // Kalimba
+
+                            {0, 0},   // Not used
+                            {0, 0},   // Not used
+                            {0, 115}, // Wood block
+                            {0, 0},   // Not used - Trombone
+                            {0, 0},   // Not used - Tuba
+                            {0, 0},   // Not used - Timpani
+                            {0, 0},   // Not used - Orchestral Harp
+                            {0, 0},   // Not used - Choir Aahs
+                            {0, 0}}); // Not used - Voice Oohs
 
   // Initializing MIDI Player
   MIDIPlayer::loadSong("assets/songs/main_theme.mid", false);
 
-  // Slow down the song for orchestral feel
+  // MIDIPlayer::setChannelTranspose(2, -12);
+  MIDIPlayer::setChannelTranspose(
+      6, -24); // Reduced from -60 to -24 (2 octaves down)
+  MIDIPlayer::setChannelTranspose(5,
+                                  24); // Reduced from +24 to +12 (1 octave up)
+
+  MIDIPlayer::setChannelTranspose(9,
+                                  24); // Reduced from +60 to +24 (2 octaves up)
+  //   Slow down the song for orchestral feel
   MIDIPlayer::setSpeed(0.9);
 
-  // Set volumes for all orchestral channels
+  // Set volumes for all orchestral channels (reduced to prevent clipping)
   for (int i = 0; i < 16; i++) {
-    MIDIPlayer::setChannelVolume(i, 127);
+    MIDIPlayer::setChannelVolume(i, 100); // Reduced from 127 to 100
   }
 }
 
@@ -735,28 +745,31 @@ void MIDIPlayer::loadSong0() {
 
                             {0, 0}, // Player Channel: Piano
 
-                            {11, 28},   // Chiptune sound (channel 13)
-                            {0, 88},    // Fantasia sound (channel 14)
-                            {12, 80}}); // Square wave sound (channel 15)
+                            {128, 25},   // Chiptune sound (channel 13)
+                            {0, 88},     // Fantasia sound (channel 14)
+                            {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
   MIDIPlayer::loadSong("assets/songs/a0.mid", true);
 }
 
 void MIDIPlayer::loadSong1() {
-  SynthEngine::setChannels({{0, 24},     // Acoustic Guitar (nylon)
-                            {0, 40},     // Violin
-                            {0, 21},     // Accordion
-                            {0, 43},     // Contrabass
-                            {0, 73},     // Flute
-                            {0, 71},     // Clarinet
-                            {0, 56},     // Trumpet
-                            {0, 46},     // Harp
-                            {0, 0},      // Always active: Piano
-                            {128, 0},    // Battle drums
-                            {0, 49},     // Always active: Slow strings
-                            {128, 1},    // Always Active: song drums
-                            {0, 0},      // Player Channel: Piano
+  SynthEngine::setChannels({{0, 24},  // Acoustic Guitar (nylon)
+                            {0, 40},  // Violin
+                            {0, 21},  // Accordion
+                            {0, 43},  // Contrabass
+                            {0, 73},  // Flute
+                            {0, 71},  // Clarinet
+                            {0, 56},  // Trumpet
+                            {0, 46},  // Harp
+                            {0, 0},   // Always active: Piano
+                            {128, 0}, // Battle drums
+
+                            {0, 49},  // Always active: Slow strings
+                            {128, 1}, // Always Active: song drums
+
+                            {0, 0}, // Player Channel: Piano
+
                             {128, 25},   // Chiptune sound (channel 13)
                             {0, 88},     // Fantasia sound (channel 14)
                             {128, 80}}); // Square wave sound (channel 15)
@@ -774,7 +787,7 @@ void MIDIPlayer::loadSong2a() {
                             {0, 54}, // Soprano voice
                             {0, 80}, // Square lead
                             {0, 78}, // Whistle
-                            {0, 66},
+                            {0, 66}, //
                             {128, 0},
                             {0, 89},
                             {0, 73},
@@ -803,11 +816,35 @@ void MIDIPlayer::loadSong2b() {
                             {0, 89},
                             {0, 73},
                             {0, 57},
-                            {128, 25}, // Chiptune sound (channel 13)
-                            {0, 88},   // Fantasia sound (channel 14)
-                            {1, 80}}); // Square wave sound (channel 15)
+                            {128, 25},   // Chiptune sound (channel 13)
+                            {0, 88},     // Fantasia sound (channel 14)
+                            {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
   MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
   MIDIPlayer::setChannelTranspose(11, -60);
+}
+
+void MIDIPlayer::loadSong3() {
+  SynthEngine::setChannels({{0, 91},     // Space voice
+                            {0, 52},     // Choir Ahhs
+                            {0, 53},     // Voice oohs
+                            {0, 42},     // Cello
+                            {0, 43},     // Contrabass
+                            {0, 73},     // Flute
+                            {0, 71},     // Clarinet
+                            {0, 82},     // Calliope
+                            {0, 56},     // Trumpet
+                            {0, 57},     // Trombone
+                            {0, 46},     // Harp
+                            {128, 0},    // Drums
+                            {0, 60},     // French horn
+                            {128, 25},   // Chiptune sound (channel 13)
+                            {0, 88},     // Fantasia sound (channel 14)
+                            {128, 80}}); // Square wave sound (channel 15)
+
+  // Initializing MIDI Player
+  MIDIPlayer::loadSong("assets/songs/a3.mid", true);
+
+  MIDIPlayer::setChannelTranspose(1, -12);
 }

@@ -11,7 +11,7 @@
 #include "Ghost.hpp"
 #include "Renderer.hpp"
 #include "actors/PuzzleActors.hpp"
-#include "actors/TestActors.hpp"
+#include "actors/SceneActors.hpp"
 
 void Scene::Cleanup() {
   // Remove all HUD elements from renderer

@@ -7,7 +7,7 @@
 
 ShineActor::ShineActor(Game *game, Vector3 color, bool autoDestroy)
     : Actor(game), mLifetime(0.0f), mAutoDestroy(autoDestroy) {
-
+  game->AddAlwaysActive(this);
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas("./assets/textures/shine.json");
@@ -27,9 +27,18 @@ ShineActor::ShineActor(Game *game, Vector3 color, bool autoDestroy)
   mSpriteComponent->SetBloomed(true);
   mSpriteComponent->SetAnimation("shine");
   mSpriteComponent->SetAnimFPS(10.0f);
+
+  // Start invisible and paused until Start() is called
+  mSpriteComponent->SetVisible(false);
+  mSpriteComponent->SetIsPaused(true);
 }
 
 void ShineActor::OnUpdate(float deltaTime) {
+  // Skip update if not started yet (lifetime is still 0 and not visible)
+  if (mLifetime <= 0.0f && !mSpriteComponent->IsVisible()) {
+    return;
+  }
+
   if (mLifetime <= 0.0f) {
     // Animation finished - destroy if marked or auto-destroy enabled
     if (mAutoDestroy || GetState() == ActorState::Destroy) {

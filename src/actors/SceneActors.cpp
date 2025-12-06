@@ -1,4 +1,4 @@
-#include "actors/TestActors.hpp"
+#include "actors/SceneActors.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MainMenu.hpp"
 #include "ShineActor.hpp"

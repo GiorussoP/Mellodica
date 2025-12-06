@@ -6,7 +6,7 @@
 
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "TestActors.hpp"
+#include "SceneActors.hpp"
 #include "scenes/MainMenu.hpp"
 
 CreditsScreen::CreditsScreen(class Game *game, const std::string &fontName)
@@ -32,8 +32,8 @@ CreditsScreen::CreditsScreen(class Game *game, const std::string &fontName)
 
   mNotePlayer = new NotePlayerActor(mGame);
   mNotePlayer->SetPosition(Vector3(-6.25f, 0.0f, 5.0f));
-  // Rotate 90 degrees around Y axis so notes shoot in +X direction (across
-  // screen)
+
+  // Look straight down
   mNotePlayer->SetRotation(Math::LookRotation(Vector3::NegUnitZ));
 
   mGame->GetCamera()->SetPosition(Vector3(0.0f, 1.0f, 0.0f));
@@ -64,17 +64,19 @@ void CreditsScreen::Update(float deltaTime) {
   mCreditsText->SetPosition(pos);
 
   // After 30 seconds or when text is off screen, go to main menu
-  if (mTimer >= 90.0f) {
+  if (mTimer >= 88.0f) {
     mGame->LoadScene(new MainMenu(mGame));
   }
 
   auto events = MIDIPlayer::pollNoteEvents();
 
   for (auto &event : events) {
-    if (event.noteOn) {
-      mNotePlayer->PlayNote(event.note, event.channel, true, 2.0f);
-    } else {
-      mNotePlayer->EndNote(event.note);
+    if (event.channel >= 2 && event.channel != 9) {
+      if (event.noteOn) {
+        mNotePlayer->PlayNote(event.note, event.channel, true, 2.0f);
+      } else {
+        mNotePlayer->EndNote(event.note);
+      }
     }
   }
 }

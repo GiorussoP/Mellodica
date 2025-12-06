@@ -4,7 +4,7 @@
 #pragma once
 #include "actors/Actor.hpp"
 #include "actors/NoteActor.hpp"
-#include "actors/TestActors.hpp"
+#include "actors/SceneActors.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"

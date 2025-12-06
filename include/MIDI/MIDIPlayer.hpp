@@ -108,6 +108,7 @@ public:
   static void loadSong1();
   static void loadSong2a();
   static void loadSong2b();
+  static void loadSong3();
 
 private:
   static void midiThreadFunction();

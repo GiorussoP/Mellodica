@@ -13,7 +13,7 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
                      Vector3 direction, Vector3 color, float speed)
     : Actor(game), mMidiChannel(midChannel), mMidiNote(midiNote),
       mIsPlaying(false), mDirection(direction), mSpeed(speed),
-      mLastStepMovement(0.0f), mNotePlayerActor(nullptr) {
+      mLastStepMovement(0.0f), mNotePlayerActor(nullptr), mShineActor(nullptr) {
 
   mGame->AddAlwaysActive(this);
 
@@ -30,6 +30,12 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
 
   SetScale(Vector3(0.4f, 0.4f, 0.1f));
   SetRotation(Math::LookRotation(mDirection));
+}
+
+NoteActor::~NoteActor() {
+  // Don't delete mShineActor - it's managed by the game's actor list
+  // Just clear our pointer to it
+  mShineActor = nullptr;
 }
 
 void NoteActor::Start() {

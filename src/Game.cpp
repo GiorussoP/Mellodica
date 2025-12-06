@@ -5,7 +5,7 @@
 #include "MIDI/SynthEngine.hpp"
 #include "Player.hpp"
 #include "actors/Actor.hpp"
-#include "actors/TestActors.hpp"
+#include "actors/SceneActors.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/DrawComponent.hpp"
 #include "components/MeshComponent.hpp"
@@ -26,6 +26,10 @@
 #include <iostream>
 #include <unordered_set>
 
+#include "Level0.hpp"
+#include "Level1.hpp"
+#include "Level2.hpp"
+#include "Level3.hpp"
 #include "UI/Screen/UIScreen.hpp"
 
 const int WINDOW_WIDTH = 800;
@@ -340,7 +344,7 @@ void Game::ProcessInput() {
     }
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_M)) {
-    LoadScene(new TestSceneA(this));
+    LoadScene(new Level3(this));
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_F3)) {
     // LoadScene(new TestSceneB(this));
@@ -431,12 +435,26 @@ void Game::FindActiveActors() {
     queryPosition = mPlayer->GetPosition();
   }
 
-  mActiveActors = mChunkGrid->GetVisibleActors(queryPosition);
+  std::vector<Actor *> visibleActors =
+      mChunkGrid->GetVisibleActors(queryPosition);
 
-  // Add always-active actors (but avoid duplicates if they're already active
+  // Filter out destroyed actors from chunk grid results
+  mActiveActors.clear();
+  for (auto actor : visibleActors) {
+    if (actor->GetState() != ActorState::Destroy) {
+      mActiveActors.push_back(actor);
+    }
+  }
+
+  // Add always-active actors (but avoid duplicates if they're already active)
+  // Also skip actors marked for destruction
   std::unordered_set<Actor *> actorSet(mActiveActors.begin(),
                                        mActiveActors.end());
   for (auto actor : mAlwaysActiveActors) {
+    // Skip destroyed actors
+    if (actor->GetState() == ActorState::Destroy) {
+      continue;
+    }
     if (actorSet.insert(actor).second) {
       mActiveActors.push_back(actor);
     }

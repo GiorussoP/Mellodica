@@ -21,7 +21,7 @@ void SynthEngine::init(const char *soundfont_path, const char *audio_driver) {
 
   synth = new_fluid_synth(settings);
 
-  fluid_synth_set_polyphony(synth, 1024);
+  fluid_synth_set_polyphony(synth, 2048);
 
   sfid = fluid_synth_sfload(synth, soundfont_path, /*reset_presets=*/0);
   if (sfid < 0) {

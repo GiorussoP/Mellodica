@@ -20,6 +20,8 @@ public:
             Vector3 direction = Vector3::UnitZ, Vector3 color = Color::White,
             float speed = 1.0f);
 
+  ~NoteActor();
+
   NoteActor(NotePlayerActor *NotePlayerActor, class Game *game,
             unsigned int midChannel, unsigned int midiNote,
             Vector3 direction = Vector3::UnitZ, Vector3 color = Color::White,
