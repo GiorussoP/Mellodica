@@ -55,6 +55,9 @@ bool Game::Initialize() {
     return false;
   }
 
+  // Disable compositor bypass for better performance when maximized
+  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
+
   // Set OpenGL attributes
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -90,8 +93,11 @@ bool Game::Initialize() {
     return false;
   }
 
-  // Enable VSync
-  SDL_GL_SetSwapInterval(1);
+  // Enable adaptive VSync (allows tearing to prevent lag)
+  if (SDL_GL_SetSwapInterval(-1) < 0) {
+    // Fallback to regular VSync if adaptive is not supported
+    SDL_GL_SetSwapInterval(1);
+  }
 
   // Create renderer
   mRenderer = new Renderer(this);
@@ -315,6 +321,13 @@ void Game::ProcessInput() {
           h = (int)(w / targetAspect + 0.5f);
         }
         SDL_SetWindowSize(mWindow, w, h);
+      } else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
+        // Switch to borderless fullscreen when maximized to avoid compositor
+        // lag
+        SDL_SetWindowFullscreen(mWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      } else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
+        // Restore normal windowed mode when un-maximized
+        SDL_SetWindowFullscreen(mWindow, 0);
       }
       break;
     case SDL_KEYDOWN:
@@ -337,7 +350,8 @@ void Game::ProcessInput() {
     if (mWindow) {
       Uint32 flags = SDL_GetWindowFlags(mWindow);
       if (flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) {
-        SDL_SetWindowFullscreen(mWindow, 0); // windowed
+        SDL_SetWindowFullscreen(mWindow, 0); // windowed (not maximized)
+        SDL_RestoreWindow(mWindow);          // ensure it's not maximized
       } else {
         SDL_SetWindowFullscreen(mWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
       }
