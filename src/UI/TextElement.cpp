@@ -180,16 +180,8 @@ void TextElement::RenderTextToTexture() {
         SDL_FillRect(lineSurface, nullptr,
                      SDL_MapRGBA(lineSurface->format, 0, 0, 0, 0));
       } else {
-        if (mBackgroundAlpha > 0.0f) {
-          SDL_Color bgColor = {static_cast<Uint8>(mBackgroundColor.x * 255),
-                               static_cast<Uint8>(mBackgroundColor.y * 255),
-                               static_cast<Uint8>(mBackgroundColor.z * 255),
-                               static_cast<Uint8>(mBackgroundAlpha * 255)};
-          lineSurface =
-              TTF_RenderUTF8_Shaded(sFont, line.c_str(), textColor, bgColor);
-        } else {
-          lineSurface = TTF_RenderUTF8_Blended(sFont, line.c_str(), textColor);
-        }
+        // Always use Blended for proper alpha support
+        lineSurface = TTF_RenderUTF8_Blended(sFont, line.c_str(), textColor);
       }
 
       if (lineSurface) {
@@ -247,19 +239,8 @@ void TextElement::RenderTextToTexture() {
       SDL_FreeSurface(lineSurf);
     }
   } else {
-    // Single-line rendering (original code)
-    if (mBackgroundAlpha > 0.0f) {
-      // Render with background color
-      SDL_Color bgColor = {static_cast<Uint8>(mBackgroundColor.x * 255),
-                           static_cast<Uint8>(mBackgroundColor.y * 255),
-                           static_cast<Uint8>(mBackgroundColor.z * 255),
-                           static_cast<Uint8>(mBackgroundAlpha * 255)};
-      textSurface =
-          TTF_RenderUTF8_Shaded(sFont, mText.c_str(), textColor, bgColor);
-    } else {
-      // Render with transparent background
-      textSurface = TTF_RenderUTF8_Blended(sFont, mText.c_str(), textColor);
-    }
+    // Single-line rendering - always use Blended for proper alpha support
+    textSurface = TTF_RenderUTF8_Blended(sFont, mText.c_str(), textColor);
   }
 
   if (!textSurface) {
