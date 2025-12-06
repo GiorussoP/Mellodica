@@ -111,6 +111,10 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
 
     mCurrentEnemyGroup->GetEnemies()[i]->SetRotation(
         Math::LookRotation(-1.0f * mBattleDir));
+
+    // Restore enemy health at start of battle
+    mCurrentEnemyGroup->GetEnemies()[i]->SetHealth(
+        mCurrentEnemyGroup->GetEnemies()[i]->GetMaxHealth());
   }
 
   // Setting ally positions
