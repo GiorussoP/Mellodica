@@ -4,6 +4,25 @@ Uma mistura de jogo de ritmo com Shoot'em Up.
 
 ![Start Menu](./screenshots/start.png)
 
+## Compilação
+
+Para compilar o jogo, primeiro instale as seguintes dependências:
+- `g++`, `make`
+-  SDL2, SDL2_image
+- fluidsynth (versão 2.3.4, ou [4.4.8 compilada com suporte ao driver sdl2](https://github.com/FluidSynth/fluidsynth/releases/tag/v2.4.8))
+- libgl, glew
+
+Agora, na raíz do projeto, rode os seguintes comandos
+
+```shell
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+```
+Com isso, o executável do jogo estará em `./build/mellodica`
+
+Para compilar a **versão de desenvolvimento**, troce o `CMAKE_BUILD_TYPE` para `Debug`.
+
 ## Membros do grupo
 
 - Giovanni Russo Paschoal (Full Stack, foco em engine/mecânicas/shaders)
