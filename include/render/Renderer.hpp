@@ -1,10 +1,10 @@
 #pragma once
 #include "../UI/HUDElement.hpp"
 #include "Math.hpp"
-#include "MeshComponent.hpp"
-#include "Shader.hpp"
-#include "SpriteComponent.hpp"
-#include "Texture.hpp"
+#include "components/MeshComponent.hpp"
+#include "render/Shader.hpp"
+#include "components/SpriteComponent.hpp"
+#include "render/Texture.hpp"
 #include <GL/glew.h>
 #include <string>
 #include <unordered_map>

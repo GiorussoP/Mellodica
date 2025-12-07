@@ -9,7 +9,7 @@
 #include "../TextElement.hpp"
 #include "../UIButton.hpp"
 #include "Game.hpp"
-#include "Renderer.hpp"
+#include "render/Renderer.hpp"
 
 class UIScreen {
 public:

@@ -2,7 +2,7 @@
 // Created by MStefan99 on 4.8.20.
 //
 
-#include "Midi.h"
+#include "MIDI/MIDIParser/Midi.h"
 
 
 Midi::Midi(const char* filePath): header(filePath) {

@@ -2,7 +2,7 @@
 #define HUD_ELEMENT_HPP
 
 #include "../actors/Actor.hpp"
-#include "SpriteComponent.hpp"
+#include "components/SpriteComponent.hpp"
 
 class HUDElement : public Actor {
 public:

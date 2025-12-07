@@ -2,7 +2,7 @@
 // Created by MStefan99 on 5.8.20.
 //
 
-#include "ReadNumber.h"
+#include "MIDI/MIDIParser/ReadNumber.h"
 
 
 uint16_t read16(FILE* f) {

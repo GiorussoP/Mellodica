@@ -2,7 +2,7 @@
 // Created by grpaschoal on 26/09/2025.
 //
 
-#include "SynthEngine.hpp"
+#include "MIDI/SynthEngine.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <thread>

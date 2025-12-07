@@ -1,5 +1,5 @@
 #pragma once
-#include "ColliderComponent.hpp"
+#include "components/ColliderComponent.hpp"
 #include "Input.hpp"
 #include "Math.hpp"
 #include <SDL2/SDL.h>

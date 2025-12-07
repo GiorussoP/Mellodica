@@ -3,7 +3,7 @@
 
 #include "../actors/Actor.hpp"
 #include "Math.hpp"
-#include "SpriteComponent.hpp"
+#include "components/SpriteComponent.hpp"
 #include <SDL2/SDL_ttf.h>
 #include <string>
 #include <vector>

@@ -1,7 +1,7 @@
 
-#include "BattleScreen.hpp"
-#include "BattleSystem.hpp"
-#include "EnemyGroup.hpp"
+#include "UI/Screen/BattleScreen.hpp"
+#include "actors/BattleSystem.hpp"
+#include "actors/EnemyGroup.hpp"
 
 BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName), mBarSize(0.52f, 0.09f, 1.0f),

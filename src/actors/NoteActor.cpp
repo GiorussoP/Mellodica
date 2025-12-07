@@ -1,10 +1,10 @@
 #include "actors/NoteActor.hpp"
 #include "Game.hpp"
-#include "Renderer.hpp"
-#include "SynthEngine.hpp"
+#include "render/Renderer.hpp"
+#include "MIDI/SynthEngine.hpp"
 #include "components/ColliderComponent.hpp"
 
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 #include "actors/ShineActor.hpp"
 
 const float SHINE_TIME = 0.5f;

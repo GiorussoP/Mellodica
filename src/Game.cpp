@@ -3,7 +3,7 @@
 #include "ChunkGrid.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MIDI/SynthEngine.hpp"
-#include "Player.hpp"
+#include "actors/Player.hpp"
 #include "actors/Actor.hpp"
 #include "actors/Ghost.hpp"
 #include "actors/RobotA.hpp"
@@ -29,10 +29,10 @@
 #include <iostream>
 #include <unordered_set>
 
-#include "Level0.hpp"
-#include "Level1.hpp"
-#include "Level2.hpp"
-#include "Level3.hpp"
+#include "scenes/Level0.hpp"
+#include "scenes/Level1.hpp"
+#include "scenes/Level2.hpp"
+#include "scenes/Level3.hpp"
 #include "UI/Screen/UIScreen.hpp"
 
 const int WINDOW_WIDTH = 800;

@@ -2,7 +2,7 @@
 // Created by MStefan99 on 4.8.20.
 //
 
-#include "TrackChunk.h"
+#include "MIDI/MIDIParser/TrackChunk.h"
 
 
 TrackChunk::TrackChunk(const char* filePath, long addr):

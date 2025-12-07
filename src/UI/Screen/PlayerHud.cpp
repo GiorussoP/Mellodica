@@ -1,4 +1,4 @@
-#include "PlayerHud.hpp"
+#include "UI/Screen/PlayerHud.hpp"
 
 PlayerHud::PlayerHud(class Game *game)
     : UIScreen(game, "./assets/fonts/MedodicaRegular.otf"), mHPrect(nullptr),

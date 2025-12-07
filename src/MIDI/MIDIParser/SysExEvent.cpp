@@ -2,7 +2,7 @@
 // Created by MStefan99 on 6.8.20.
 //
 
-#include "SysExEvent.h"
+#include "MIDI/MIDIParser/SysExEvent.h"
 
 
 SysExEvent::SysExEvent(const char* filePath, long addr) {
