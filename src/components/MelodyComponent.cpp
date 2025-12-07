@@ -1,4 +1,9 @@
 #include "components/MelodyComponent.hpp"
+#include "Actor.hpp"
+
+/*
+  More complex pattern matching primitives below, currently NOT used
+ */
 
 // Standard Knuth–Morris–Pratt algorithm for string matching
 std::vector<int> kmp(std::vector<int> seq) {
@@ -30,6 +35,8 @@ void computeAutomaton(std::vector<std::vector<int>> &aut,
   
 }
 
+// End of complex pattern matching primitives
+
 MelodyComponent::MelodyComponent(class Actor *owner, std::vector<int> melody,
                                  float timer)
     : Component(owner), sequence(melody)
@@ -50,29 +57,30 @@ void MelodyComponent::Update(float deltaTime) {
     state = 0;
   }
 
-  if (delayTimer > 0) {
-    delayTimer -= deltaTime;
-    delayTimer = Math::Max(0.0f, delayTimer);
-  }
+  // if (delayTimer > 0) {
+  //   delayTimer -= deltaTime;
+  //   delayTimer = Math::Max(0.0f, delayTimer);
+  // }
 }
 
-bool MelodyComponent::OnNoteCollision(const NoteActor *note) {
+bool MelodyComponent::OnNoteCollision(NoteActor *note) {
   if (FullMatch()) return true;
-  // if (delayTimer > 0) return false;
   SDL_Log("Melody Component: received note %d", note->GetNote());
   SDL_Log("Melody Component: current state %d, next note is %d", state, sequence[state]);
-  // delayTimer = MelodyComponent::DELAY;
+  bool ret;
   if (CompareNotes(sequence[state], note->GetNote())) {
     // match!
     state++;
     currentTimer = timer;
-    return true;
-  } else if (state > 0 and CompareNotes(sequence[state-1], note->GetNote())) {
-    currentTimer = timer;
-    return true;
+    ret = true;
   } else {
     // reset!
     currentTimer = 0;
-    return false;
+    ret = false;
   }
+
+  // destroy note after collision
+  note->SetState(ActorState::Destroy);
+  
+  return ret;
 }

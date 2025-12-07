@@ -60,6 +60,7 @@ class MusicButtonActor : public Actor {
 public:
   MusicButtonActor(class Game *game, std::vector<int> targetMelody);
 
+  void OnUpdate(float deltaTime) override;
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
 
   bool IsActivated() const { return mIsActivated; }

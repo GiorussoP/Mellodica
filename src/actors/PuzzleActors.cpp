@@ -207,14 +207,27 @@ void MusicButtonActor::OnCollision(Vector3 penetration,
   if (other->GetLayer() == ColliderLayer::Note) {
 
     
-    bool matched = mMelodyComp->OnNoteCollision(dynamic_cast<NoteActor *>(other->GetOwner()));
+    mMelodyComp->OnNoteCollision(dynamic_cast<NoteActor *>(other->GetOwner()));
 
     if (mMelodyComp->FullMatch()) {
       Activate();
-    } else if (matched) {
-      // TODO: give visual feedback to plater based on partial match  
+    } else {
     }
+
   }
+}
+
+void MusicButtonActor::OnUpdate(float deltaTime) {
+  if (mIsActivated)
+    return;
+
+  const auto baseColor = Vector3(0.5f, 0.5f, 0.5f);
+  const auto matchingColor = Vector3(0.0f, 1.0f, 0.0f) * mMelodyComp->GetPercentage();
+  mMeshComp->SetColor(baseColor + matchingColor);
+
+  // TODO: decide if blooming will happen, I think it is too much
+  // if (mMelodyComp->GetPercentage() > 0.0f) mMeshComp->SetBloomed(true);
+  // else mMeshComp->SetBloomed(false);
 }
 
 void MusicButtonActor::Activate() {
