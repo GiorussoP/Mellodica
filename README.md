@@ -7,7 +7,7 @@ Uma mistura de jogo de ritmo com Shoot'em Up.
 ## Compilação
 
 Para compilar o jogo, primeiro instale as seguintes dependências:
-- `g++`, `make`
+- `g++`, `cmake`
 -  SDL2, SDL2_image
 - fluidsynth (versão 2.3.4, ou [4.4.8 compilada com suporte ao driver sdl2](https://github.com/FluidSynth/fluidsynth/releases/tag/v2.4.8))
 - libgl, glew

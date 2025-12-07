@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.10)
 # Define the project name and enable C and C++ languages
 project(Mellodica LANGUAGES C CXX)
 
+set(EXEC_NAME mellodica) # Use EXEC_NAME from Makefile for the target name
+
 # 2. Optimization and Build Flags
 # Map the Makefile's OPTIMIZATION_LEVEL to CMAKE_BUILD_TYPE.
 # We'll set the default optimization level to -O1 unless specified.
@@ -32,8 +34,8 @@ find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # Find fluidsynth
-find_package(PkgConfig QUIET)
-pkg_check_modules(FLUIDSYNTH QUIET fluidsynth) # Use pkg-config as fluidsynth might not have a standard CMake module
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FLUIDSYNTH REQUIRED fluidsynth)
 
 # 4. Source Discovery and Include Directories
 # Define directories
@@ -46,10 +48,9 @@ file(GLOB_RECURSE SOURCE_FILES
     "${SOURCE_DIR}/*.c"
 )
 
-# 5. Define the Executable Target
-# Define the executable with all discovered sources
-set(EXEC_NAME mellodica) # Use EXEC_NAME from Makefile for the target name
 add_executable(${EXEC_NAME} ${SOURCE_FILES})
+
+target_link_directories(${EXEC_NAME} PRIVATE ${FLUIDSYNTH_LIBRARY_DIRS})
 
 # Add -Wall and -Wextra ONLY if the configuration is Debug.
 target_compile_options(${EXEC_NAME}
@@ -76,6 +77,7 @@ target_include_directories(${EXEC_NAME}
 target_link_libraries(${EXEC_NAME}
     # Link the found libraries (similar to LDFLAGS)
     SDL2::SDL2 # Replaces -lSDL2
+    SDL2::SDL2main # Replaces -lSDL2main
     SDL2_image::SDL2_image # Replaces -lSDL2_image
     SDL2_ttf::SDL2_ttf # Replaces -lSDL2_ttf
     GLEW::GLEW # Replaces -lGLEW

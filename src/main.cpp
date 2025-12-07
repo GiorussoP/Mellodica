@@ -1,3 +1,5 @@
+#include <SDL2/SDL_main.h>
+#include <SDL2/SDL.h>
 #include "CSV.h"
 #include "Game.hpp"
 
@@ -14,3 +16,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
