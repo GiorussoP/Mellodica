@@ -382,9 +382,14 @@ void Level1::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 11: {
-      auto hpitem = new HPItemActor(mGame);
-      hpitem->SetPosition(Vector3(x, 1.0f, z));
+      // TODO: revert this!
+      // auto hpitem = new HPItemActor(mGame);
+      // hpitem->SetPosition(Vector3(x, 1.0f, z));
+      // break;
+      auto musicButton = new MusicButtonActor(mGame, {60, 61, 62});
+      musicButton->SetPosition(Vector3(x, 1.0f, z));
       break;
+
     }
     case 5: {
       auto rock = new MediumRockActor(mGame);

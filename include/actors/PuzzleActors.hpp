@@ -2,6 +2,7 @@
 // Created by luiza on 29/11/2025.
 //
 #pragma once
+#include "MelodyComponent.hpp"
 #include "actors/Actor.hpp"
 #include "actors/NoteActor.hpp"
 #include "actors/SceneActors.hpp"
@@ -57,7 +58,7 @@ private:
 
 class MusicButtonActor : public Actor {
 public:
-  MusicButtonActor(class Game *game, int midiTarget);
+  MusicButtonActor(class Game *game, std::vector<int> targetMelody);
 
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
 
@@ -66,8 +67,8 @@ public:
 private:
   void Activate();
 
-  int mTargetNote;
   bool mIsActivated;
+  class MelodyComponent *mMelodyComp;
   class MeshComponent *mMeshComp;
   class OBBCollider *mCollider;
 };
