@@ -1,6 +1,6 @@
 #pragma once
-#include "Component.hpp"
-#include "NoteActor.hpp"
+#include "components/Component.hpp"
+#include "actors/NoteActor.hpp"
 #include <vector>
 
 class MelodyComponent : public Component {

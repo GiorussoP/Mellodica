@@ -1,6 +1,6 @@
 #include "components/MelodyComponent.hpp"
-#include "Actor.hpp"
-#include "NotePlayerActor.hpp"
+#include "actors/Actor.hpp"
+#include "actors/NotePlayerActor.hpp"
 
 /*
   More complex pattern matching primitives below, currently NOT used
