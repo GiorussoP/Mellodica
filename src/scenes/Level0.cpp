@@ -2,7 +2,6 @@
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "MelodyComponent.hpp"
 #include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
