@@ -112,13 +112,13 @@ jobs:
 
           # Desktop entry
           cat > AppDir/usr/share/applications/mellodica.desktop <<EOF
-          [Desktop Entry]
-          Type=Application
-          Name=Mellodica
-          Exec=mellodica
-          Icon=mellodica
-          Categories=Game;
-          EOF
+[Desktop Entry]
+Type=Application
+Name=Mellodica
+Exec=mellodica
+Icon=mellodica
+Categories=Game;
+EOF
 
           # You can provide a proper PNG here
           cp assets/sprites/scenes/title-screen.png AppDir/usr/share/icons/hicolor/256x256/apps/mellodica.png
