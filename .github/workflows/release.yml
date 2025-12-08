@@ -105,7 +105,7 @@ jobs:
         run: |
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/applications
-          mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
+          mkdir -p AppDir/usr/share/icons/hicolor/64x64/apps
 
           # Install your executable into AppDir
           cp build/mellodica AppDir/usr/bin/
@@ -113,8 +113,11 @@ jobs:
           # Desktop entry
           cp assets/mellodica.desktop AppDir/usr/share/applications/mellodica.desktop
 
-          # You can provide a proper PNG here
-          cp assets/mellodica.png AppDir/usr/share/icons/hicolor/512x512/apps/mellodica.png
+          # Icon
+          cp assets/mellodica.png AppDir/usr/share/icons/hicolor/64x64/apps/mellodica.png
+
+          # Copy all assets used by game
+          cp -r assets AppDir/usr/bin/
 
       - name: Generate AppImage
         if: startsWith(matrix.os, 'ubuntu')
@@ -123,7 +126,7 @@ jobs:
           ./linuxdeploy-x86_64.AppImage \
               --appdir AppDir \
               --desktop-file=AppDir/usr/share/applications/mellodica.desktop \
-              --icon-file=AppDir/usr/share/icons/hicolor/512x512/apps/mellodica.png \
+              --icon-file=AppDir/usr/share/icons/hicolor/64x64/apps/mellodica.png \
               --output appimage
 
      
