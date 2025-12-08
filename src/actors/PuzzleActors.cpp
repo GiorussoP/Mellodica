@@ -5,6 +5,7 @@
 #include "actors/PuzzleActors.hpp"
 #include "Game.hpp"
 #include "MIDIPlayer.hpp"
+#include "MelodyComponent.hpp"
 #include "Renderer.hpp"
 #include "actors/Player.hpp"
 #include "actors/ShineActor.hpp"
@@ -181,8 +182,10 @@ void MovableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
   }
 }
 
-MusicButtonActor::MusicButtonActor(Game *game, int midiTarget)
-    : Actor(game), mTargetNote(midiTarget), mIsActivated(false) {
+MusicButtonActor::MusicButtonActor(Game *game, std::vector<int> targetMelody)
+    : Actor(game)
+    , mIsActivated(false) {
+  mMelodyComp = new MelodyComponent(this, targetMelody);
 
   SetScale(Vector3(2.0f, 2.0f, 2.0f));
 
@@ -200,22 +203,40 @@ void MusicButtonActor::OnCollision(Vector3 penetration,
   if (mIsActivated)
     return;
 
+
   if (other->GetLayer() == ColliderLayer::Note) {
-    NoteActor *note = dynamic_cast<NoteActor *>(other->GetOwner());
 
-    if (note) {
+    
+    mMelodyComp->OnNoteCollision(dynamic_cast<NoteActor *>(other->GetOwner()));
 
-      int hitNote = note->GetNote();
-      if (hitNote % 12 == mTargetNote % 12) {
-        Activate();
-      }
+    if (mMelodyComp->FullMatch()) {
+      Activate();
+    } else {
     }
+
   }
+}
+
+void MusicButtonActor::OnUpdate(float deltaTime) {
+  if (mIsActivated)
+    return;
+
+  const auto baseColor = Vector3(0.5f, 0.5f, 0.5f);
+  const auto matchingColor = Vector3(0.0f, 1.0f, 0.0f) * mMelodyComp->GetPercentage();
+  mMeshComp->SetColor(baseColor + matchingColor);
+
+  // TODO: decide if blooming will happen, I think it is too much
+  // if (mMelodyComp->GetPercentage() > 0.0f) mMeshComp->SetBloomed(true);
+  // else mMeshComp->SetBloomed(false);
 }
 
 void MusicButtonActor::Activate() {
   mIsActivated = true;
-  std::cout << "Puzzle Resolvido! Nota correta: " << mTargetNote << std::endl;
+  std::cout << "Puzzle Resolvido! Melodia correta: ";
+  for (auto note : mMelodyComp->GetMelody()) {
+    std::cout << note << ' ';
+  }
+  std::cout << std::endl;
 
   // Só faz o bloco brilhar
   // mMeshComp->SetColor(Vector3(0.0f, 1.0f, 0.0f));
