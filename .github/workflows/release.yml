@@ -140,7 +140,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Mellodica-AppImage
-          path: build/Mellodica-${{ github.ref_name }}-Linux.AppImage
+          path: "./Mellodica-${{ github.ref_name }}-Linux.AppImage"
       
       
       ###############################################################
@@ -151,6 +151,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Mellodica-DMG
-          path: build/Mellodica-${{ github.ref_name }}-Darwin.dmg
+          path: "/Users/runner/work/Mellodica/Mellodica/build/Mellodica-${{ github.ref_name }}-Darwin.dmg"
 
 
