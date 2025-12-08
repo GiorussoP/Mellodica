@@ -1,15 +1,15 @@
 #include "scenes/Level1.hpp"
 
-#include "actors/BattleSystem.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "render/Renderer.hpp"
+#include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
+#include "render/Renderer.hpp"
 
 #include <iostream>
 
