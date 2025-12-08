@@ -2,11 +2,11 @@
 // Created by luiza on 29/11/2025.
 //
 #pragma once
-#include "MelodyComponent.hpp"
 #include "actors/Actor.hpp"
 #include "actors/NoteActor.hpp"
 #include "actors/SceneActors.hpp"
 #include "components/ColliderComponent.hpp"
+#include "components/MelodyComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
 #include <iostream>
