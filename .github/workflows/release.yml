@@ -81,7 +81,8 @@ jobs:
         run: |
           cmake -S . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+            -DPROJECT_VERSION="${{ github.ref_name }}"
 
       - name: Build
         run: cmake --build build --config $BUILD_TYPE -j
@@ -130,38 +131,26 @@ jobs:
               --output appimage
 
      
+
+      ###############################################################
+      # Upload Linux AppImage
+      ###############################################################
       - name: Upload AppImage
-        uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v4
         with:
           name: Mellodica-AppImage
-          path: ./*.AppImage
-
-
-      ###############################################################
-      # Upload artifacts
-      ###############################################################
-      - name: Find built artifacts
-        id: artifacts
-        run: |
-          echo "=== Searching for AppImages and DMGs ==="
-          find build -type f -name "*.AppImage" -print > appimage.txt
-          find build -type f -name "*.dmg"      -print > dmg.txt
+          path: build/Mellodica-${{ github.ref_name }}-Linux.AppImage
       
-          echo "appimage=$(cat appimage.txt 2>/dev/null || echo '')" >> "$GITHUB_ENV"
-          echo "dmg=$(cat dmg.txt 2>/dev/null || echo '')" >> "$GITHUB_ENV"
       
-          echo "Found AppImage: $appimage"
-          echo "Found DMG: $dmg"
-
-
-      - name: Upload artifacts
+      ###############################################################
+      # Upload macOS DMG
+      ###############################################################
+      - name: Upload DMG
+        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-release
-          path: |
-            ${{ env.appimage }}
-            ${{ env.dmg }}
-          if-no-files-found: warn
+          name: Mellodica-DMG
+          path: build/Mellodica-${{ github.ref_name }}-Darwin.dmg
 
 
