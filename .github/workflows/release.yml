@@ -113,8 +113,11 @@ jobs:
           # Desktop entry
           cp assets/mellodica.desktop AppDir/usr/share/applications/mellodica.desktop
 
-          # You can provide a proper PNG here
+          # Icon
           cp assets/mellodica.png AppDir/usr/share/icons/hicolor/64x64/apps/mellodica.png
+
+          # Copy all assets used by game
+          cp -r assets AppDir/usr/bin/
 
       - name: Generate AppImage
         if: startsWith(matrix.os, 'ubuntu')
