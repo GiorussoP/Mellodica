@@ -124,9 +124,9 @@ jobs:
           cp assets/sprites/scenes/title-screen.png AppDir/usr/share/icons/hicolor/256x256/apps/mellodica.png
 
       - name: Generate AppImage
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
-          ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage --plugin appimage
+          ./linuxdeploy-plugin-appimage-x86_64.AppImage --appdir AppDir
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
