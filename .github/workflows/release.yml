@@ -141,20 +141,27 @@ jobs:
       ###############################################################
       # Upload artifacts
       ###############################################################
-      - name: List artifacts
+      - name: Find built artifacts
+        id: artifacts
         run: |
-          echo "=== Listing build directory ==="
-          ls -R build || true
+          echo "=== Searching for AppImages and DMGs ==="
+          find build -type f -name "*.AppImage" -print > appimage.txt
+          find build -type f -name "*.dmg"      -print > dmg.txt
+      
+          echo "appimage=$(cat appimage.txt 2>/dev/null || echo '')" >> "$GITHUB_ENV"
+          echo "dmg=$(cat dmg.txt 2>/dev/null || echo '')" >> "$GITHUB_ENV"
+      
+          echo "Found AppImage: $appimage"
+          echo "Found DMG: $dmg"
 
-          echo "=== Matching files that will be uploaded ==="
-          ls -1 build/**/*.AppImage 2>/dev/null || echo "No AppImage found"
-          ls -1 build/**/*.dmg     2>/dev/null || echo "No DMG found"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-release
           path: |
-            build/**/*.AppImage
-            build/**/*.dmg
+            ${{ env.appimage }}
+            ${{ env.dmg }}
+          if-no-files-found: warn
+
 
