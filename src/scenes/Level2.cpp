@@ -1,16 +1,16 @@
 #include "scenes/Level2.hpp"
 
-#include "actors/BattleSystem.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "render/Renderer.hpp"
+#include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
+#include "render/Renderer.hpp"
 #include "scenes/Level2.hpp"
 
 void Level2::Initialize() {
@@ -425,6 +425,8 @@ void Level2::LoadLevel(const std::string &levelPath) {
         mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
         mGame->GetCamera()->SetIsometricDirection(
             IsometricDirections::NorthEast);
+        mGame->GetCamera()->SetRotation(Math::LookRotation(
+            Vector3::Normalize(Vector3(0.0f, -1.0f, 0.0f)), Vector3::UnitX));
       }
 
       break;

@@ -11,7 +11,16 @@ class Game;
 class Scene {
 
 public:
-  enum SceneEnum { scene0, scene1, scene2, scene3, scene4, scene5, scene6, scene7 };
+  enum SceneEnum {
+    scene0,
+    scene1,
+    scene2,
+    scene3,
+    scene4,
+    scene5,
+    scene6,
+    scene7
+  };
 
   Scene(Game *game, Scene::SceneEnum sceneID)
       : mGame(game), mSceneID(sceneID) {}

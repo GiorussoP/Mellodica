@@ -431,6 +431,8 @@ void Level3::LoadLevel(const std::string &levelPath) {
         mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
         mGame->GetCamera()->SetIsometricDirection(
             IsometricDirections::NorthEast);
+        mGame->GetCamera()->SetRotation(Math::LookRotation(
+            Vector3::Normalize(Vector3(0.0f, -1.0f, 0.0f)), Vector3::UnitX));
       }
 
       break;

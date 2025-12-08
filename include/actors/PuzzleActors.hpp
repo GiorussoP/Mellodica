@@ -9,6 +9,7 @@
 #include "components/MelodyComponent.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
+#include "scenes/Scene.hpp"
 #include <iostream>
 
 class ItemActor : public Actor {
@@ -36,6 +37,9 @@ public:
   MovableBox(Game *game, const Vector3 &color = Vector3(0.5f))
       : SolidCubeActor(game, color, 8), mIsInHole(false) {
     mColliderComponent->SetStatic(false);
+    if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+      mMeshComponent->SetBloomed(true);
+    }
   };
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
 

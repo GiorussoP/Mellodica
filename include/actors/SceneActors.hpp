@@ -7,6 +7,7 @@
 #include "components/MeshComponent.hpp"
 #include "components/RigidBodyComponent.hpp"
 #include "components/SpriteComponent.hpp"
+#include "scenes/Scene.hpp"
 
 // Simple cube actor with MeshComponent
 class CubeActor : public Actor {
@@ -15,7 +16,7 @@ public:
             int startingIndex = -1);
   void OnUpdate(float deltaTime) override;
 
-private:
+protected:
   MeshComponent *mMeshComponent;
   // ColliderComponent* mColliderComponent;
 };
@@ -241,7 +242,11 @@ private:
 class EntranceWall : public WallActor {
 public:
   EntranceWall(Game *game, const Vector3 &color = Vector3(0.9f))
-      : WallActor(game, color, 8) {}
+      : WallActor(game, color, 8) {
+    if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+      mMeshComponent->SetBloomed(true);
+    }
+  }
 };
 
 class MarioActor : public Actor {

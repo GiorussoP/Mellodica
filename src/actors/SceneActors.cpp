@@ -1,8 +1,6 @@
 #include "actors/SceneActors.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "scenes/MainMenu.hpp"
 #include "actors/ShineActor.hpp"
-#include "scenes/TestScene.hpp"
 #include "components/ColliderComponent.hpp"
 #include "render/Mesh.hpp"
 #include "render/Renderer.hpp"
@@ -13,6 +11,9 @@
 #include "scenes/Level1.hpp"
 #include "scenes/Level2.hpp"
 #include "scenes/Level3.hpp"
+#include "scenes/MainMenu.hpp"
+#include "scenes/Scene.hpp"
+#include "scenes/TestScene.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -124,6 +125,10 @@ WindowWall::WindowWall(Game *game, const Vector3 &color)
     mRoofComponent->SetColor(Color::White);
     mRoofComponent->SetOffset(Vector3(0.0f, 1.75f, 0.0f));
     mRoofComponent->SetScale(Vector3(1.5f, 0.5f, 1.5f));
+
+    if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+      mMeshComponent->SetBloomed(true);
+    }
   }
 }
 
@@ -146,7 +151,8 @@ TreeActor::TreeActor(Game *game) : Actor(game) {
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
 
-  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene0) {
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene0 ||
+      mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
     mSpriteComponent->SetBloomed(true);
   }
 
@@ -193,6 +199,11 @@ VisualTree::VisualTree(Game *game) : Actor(game) {
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
 
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene0 ||
+      mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+    mSpriteComponent->SetBloomed(true);
+  }
+
   mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
 }
 
@@ -221,6 +232,10 @@ SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
 
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+    mSpriteComponent->SetBloomed(true);
+  }
+
   mColliderComponent = new SphereCollider(
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.125f, true);
 }
@@ -241,6 +256,10 @@ MediumRockActor::MediumRockActor(Game *game) : Actor(game) {
   mSpriteComponent->AddAnimation("idle", {"medium-rock-32x32.png"});
   mSpriteComponent->SetAnimFPS(0.0f);
   mSpriteComponent->SetAnimation("idle");
+
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+    mSpriteComponent->SetBloomed(true);
+  }
 
   mColliderComponent = new SphereCollider(
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.25f, true);
@@ -265,6 +284,10 @@ BushActor::BushActor(Game *game) : Actor(game) {
 
   mColliderComponent = new SphereCollider(
       this, ColliderLayer::Ground, Vector3(0.0f, 0.0f, 0.0f), 0.5f, true);
+
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+    mSpriteComponent->SetBloomed(true);
+  }
 
   mSwayPhase = static_cast<float>(rand()) / RAND_MAX * 2 * 3.14159f;
 }
