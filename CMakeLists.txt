@@ -119,7 +119,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 
     # ---- Linux AppImage ----
     if(UNIX AND NOT APPLE)
-        set(CPACK_GENERATOR AppImage)
+        set(CPACK_GENERATOR ZIP)
         set(CPACK_PROJECT_NAME ${PROJECT_NAME})
         set(CPACK_PROJECT_VERSION "1.0.0")
     endif()
