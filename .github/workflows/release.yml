@@ -145,4 +145,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-release
-          path: build/*.AppImage, build/*.dmg, build/*.zip, build/*.tar.gz
+          path: |
+            build/**/*.AppImage
+            build/**/*.dmg
+            build/**/*.zip
+            build/**/*.tar.gz
+
