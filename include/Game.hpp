@@ -53,6 +53,9 @@ public:
   // Scene getter
   Scene *GetCurrentScene() { return mCurrentScene; }
 
+  // Get level-specific asset path (e.g., "./assets/sprites/level0/")
+  std::string GetLevelAssetPath() const;
+
   // Battle system getter
   BattleSystem *GetBattleSystem() { return mBattleSystem; }
   void SetBattleSystem(BattleSystem *battleSystem) {

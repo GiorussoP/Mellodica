@@ -21,11 +21,6 @@ void Level0::Initialize() {
 
   LoadLevel("assets/levels/level0");
 
-  auto end = new NextSceneActor(mGame);
-  end->SetPosition(mGame->GetPlayer()->GetPosition() +
-                   Vector3(0.0f, 0.0f, -10.0f));
-  end->SetScale(Vector3(1.0f, 1.0f, 1.0f));
-
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
@@ -85,7 +80,7 @@ void Level0::LoadLevel(const std::string &levelPath) {
       break;
     }
     case 132: {
-      auto hole = new Water(mGame);
+      auto hole = new Hole(mGame);
       hole->SetPosition(Vector3(x, 0.0f, z));
       hole->SetScale(Vector3(size_x, 1.0f, size_y));
       break;

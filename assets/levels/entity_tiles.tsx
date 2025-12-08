@@ -29,16 +29,16 @@
   <image source="../sprites/robots/robot-5.png" width="24" height="52"/>
  </tile>
  <tile id="10">
-  <image source="../sprites/visualtree.png" width="64" height="64"/>
+  <image source="../sprites/textures/visualtree.png" width="64" height="64"/>
  </tile>
  <tile id="11">
   <image source="../sprites/textures/HPitem.png" width="32" height="32"/>
  </tile>
  <tile id="14">
-  <image source="../sprites/mbox.png" width="32" height="32"/>
+  <image source="../sprites/textures/mbox.png" width="32" height="32"/>
  </tile>
  <tile id="15">
-  <image source="../sprites/bbox.png" width="32" height="32"/>
+  <image source="../sprites/textures/bbox.png" width="32" height="32"/>
  </tile>
  <tile id="16">
   <image source="../sprites/textures/finish.png" width="32" height="32"/>
