@@ -1,5 +1,6 @@
 #include "actors/ShineActor.hpp"
 
+#include "AssetLoader.hpp"
 #include "Game.hpp"
 #include "render/Renderer.hpp"
 #include "components/SpriteComponent.hpp"
@@ -10,10 +11,10 @@ ShineActor::ShineActor(Game *game, Vector3 color, bool autoDestroy)
   game->AddAlwaysActive(this);
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/shine.json");
+    game->GetRenderer()->LoadAtlas(getAssetPath("textures/shine.json"));
   // Get texture index from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/shine.png");
+      game->GetRenderer()->LoadTexture(getAssetPath("textures/shine.png"));
 
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
   atlas->SetTextureIndex(textureIndex);

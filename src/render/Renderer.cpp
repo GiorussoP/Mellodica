@@ -1,4 +1,5 @@
 #include "render/Renderer.hpp"
+#include "AssetLoader.hpp"
 #include "actors/Actor.hpp"
 #include "Game.hpp"
 #include "render/Mesh.hpp"
@@ -376,8 +377,8 @@ void Renderer::Present() {
 bool Renderer::LoadShaders() {
   // Create mesh shader (Base.vert -> Mesh.frag)
   mMeshShader = new Shader();
-  if (!mMeshShader->Load("./assets/shaders/Base.vert",
-                         "./assets/shaders/Mesh.frag")) {
+  if (!mMeshShader->Load(getAssetPath("shaders/Base.vert"),
+                         getAssetPath("shaders/Mesh.frag"))) {
     delete mMeshShader;
     mMeshShader = nullptr;
     return false;
@@ -385,8 +386,8 @@ bool Renderer::LoadShaders() {
 
   // Create sprite shader (Base.vert -> Sprite.frag)
   mSpriteShader = new Shader();
-  if (!mSpriteShader->Load("./assets/shaders/Base.vert",
-                           "./assets/shaders/Sprite.frag")) {
+  if (!mSpriteShader->Load(getAssetPath("shaders/Base.vert"),
+                           getAssetPath("shaders/Sprite.frag"))) {
     delete mSpriteShader;
     mSpriteShader = nullptr;
     return false;
@@ -394,8 +395,8 @@ bool Renderer::LoadShaders() {
 
   // Create framebuffer shader (Framebuffer.vert -> Framebuffer.frag)
   mFramebufferShader = new Shader();
-  if (!mFramebufferShader->Load("./assets/shaders/Framebuffer.vert",
-                                "./assets/shaders/Framebuffer.frag")) {
+  if (!mFramebufferShader->Load(getAssetPath("shaders/Framebuffer.vert"),
+                                getAssetPath("shaders/Framebuffer.frag"))) {
     delete mFramebufferShader;
     mFramebufferShader = nullptr;
     return false;
@@ -403,8 +404,8 @@ bool Renderer::LoadShaders() {
 
   // Create HUD shader (HUD.vert -> HUD.frag)
   mHUDShader = new Shader();
-  if (!mHUDShader->Load("./assets/shaders/HUD.vert",
-                        "./assets/shaders/HUD.frag")) {
+  if (!mHUDShader->Load(getAssetPath("shaders/HUD.vert"),
+                        getAssetPath("shaders/HUD.frag"))) {
     delete mHUDShader;
     mHUDShader = nullptr;
     return false;
@@ -412,8 +413,8 @@ bool Renderer::LoadShaders() {
 
   // Create bloom blur shader (Framebuffer.vert -> Bloom.frag)
   mBloomBlurShader = new Shader();
-  if (!mBloomBlurShader->Load("./assets/shaders/Framebuffer.vert",
-                              "./assets/shaders/Bloom.frag")) {
+  if (!mBloomBlurShader->Load(getAssetPath("shaders/Framebuffer.vert"),
+                              getAssetPath("shaders/Bloom.frag"))) {
     delete mBloomBlurShader;
     mBloomBlurShader = nullptr;
     return false;

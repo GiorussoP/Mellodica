@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "../include/UI/HUDElement.hpp"
+#include "AssetLoader.hpp"
 #include "ChunkGrid.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MIDI/SynthEngine.hpp"
@@ -142,21 +143,27 @@ bool Game::Initialize() {
 
 std::string Game::GetLevelAssetPath() const {
   if (!mCurrentScene) {
-    return "./assets/sprites/level0/";
+    return getAssetPath("sprites/level0/");
+    // return "./assets/sprites/level0/";
   }
 
   auto sceneID = mCurrentScene->GetSceneID();
   switch (sceneID) {
   case Scene::SceneEnum::scene0:
-    return "./assets/sprites/level0/";
+    return getAssetPath("sprites/level0/");
+    // return "./assets/sprites/level0/";
   case Scene::SceneEnum::scene1:
-    return "./assets/sprites/level1/";
+    return getAssetPath("sprites/level1/");
+    // return "./assets/sprites/level1/";
   case Scene::SceneEnum::scene2:
-    return "./assets/sprites/level2/";
+    return getAssetPath("sprites/level2/");
+    // return "./assets/sprites/level2/";
   case Scene::SceneEnum::scene3:
-    return "./assets/sprites/level3/";
+    return getAssetPath("sprites/level3/");
+    // return "./assets/sprites/level3/";
   default:
-    return "./assets/sprites/level0/";
+    return getAssetPath("sprites/level0/");
+    // return "./assets/sprites/level0/";
   }
 }
 

@@ -1,4 +1,5 @@
 #include "actors/RobotA.hpp"
+#include "AssetLoader.hpp"
 #include "Game.hpp"
 #include "render/Renderer.hpp"
 
@@ -10,7 +11,7 @@ RobotA::RobotA(Game *game, int channel, int health)
 RobotA::~RobotA() {}
 
 void RobotA::InitializeSprite() {
-  const std::string texture_name = "./assets/sprites/robots/robot";
+  const std::string texture_name =getAssetPath("sprites/robots/robot");
   TextureAtlas *atlas = mGame->GetRenderer()->LoadAtlas(texture_name + ".json");
   Texture *texture = mGame->GetRenderer()->LoadTexture(texture_name + ".png");
   int textureIndex = mGame->GetRenderer()->GetTextureIndex(texture);

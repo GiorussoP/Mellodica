@@ -1,4 +1,5 @@
 #include "actors/Player.hpp"
+#include "AssetLoader.hpp"
 #include "Game.hpp"
 #include "scenes/GameOver.hpp"
 #include "scenes/Level1.hpp"
@@ -50,10 +51,10 @@ Player::Player(Game *game)
 
   // Get atlas from renderer cache
   TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
-      "./assets/sprites/main-character/player.json");
+getAssetPath("sprites/main-character/player.json"));
   // Get texture index from renderer cache
   Texture *texture = game->GetRenderer()->LoadTexture(
-      "./assets/sprites/main-character/player.png");
+getAssetPath("sprites/main-character/player.png"));
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
 
   // Create sprite component with atlas

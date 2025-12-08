@@ -1,5 +1,6 @@
 
 #include "UI/Screen/BattleScreen.hpp"
+#include "AssetLoader.hpp"
 #include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 
@@ -22,7 +23,7 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
     enemyHPBackground->SetScale(mBarSize);
 
     auto enemyHPBorder =
-        AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
+        AddImageOrElement(getAssetPath("sprites/textures/hud-vida-70x20.png"));
     enemyHPBorder->SetPosition(
         Vector3(mRightBarCenter,
                 0.9f - static_cast<float>(mEnemyHPrects.size()) * 0.2f, 1.0f));
@@ -62,7 +63,7 @@ BattleScreen::BattleScreen(class Game *game, const std::string &fontName)
     allyHPBackground->SetScale(mBarSize);
 
     auto allyHPBorder =
-        AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
+        AddImageOrElement(getAssetPath("sprites/textures/hud-vida-70x20.png"));
     allyHPBorder->SetPosition(
         Vector3(mLeftBarCenter,
                 -0.5f + static_cast<float>(mAllyHPrects.size()) * 0.2f, 1.0f));

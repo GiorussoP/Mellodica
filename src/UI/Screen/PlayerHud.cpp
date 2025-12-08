@@ -1,7 +1,8 @@
 #include "UI/Screen/PlayerHud.hpp"
+#include "AssetLoader.hpp"
 
 PlayerHud::PlayerHud(class Game *game)
-    : UIScreen(game, "./assets/fonts/MedodicaRegular.otf"), mHPrect(nullptr),
+    : UIScreen(game, getAssetPath("fonts/MedodicaRegular.otf")), mHPrect(nullptr),
       mENrect(nullptr), mHPText(nullptr), mENText(nullptr),
       mBarSize(0.52f, 0.09f, 1.0f), mBorderSize(0.6f, 0.2f, 1.0f),
       mLeftBarCenter(-0.7f), lastHealth(500), lastEnergy(200) {
@@ -11,7 +12,7 @@ PlayerHud::PlayerHud(class Game *game)
   energiaBackground->SetPosition(Vector3(mLeftBarCenter, -0.9f, -1.0f));
   energiaBackground->SetScale(mBarSize);
   auto energia =
-      AddImageOrElement("./assets/sprites/textures/hud-energia-70x20.png");
+      AddImageOrElement(getAssetPath("sprites/textures/hud-energia-70x20.png"));
   energia->SetPosition(Vector3(mLeftBarCenter, -0.9f, 1.0f));
   energia->SetScale(mBorderSize);
   mENrect = AddImageOrElement(Color::DarkGray);
@@ -22,7 +23,7 @@ PlayerHud::PlayerHud(class Game *game)
   auto vidaBackground = AddImageOrElement(Color::Black);
   vidaBackground->SetPosition(Vector3(mLeftBarCenter, -0.7f, -1.0f));
   vidaBackground->SetScale(mBarSize);
-  auto vida = AddImageOrElement("./assets/sprites/textures/hud-vida-70x20.png");
+  auto vida = AddImageOrElement(getAssetPath("sprites/textures/hud-vida-70x20.png"));
   vida->SetPosition(Vector3(mLeftBarCenter, -0.7f, 1.0f));
   vida->SetScale(mBorderSize);
   mHPrect = AddImageOrElement(Color::White);

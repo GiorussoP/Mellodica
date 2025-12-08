@@ -2,6 +2,7 @@
 #include "../../include/Game.hpp"
 #include "../../include/render/Renderer.hpp"
 #include "../../include/render/Texture.hpp"
+#include "AssetLoader.hpp"
 #include <SDL2/SDL_ttf.h>
 #include <vector>
 
@@ -33,7 +34,7 @@ TextElement::TextElement(Game *game, const std::string &text,
 
   // Load font on first use
   if (!sFont) {
-    sFont = TTF_OpenFont("./assets/fonts/MedodicaRegular.otf", 24);
+    sFont = TTF_OpenFont(getAssetPath("fonts/MedodicaRegular.otf").data(), 24);
     if (!sFont) {
       SDL_Log("Failed to load font: %s", TTF_GetError());
       // Create fallback sprite

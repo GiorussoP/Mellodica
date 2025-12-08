@@ -1,4 +1,5 @@
 #include "actors/SceneActors.hpp"
+#include "AssetLoader.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "actors/ShineActor.hpp"
 #include "components/ColliderComponent.hpp"
@@ -483,9 +484,9 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // SpriteComponent
   {
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/textures/shine.json");
+        game->GetRenderer()->LoadAtlas(getAssetPath("textures/shine.json"));
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/textures/shine.png");
+        game->GetRenderer()->LoadTexture(getAssetPath("textures/shine.png"));
     int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
     atlas->SetTextureIndex(textureIndex);
     mSpriteComponent = new SpriteComponent(this, textureIndex, atlas);
@@ -628,11 +629,11 @@ void CubeActor::OnUpdate(float deltaTime) {}
 MarioActor::MarioActor(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Mario.json");
+      game->GetRenderer()->LoadAtlas(getAssetPath("textures/Mario.json"));
 
   // Get texture index from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Mario.png");
+      game->GetRenderer()->LoadTexture(getAssetPath("textures/Mario.png"));
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
   atlas->SetTextureIndex(textureIndex);
 
@@ -658,11 +659,11 @@ GoombaActor::GoombaActor(Game *game)
   mGame->AddAlwaysActive(this);
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/textures/Goomba.json");
+      game->GetRenderer()->LoadAtlas(getAssetPath("textures/Goomba.json"));
 
   // Get texture index from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/textures/Goomba.png");
+      game->GetRenderer()->LoadTexture(getAssetPath("textures/Goomba.png"));
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
   atlas->SetTextureIndex(textureIndex);
 

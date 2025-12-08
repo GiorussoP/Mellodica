@@ -1,4 +1,5 @@
 #include "actors/BattleSystem.hpp"
+#include "AssetLoader.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 
 #include "Game.hpp"
@@ -147,7 +148,7 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
                             {0.0f, 15, 60, false},
                             {0.0f, 15, 63, false}});
   // Screen
-  mBattleScreen = new BattleScreen(mGame, "./assets/fonts/MedodicaRegular.otf");
+  mBattleScreen = new BattleScreen(mGame,getAssetPath( "fonts/MedodicaRegular.otf"));
 }
 
 void BattleSystem::EndBattle(bool won) {
