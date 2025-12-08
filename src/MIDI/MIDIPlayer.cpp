@@ -3,6 +3,7 @@
 //
 
 #include "MIDI/MIDIPlayer.hpp"
+#include "AssetLoader.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -580,7 +581,7 @@ void MIDIPlayer::loadMainTheme() {
                             {1, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/main_theme.mid").data(), true);
 
   MIDIPlayer::setChannelVolume(0, 127);
   MIDIPlayer::setChannelVolume(1, 127);
@@ -616,7 +617,7 @@ void MIDIPlayer::loadGameOverTheme() {
                             {1, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/main_theme.mid").data(), true);
 
   // Slow down the song
   MIDIPlayer::setSpeed(0.8);
@@ -669,7 +670,7 @@ void MIDIPlayer::loadOpeningTheme() {
                             {1, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/main_theme.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/main_theme.mid").data(), true);
 
   // Slow down the song
   MIDIPlayer::setSpeed(0.8);
@@ -706,7 +707,7 @@ void MIDIPlayer::loadCreditsTheme() {
                             {0, 0}}); // Not used - Voice Oohs
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/main_theme.mid", false);
+  MIDIPlayer::loadSong(getAssetPath("songs/main_theme.mid").data(), false);
 
   // MIDIPlayer::setChannelTranspose(2, -12);
   MIDIPlayer::setChannelTranspose(
@@ -750,7 +751,7 @@ void MIDIPlayer::loadSong0() {
                             {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/a0.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a0.mid").data(), true);
 }
 
 void MIDIPlayer::loadSong1() {
@@ -774,7 +775,7 @@ void MIDIPlayer::loadSong1() {
                             {0, 88},     // Fantasia sound (channel 14)
                             {128, 80}}); // Square wave sound (channel 15)
 
-  MIDIPlayer::loadSong("assets/songs/a1.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a1.mid").data(), true);
   MIDIPlayer::setChannelTranspose(11, -60);
 }
 
@@ -797,7 +798,8 @@ void MIDIPlayer::loadSong2a() {
                             {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/a2a.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a2a.mid").data()
+                             , true);
   MIDIPlayer::setChannelTranspose(11, -60);
 }
 
@@ -820,7 +822,7 @@ void MIDIPlayer::loadSong2b() {
                             {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/a2b.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a2b.mid").data(), true);
   MIDIPlayer::setChannelTranspose(11, -60);
 }
 
@@ -843,7 +845,7 @@ void MIDIPlayer::loadSong3() {
                             {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong("assets/songs/a3.mid", true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a3.mid").data(), true);
 
   MIDIPlayer::setChannelTranspose(1, -12);
 }

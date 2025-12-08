@@ -4,6 +4,7 @@
 #ifndef SYNTHENGINE_H
 #define SYNTHENGINE_H
 
+#include "AssetLoader.hpp"
 #include <fluidsynth.h>
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@ struct SoundPreset {
 
 class SynthEngine {
 public:
-  static void init(const char *soundfont_path = "assets/songs/sf.sf2",
+  static void init(const char *soundfont_path = getAssetPath("songs/sf.sf2").data(),
                    const char *audio_driver = "sdl2");
   static void clean();
   static void setChannels(const std::vector<SoundPreset> &presets);

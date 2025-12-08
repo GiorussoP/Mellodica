@@ -4,6 +4,7 @@
 
 #include "../../../include/UI/Screen/MainMenuScreen.hpp"
 
+#include "AssetLoader.hpp"
 #include "Game.hpp"
 #include "scenes/Level0.hpp"
 #include "scenes/Level1.hpp"
@@ -15,7 +16,7 @@
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
     : UIScreen(game, fontName) {
 
-  auto mB1 = AddButton("assets/textures/hud/iniciar.png", [this] {
+  auto mB1 = AddButton(getAssetPath("textures/hud/iniciar.png"), [this] {
     // Load saved state and go to saved level
     auto savedState = mGame->LoadState();
     int savedScene = 0; // Default to level0 (which means start from level1)
@@ -48,12 +49,12 @@ MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)
   mB1->ButtonSetPosition(Vector3(0.0f, 0.25f, 0.0f));
 
   auto mB2 =
-      AddButton("assets/textures/hud/sair.png", [this] { mGame->Quit(); });
+      AddButton(getAssetPath("textures/hud/sair.png"), [this] { mGame->Quit(); });
   SDL_Log("Button 2 Added!");
   mB2->ButtonSetScale(Vector3(0.5f, 0.5f, 0.0f));
   mB2->ButtonSetPosition(Vector3(0.0f, -0.2f, 0.0f));
 
-  auto image = AddImageOrElement("assets/sprites/scenes/title-screen.png");
+  auto image = AddImageOrElement(getAssetPath("sprites/scenes/title-screen.png"));
   image->SetPosition(Vector3(0.0f, 0.0f, -1.0f));
   image->SetScale(Vector3(2.0f, 2.0f, 1.0f));
 }

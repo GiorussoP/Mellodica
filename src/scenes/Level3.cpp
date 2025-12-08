@@ -1,4 +1,5 @@
 #include "scenes/Level3.hpp"
+#include "AssetLoader.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
@@ -18,7 +19,7 @@ void Level3::Initialize() {
   // Load song before creating battle system
   MIDIPlayer::loadSong3();
 
-  LoadLevel("assets/levels/level3");
+  LoadLevel(getAssetPath("levels/level3"));
 
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));

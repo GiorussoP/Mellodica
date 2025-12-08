@@ -1,4 +1,5 @@
 #include "scenes/TestScene.hpp"
+#include "AssetLoader.hpp"
 #include "UI/HUDElement.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "render/Renderer.hpp"
@@ -131,7 +132,7 @@ void TestSceneB::Initialize() {
   // Load song before creating battle system
   MIDIPlayer::loadSong0();
 
-  LoadLevel("assets/levels/level1");
+  LoadLevel(getAssetPath("levels/level1"));
 
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
