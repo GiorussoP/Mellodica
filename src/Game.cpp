@@ -381,7 +381,8 @@ void Game::ProcessInput() {
     }
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_M)) {
-    LoadScene(new Level3(this));
+    MIDIPlayer::loadSong2a();
+    MIDIPlayer::play();
   }
   if (Input::WasKeyPressed(SDL_SCANCODE_F3)) {
     // LoadScene(new TestSceneB(this));

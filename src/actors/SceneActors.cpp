@@ -21,10 +21,10 @@
 CubeActor::CubeActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/cubes.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/cubes.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -55,10 +55,10 @@ void SolidCubeActor::OnUpdate(float deltaTime) {
 WallActor::WallActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/wall.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/wall.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/wall.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/wall.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -92,9 +92,9 @@ DoorWall::DoorWall(Game *game, const Vector3 &color)
   // Add roof MeshComponent - Pyramid
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/floor.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/floor.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mRoofComponent = new MeshComponent(this, *mesh, texture, atlas, 50);
@@ -113,9 +113,9 @@ WindowWall::WindowWall(Game *game, const Vector3 &color)
   // Add roof MeshComponent - Pyramid
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/floor.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/floor.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mRoofComponent = new MeshComponent(this, *mesh, texture, atlas, 50);
@@ -131,9 +131,9 @@ void WindowWall::OnUpdate(float deltaTime) {
 
 TreeActor::TreeActor(Game *game) : Actor(game) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/tree.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/tree.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/tree.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/tree.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -160,9 +160,9 @@ void TreeActor::OnUpdate(float deltaTime) {
 
 VisualTree::VisualTree(Game *game) : Actor(game) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/tree.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/tree.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/tree.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/tree.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -201,10 +201,10 @@ void VisualTree::OnUpdate(float deltaTime) {
 }
 
 SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
-  Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
-  TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  Texture *texture = game->GetRenderer()->LoadTexture(
+      "./assets/sprites/level1/medium_nature.png");
+  TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
+      "./assets/sprites/level1/medium_nature.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -221,10 +221,10 @@ SmallRockActor::SmallRockActor(Game *game) : Actor(game) {
 }
 
 MediumRockActor::MediumRockActor(Game *game) : Actor(game) {
-  Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
-  TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  Texture *texture = game->GetRenderer()->LoadTexture(
+      "./assets/sprites/level1/medium_nature.png");
+  TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
+      "./assets/sprites/level1/medium_nature.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -241,10 +241,10 @@ MediumRockActor::MediumRockActor(Game *game) : Actor(game) {
 }
 
 BushActor::BushActor(Game *game) : Actor(game) {
-  Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/medium_nature.png");
-  TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/medium_nature.json");
+  Texture *texture = game->GetRenderer()->LoadTexture(
+      "./assets/sprites/level1/medium_nature.png");
+  TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
+      "./assets/sprites/level1/medium_nature.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -271,9 +271,9 @@ void BushActor::OnUpdate(float deltaTime) {
 
 GrassActorA::GrassActorA(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/grass.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/grass.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -313,9 +313,9 @@ void GrassActorA::OnUpdate(float deltaTime) {
 
 GrassActorB::GrassActorB(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/grass.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/grass.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -355,9 +355,9 @@ void GrassActorB::OnUpdate(float deltaTime) {
 
 GrassActorC::GrassActorC(Game *game) : Actor(game), mSpriteComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/grass.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/grass.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/grass.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/grass.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   mSpriteComponent = new SpriteComponent(
@@ -396,10 +396,10 @@ void GrassActorC::OnUpdate(float deltaTime) {
 GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/floor.png");
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/floor.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
   // Get shared mesh from renderer cache (only one instance created)
@@ -421,9 +421,9 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // First MeshComponent - Cube
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/wall.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/wall.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/wall.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/wall.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
     mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 5);
@@ -439,9 +439,9 @@ MultiDrawablesActor::MultiDrawablesActor(Game *game)
   // Second MeshComponent - Pyramid
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/floor.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/floor.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 50);
@@ -487,11 +487,11 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
 
   // Get texture from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/cubes.png");
 
   // Get atlas from renderer cache
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/cubes.json");
 
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
 
@@ -559,9 +559,9 @@ HouseActor::HouseActor(Game *game)
   // First MeshComponent - Cube
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/cubes.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/cubes.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
     mMeshComponent1 = new MeshComponent(this, *mesh, texture, atlas, 5);
@@ -577,9 +577,9 @@ HouseActor::HouseActor(Game *game)
   // Second MeshComponent - Pyramid
   {
     Texture *texture =
-        game->GetRenderer()->LoadTexture("./assets/sprites/floor.png");
+        game->GetRenderer()->LoadTexture("./assets/sprites/level1/floor.png");
     TextureAtlas *atlas =
-        game->GetRenderer()->LoadAtlas("./assets/sprites/floor.json");
+        game->GetRenderer()->LoadAtlas("./assets/sprites/level1/floor.json");
     atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
     Mesh *mesh = game->GetRenderer()->LoadMesh("pyramid");
     mMeshComponent2 = new MeshComponent(this, *mesh, texture, atlas, 50);
@@ -667,9 +667,9 @@ OBBTestActor::OBBTestActor(Game *game)
 
   // Get texture from renderer cache
   Texture *texture =
-      game->GetRenderer()->LoadTexture("./assets/sprites/cubes.png");
+      game->GetRenderer()->LoadTexture("./assets/sprites/level1/cubes.png");
   TextureAtlas *atlas =
-      game->GetRenderer()->LoadAtlas("./assets/sprites/cubes.json");
+      game->GetRenderer()->LoadAtlas("./assets/sprites/level1/cubes.json");
   atlas->SetTextureIndex(game->GetRenderer()->GetTextureIndex(texture));
   Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
 

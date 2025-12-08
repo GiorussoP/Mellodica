@@ -787,7 +787,7 @@ void MIDIPlayer::loadSong2a() {
                             {0, 54}, // Soprano voice
                             {0, 80}, // Square lead
                             {0, 78}, // Whistle
-                            {0, 66}, //
+                            {0, 66},
                             {128, 0},
                             {0, 89},
                             {0, 73},
@@ -799,7 +799,6 @@ void MIDIPlayer::loadSong2a() {
   // Initializing MIDI Player
   MIDIPlayer::loadSong("assets/songs/a2a.mid", true);
   MIDIPlayer::setChannelTranspose(11, -60);
-  MIDIPlayer::setSpeed(0.3f);
 }
 
 void MIDIPlayer::loadSong2b() {
