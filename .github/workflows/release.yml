@@ -82,7 +82,6 @@ jobs:
           cmake -S . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-            -DPROJECT_VERSION="${{ github.ref_name }}"
 
       - name: Build
         run: cmake --build build --config $BUILD_TYPE -j
@@ -140,7 +139,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Mellodica-AppImage
-          path: "./Mellodica-${{ github.ref_name }}-Linux.AppImage"
+          path: "./Mellodica-x86_64.AppImage"
       
       
       ###############################################################
@@ -151,6 +150,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Mellodica-DMG
-          path: "/Users/runner/work/Mellodica/Mellodica/build/Mellodica-${{ github.ref_name }}-Darwin.dmg"
+          path: "/Users/runner/work/Mellodica/Mellodica/build/Mellodica-Darwin.dmg"
 
 
