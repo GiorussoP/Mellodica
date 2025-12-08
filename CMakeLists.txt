@@ -106,6 +106,7 @@ add_custom_target(run
     DEPENDS ${EXEC_NAME}
 )
 
+
 # Only enable packaging when we are building a Release build
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Packaging enabled for Release build")
@@ -117,11 +118,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             BUNDLE DESTINATION .
             RUNTIME DESTINATION bin)
 
+    set(CPACK_PACKAGE_FILE_NAME "Mellodica-${CMAKE_SYSTEM_NAME}")
+    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
+
     # ---- Linux AppImage ----
     if(UNIX AND NOT APPLE)
         set(CPACK_GENERATOR ZIP)
         set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-        set(CPACK_PROJECT_VERSION "1.0.0")
+        #set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
     endif()
 
     # ---- macOS DMG ----
@@ -129,7 +133,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(CPACK_GENERATOR DragNDrop)
         set(MACOSX_BUNDLE TRUE)
         set(CPACK_BUNDLE_NAME ${PROJECT_NAME})
-        set(CPACK_PROJECT_VERSION "1.0.0")
+        #set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
     endif()
 
     include(CPack)
