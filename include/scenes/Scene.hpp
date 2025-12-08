@@ -1,7 +1,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include "Actor.hpp"
+#include "actors/Actor.hpp"
 #include <string>
 #include <unordered_set>
 #include <vector>

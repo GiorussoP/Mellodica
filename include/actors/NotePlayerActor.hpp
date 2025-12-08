@@ -5,7 +5,7 @@
 #include <iostream>
 
 class Game;
-#include "SynthEngine.hpp"
+#include "MIDI/SynthEngine.hpp"
 #include <array>
 
 static const unsigned int MAX_NOTES = 12;

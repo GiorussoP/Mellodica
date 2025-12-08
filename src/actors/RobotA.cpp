@@ -1,4 +1,4 @@
-#include "RobotA.hpp"
+#include "actors/RobotA.hpp"
 #include "Game.hpp"
 #include "render/Renderer.hpp"
 

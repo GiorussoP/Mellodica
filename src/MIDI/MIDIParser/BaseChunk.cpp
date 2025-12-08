@@ -3,7 +3,7 @@
 //
 
 
-#include "BaseChunk.h"
+#include "MIDI/MIDIParser/BaseChunk.h"
 
 
 BaseChunk::BaseChunk(const char* filePath, long addr) {

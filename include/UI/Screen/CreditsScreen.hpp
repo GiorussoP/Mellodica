@@ -2,7 +2,7 @@
 #define MELLODICA_CREDITSSCREEN_H
 
 #include "./UIScreen.hpp"
-#include "NotePlayerActor.hpp"
+#include "actors/NotePlayerActor.hpp"
 
 class CreditsScreen : public UIScreen {
 public:

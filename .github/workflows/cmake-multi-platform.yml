@@ -1,0 +1,199 @@
+name: CMake Build with Dependencies
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+        include:
+
+          ###########################################################
+          #  WINDOWS — MinGW64 (GCC)
+          ###########################################################
+          - os: windows-latest
+            msystem: MINGW64
+            prefix: /mingw64
+            toolchain_packages: >-
+              base-devel
+              mingw-w64-x86_64-toolchain
+              mingw-w64-x86_64-cmake
+              mingw-w64-x86_64-ninja
+              mingw-w64-x86_64-pkg-config
+              mingw-w64-x86_64-SDL2
+              mingw-w64-x86_64-SDL2_image
+              mingw-w64-x86_64-SDL2_ttf
+              mingw-w64-x86_64-SDL2_mixer
+              mingw-w64-x86_64-fluidsynth
+              mingw-w64-x86_64-glew
+
+          ###########################################################
+          #  WINDOWS — Clang64
+          ###########################################################
+          - os: windows-latest
+            msystem: CLANG64
+            prefix: /clang64
+            toolchain_packages: >-
+              base-devel
+              mingw-w64-clang-x86_64-toolchain
+              mingw-w64-clang-x86_64-cmake
+              mingw-w64-clang-x86_64-ninja
+              mingw-w64-clang-x86_64-pkg-config
+              mingw-w64-clang-x86_64-SDL2
+              mingw-w64-clang-x86_64-SDL2_image
+              mingw-w64-clang-x86_64-SDL2_ttf
+              mingw-w64-clang-x86_64-SDL2_mixer
+              mingw-w64-clang-x86_64-fluidsynth
+              mingw-w64-clang-x86_64-glew
+
+          ###########################################################
+          #  Linux (GCC / Clang)
+          ###########################################################
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+
+          ###########################################################
+          #  macOS (Clang)
+          ###########################################################
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+
+    env:
+      BUILD_TYPE: Release
+
+    steps:
+
+      ###############################################################
+      - uses: actions/checkout@v4
+      ###############################################################
+
+      ###############################################################
+      # UBUNTU
+      ###############################################################
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            g++ clang cmake ninja-build \
+            libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev \
+            libfluidsynth-dev libglew-dev libgl1-mesa-dev
+
+      - name: Set compiler (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "CC=${{ matrix.c_compiler }}" >> $GITHUB_ENV
+          echo "CXX=${{ matrix.cpp_compiler }}" >> $GITHUB_ENV
+
+
+      ###############################################################
+      # WINDOWS — MSYS2
+      ###############################################################
+      - name: Setup MSYS2
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: ${{ matrix.toolchain_packages }}
+
+      ###############################################################
+      # MACOS
+      ###############################################################
+############################################################
+      # MACOS
+      ############################################################
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew update
+          brew install \
+            cmake glib jack sdl2 sdl2_image sdl2_ttf \
+            glew libsndfile pkg-config gettext
+
+      - name: Build FluidSynth from source (SDL2 enabled)
+        if: runner.os == 'macOS'
+        run: |
+          curl -L -o fluidsynth.tar.gz \
+            https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
+          tar xf fluidsynth.tar.gz
+          mv fluidsynth-2.4.8 fluidsynth
+          cd fluidsynth
+          mkdir build && cd build
+          cmake .. \
+            -Denable-sdl2=1 \
+            -Denable-framework=0 \
+            -Denable-floats=1 \
+            -Denable-libsndfile=1 \
+            -Denable-gentables=0 \
+            -DCMAKE_INSTALL_PREFIX=/usr/local
+          make -j$(sysctl -n hw.logicalcpu)
+          sudo make install
+          sudo update_dyld_shared_cache
+
+      - name: Set compiler (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+
+      ###############################################################
+      # BUILD — Linux/macOS
+      ###############################################################
+      - name: Configure CMake (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+            -DCMAKE_C_COMPILER=$CC \
+            -DCMAKE_CXX_COMPILER=$CXX
+
+      - name: Build (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build build --config $BUILD_TYPE -j
+
+
+      ###############################################################
+      # BUILD — Windows (MSYS2)
+      ###############################################################
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          export "CMAKE_PREFIX_PATH=${{ matrix.prefix }}"
+          export "PKG_CONFIG_PATH=${{ matrix.prefix }}/lib/pkgconfig"
+
+          if [ "$MSYSTEM" = "MINGW64" ]; then
+            export "CC=${{ matrix.prefix }}/bin/gcc.exe"
+            export "CXX=${{ matrix.prefix }}/bin/g++.exe"
+          else
+            export "CC=${{ matrix.prefix }}/bin/clang.exe"
+            export "CXX=${{ matrix.prefix }}/bin/clang++.exe"
+          fi
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+            -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} \
+            -DCMAKE_C_COMPILER=$CC \
+            -DCMAKE_CXX_COMPILER=$CXX
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: cmake --build build --config $BUILD_TYPE -j

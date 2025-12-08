@@ -1,16 +1,16 @@
 #include "scenes/Level0.hpp"
-#include "BattleSystem.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MelodyComponent.hpp"
-#include "Renderer.hpp"
+#include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
+#include "render/Renderer.hpp"
 
 void Level0::Initialize() {
 

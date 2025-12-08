@@ -1,7 +1,7 @@
-#include "Camera.hpp"
+#include "render/Camera.hpp"
 
 #include "Game.hpp"
-#include "Renderer.hpp"
+#include "render/Renderer.hpp"
 
 Camera::Camera(class Game *game, const Vector3 &eye, const Quaternion rotation,
                float moveSpeed, float turnSpeed)

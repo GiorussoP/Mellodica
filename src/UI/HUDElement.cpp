@@ -1,10 +1,9 @@
-#include "HUDElement.hpp"
-#include "../../include/UI/HUDElement.hpp"
-#include "../components/SpriteComponent.hpp"
+#include "UI/HUDElement.hpp"
+#include "components/SpriteComponent.hpp"
 #include "Game.hpp"
-#include "Renderer.hpp"
-#include "Texture.hpp"
-#include "TextureAtlas.hpp"
+#include "render/Renderer.hpp"
+#include "render/Texture.hpp"
+#include "render/TextureAtlas.hpp"
 
 HUDElement::HUDElement(Game *game) : Actor(game) {
   game->AddAlwaysActive(this);

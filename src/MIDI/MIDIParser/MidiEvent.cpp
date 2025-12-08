@@ -2,7 +2,7 @@
 // Created by MStefan99 on 6.8.20.
 //
 
-#include "MidiEvent.h"
+#include "MIDI/MIDIParser/MidiEvent.h"
 
 
 uint8_t MidiEvent::lastStatus {0};

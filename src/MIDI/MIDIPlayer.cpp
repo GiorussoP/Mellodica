@@ -2,7 +2,7 @@
 // Created by grpaschoal on 26/09/2025.
 //
 
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 
 #include <algorithm>
 #include <chrono>

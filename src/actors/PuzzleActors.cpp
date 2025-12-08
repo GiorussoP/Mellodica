@@ -4,12 +4,10 @@
 
 #include "actors/PuzzleActors.hpp"
 #include "Game.hpp"
-#include "MIDIPlayer.hpp"
-#include "MelodyComponent.hpp"
-#include "Renderer.hpp"
-#include "actors/NoteActor.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 #include "actors/Player.hpp"
 #include "actors/ShineActor.hpp"
+#include "render/Renderer.hpp"
 
 ItemActor::ItemActor(Game *game) : Actor(game), mAnimTime(0.0f) {
   SetScale(Vector3(0.5f, 0.5f, 0.5f));

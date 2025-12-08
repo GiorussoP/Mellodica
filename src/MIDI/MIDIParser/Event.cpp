@@ -3,7 +3,7 @@
 //
 
 
-#include "Event.h"
+#include "MIDI/MIDIParser/Event.h"
 
 
 uint8_t Event::getByteLength() const {

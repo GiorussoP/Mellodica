@@ -2,7 +2,7 @@
 // Created by MStefan99 on 4.8.20.
 //
 
-#include "HeaderChunk.h"
+#include "MIDI/MIDIParser/HeaderChunk.h"
 
 
 HeaderChunk::HeaderChunk(const char* filePath):

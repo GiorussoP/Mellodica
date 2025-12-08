@@ -1,4 +1,4 @@
-#include "Scene.hpp"
+#include "scenes/Scene.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include <algorithm>
@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <vector>
 
-#include "EnemyGroup.hpp"
-#include "Ghost.hpp"
-#include "Renderer.hpp"
+#include "actors/EnemyGroup.hpp"
+#include "actors/Ghost.hpp"
+#include "render/Renderer.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/SceneActors.hpp"
 

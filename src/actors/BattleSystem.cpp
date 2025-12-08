@@ -1,9 +1,9 @@
 #include "actors/BattleSystem.hpp"
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 
 #include "Game.hpp"
-#include "Mesh.hpp"
-#include "Renderer.hpp"
+#include "render/Mesh.hpp"
+#include "render/Renderer.hpp"
 #include "UI/Screen/BattleScreen.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/NotePlayerActor.hpp"

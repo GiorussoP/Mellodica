@@ -1,7 +1,7 @@
 #include "actors/ShineActor.hpp"
 
 #include "Game.hpp"
-#include "Renderer.hpp"
+#include "render/Renderer.hpp"
 #include "components/SpriteComponent.hpp"
 #include <random>
 
