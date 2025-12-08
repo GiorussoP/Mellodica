@@ -24,11 +24,6 @@ void Level1::Initialize() {
 
   LoadLevel("assets/levels/level1");
 
-  // TODO: Colocar no editor de mapas
-  // auto musicButton = new MusicButtonActor(mGame, 60); // C4
-  // musicButton->SetPosition(mGame->GetPlayer()->GetPosition() +
-  //                        Vector3(-3.0f, 0.5f, 0.0f));
-
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
@@ -36,7 +31,7 @@ void Level1::Initialize() {
 
 void Level1::LoadLevel(const std::string &levelPath) {
 
-  int enemyCounter = 1;
+  int enemyCounter = 1, noteCounter = 1;
 
   MapReader mapReader(levelPath + "_terrain.csv");
 
@@ -447,6 +442,15 @@ void Level1::LoadLevel(const std::string &levelPath) {
     case 15: {
       auto box = new BreakableBox(mGame);
       box->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+
+    case 17: {
+      // Random number of notes between 3 and 10
+      int n_notes = 3 + std::rand() % 8;
+      auto musicbox =
+          new MusicButtonActor(mGame, (noteCounter - 1) % 8, n_notes);
+      musicbox->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
 

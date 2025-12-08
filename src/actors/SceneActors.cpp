@@ -42,8 +42,9 @@ SolidCubeActor::SolidCubeActor(Game *game, const Vector3 &color,
                                int startingIndex)
     : CubeActor(game, color, startingIndex), mColliderComponent(nullptr) {
   // Add AABB collider
-  mColliderComponent = new AABBCollider(
-      this, ColliderLayer::Ground, Vector3::Zero, Vector3(0.5f, 0.5f, 0.5f));
+  mColliderComponent =
+      new AABBCollider(this, ColliderLayer::Ground, Vector3::Zero,
+                       Vector3(0.4999f, 0.4999f, 0.4999f));
 }
 
 void SolidCubeActor::OnUpdate(float deltaTime) {

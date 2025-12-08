@@ -58,7 +58,12 @@ private:
 
 class MusicButtonActor : public Actor {
 public:
-  MusicButtonActor(class Game *game, std::vector<int> targetMelody);
+  MusicButtonActor(class Game *game, std::vector<int> targetMelody,
+                   Vector3 baseColor = Vector3(0.5f, 0.5f, 0.5f),
+                   Vector3 matchingColor = Vector3(1.0f, 1.0f, 1.0f));
+
+  MusicButtonActor(class Game *game, unsigned int channel,
+                   unsigned int n_notes);
 
   void OnUpdate(float deltaTime) override;
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;
@@ -68,8 +73,13 @@ public:
 private:
   void Activate();
 
+  Vector3 mMatchingColor;
+  Vector3 mBaseColor;
+
   bool mIsActivated;
   class MelodyComponent *mMelodyComp;
   class MeshComponent *mMeshComp;
   class OBBCollider *mCollider;
+
+  int mChannel;
 };

@@ -30,6 +30,8 @@ public:
     mNotePlayerActor = NotePlayerActor;
   }
 
+  NotePlayerActor *GetNotePlayerActor() const { return mNotePlayerActor; }
+
   void Start();
   void OnUpdate(float deltaTime) override;
   void End();

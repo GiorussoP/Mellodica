@@ -1,5 +1,6 @@
 #include "components/MelodyComponent.hpp"
 #include "Actor.hpp"
+#include "NotePlayerActor.hpp"
 
 /*
   More complex pattern matching primitives below, currently NOT used
@@ -10,8 +11,10 @@ std::vector<int> kmp(std::vector<int> seq) {
   const int n = seq.size();
   std::vector<int> pi(n, 0);
   for (int i = 1, j = 0; i < n; i++) {
-    while (j > 0 and !MelodyComponent::CompareNotes(seq[i], seq[j])) j = pi[j-1];
-    if (MelodyComponent::CompareNotes(seq[i], seq[j])) j++;
+    while (j > 0 and !MelodyComponent::CompareNotes(seq[i], seq[j]))
+      j = pi[j - 1];
+    if (MelodyComponent::CompareNotes(seq[i], seq[j]))
+      j++;
     pi[i] = j;
   }
   return pi;
@@ -27,24 +30,22 @@ void computeAutomaton(std::vector<std::vector<int>> &aut,
     aut[i].resize(MelodyComponent::SIGMA);
     for (unsigned c = 0; c < MelodyComponent::SIGMA; c++) {
       if (i > 0 and !MelodyComponent::CompareNotes(sequence[i], c))
-        aut[i][c] = aut[pi[i-1]][c];
+        aut[i][c] = aut[pi[i - 1]][c];
       else
         aut[i][c] = i + (MelodyComponent::CompareNotes(sequence[i], c) == 1);
     }
   }
-  
 }
 
 // End of complex pattern matching primitives
 
 MelodyComponent::MelodyComponent(class Actor *owner, std::vector<int> melody,
                                  float timer)
-    : Component(owner), sequence(melody)
-    , timer(timer) {
-}
+    : Component(owner), sequence(melody), timer(timer) {}
 
 void MelodyComponent::Update(float deltaTime) {
-  if (FullMatch()) return;
+  if (FullMatch())
+    return;
   if (currentTimer > 0) {
     currentTimer -= deltaTime;
     currentTimer = Math::Max(0.0f, currentTimer);
@@ -64,9 +65,11 @@ void MelodyComponent::Update(float deltaTime) {
 }
 
 bool MelodyComponent::OnNoteCollision(NoteActor *note) {
-  if (FullMatch()) return true;
+  if (FullMatch())
+    return true;
   SDL_Log("Melody Component: received note %d", note->GetNote());
-  SDL_Log("Melody Component: current state %d, next note is %d", state, sequence[state]);
+  SDL_Log("Melody Component: current state %d, next note is %d", state,
+          sequence[state]);
   bool ret;
   if (CompareNotes(sequence[state], note->GetNote())) {
     // match!
@@ -79,8 +82,13 @@ bool MelodyComponent::OnNoteCollision(NoteActor *note) {
     ret = false;
   }
 
+  if (note->GetNotePlayerActor() != nullptr &&
+      note->GetNotePlayerActor()->GetActiveNote(note->GetNote()) == note) {
+    note->GetNotePlayerActor()->EndNote(note->GetNote());
+  }
+
   // destroy note after collision
   note->SetState(ActorState::Destroy);
-  
+
   return ret;
 }

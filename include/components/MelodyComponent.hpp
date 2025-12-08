@@ -3,14 +3,11 @@
 #include "NoteActor.hpp"
 #include <vector>
 
-
-
 class MelodyComponent : public Component {
 public:
-
   // TODO: review these constants
-  static constexpr int SIGMA = 12; // Alphabet size for melodies
-  static constexpr float DEFAULT_TIMER = 1.0f; // Default timer for matching
+  static constexpr int SIGMA = 12;             // Alphabet size for melodies
+  static constexpr float DEFAULT_TIMER = 5.0f; // Default timer for matching
 
   /*
     Adds melody matching capabilities to actor. The tracking resets if
@@ -18,11 +15,13 @@ public:
     collision. After a full match, the component becomes idle.
     Additional Parameters:
     - melody: which melody to track
-    - timer: max time between right matches, if timer segunds ellapses since last right note colliding, the tracking resets. Smaller timers result in higher difficulty
+    - timer: max time between right matches, if timer segunds ellapses since
+    last right note colliding, the tracking resets. Smaller timers result in
+    higher difficulty
    */
-  MelodyComponent(class Actor *owner, std::vector<int> melody, float timer = DEFAULT_TIMER);
+  MelodyComponent(class Actor *owner, std::vector<int> melody,
+                  float timer = DEFAULT_TIMER);
   ~MelodyComponent() = default;
-
 
   // Returns if notes are equal modulo SIGMA
   static bool CompareNotes(const int a, const int b) {
@@ -40,7 +39,7 @@ public:
   // Returns whether Note matched, should be used for visual feedback
   // Becomes a noop after full match
   // ALERT: destroys Note after collision
-  bool OnNoteCollision(NoteActor* note);
+  bool OnNoteCollision(NoteActor *note);
 
   // Returns wheter full melody matched
   bool FullMatch() const { return state == sequence.size(); }
@@ -56,7 +55,7 @@ public:
     sequence = melody;
     Reset();
   }
-  const std::vector<int>& GetMelody() const {return sequence; }
+  const std::vector<int> &GetMelody() const { return sequence; }
 
   // Get current matching percentage
   float GetPercentage() const { return ((float)state) / sequence.size(); }

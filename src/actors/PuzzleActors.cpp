@@ -7,6 +7,7 @@
 #include "MIDIPlayer.hpp"
 #include "MelodyComponent.hpp"
 #include "Renderer.hpp"
+#include "actors/NoteActor.hpp"
 #include "actors/Player.hpp"
 #include "actors/ShineActor.hpp"
 
@@ -182,17 +183,78 @@ void MovableBox::OnCollision(Vector3 penetration, ColliderComponent *other) {
   }
 }
 
-MusicButtonActor::MusicButtonActor(Game *game, std::vector<int> targetMelody)
-    : Actor(game)
-    , mIsActivated(false) {
+MusicButtonActor::MusicButtonActor(Game *game, std::vector<int> targetMelody,
+                                   Vector3 baseColor, Vector3 matchingColor)
+    : Actor(game), mIsActivated(false), mBaseColor(baseColor),
+      mMatchingColor(matchingColor), mChannel(-1) {
   mMelodyComp = new MelodyComponent(this, targetMelody);
 
-  SetScale(Vector3(2.0f, 2.0f, 2.0f));
+  SetScale(Vector3(1.0f));
 
   Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
   mMeshComp = new MeshComponent(this, *mesh);
-  mMeshComp->SetColor(Vector3(0.5f, 0.5f, 0.5f));
+  mMeshComp->SetColor(mBaseColor);
+  mCollider = new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
+                              Vector3(0.5f, 0.5f, 0.5f), false);
+}
 
+MusicButtonActor::MusicButtonActor(Game *game, unsigned int channel,
+                                   unsigned int n_notes)
+    : Actor(game), mIsActivated(false), mChannel(-1) {
+
+  // Apply modulo to channel to ensure it's within 0-15 range
+  channel = channel % 16;
+  mChannel = static_cast<int>(channel);
+
+  // Get the MIDI channels
+  auto &channels = MIDIPlayer::getChannels();
+
+  // Extract target melody from the specified channel
+  std::vector<int> targetMelody;
+
+  if (channel < channels.size() && channels[channel].active) {
+    const auto &channelData = channels[channel];
+
+    // Collect all NoteOn events
+    std::vector<int> allNoteOns;
+    for (const auto &noteEvent : channelData.notes) {
+      if (noteEvent.on) {
+        allNoteOns.push_back(noteEvent.note % 12); // Store note modulo 12
+      }
+    }
+
+    // If we have NoteOn events, select n_notes randomly
+    if (!allNoteOns.empty()) {
+      // Use modulo to wrap n_notes if it exceeds available notes
+      unsigned int actualNotes =
+          std::min(n_notes, static_cast<unsigned int>(allNoteOns.size()));
+
+      // Select random starting position
+      unsigned int startPos = rand() % allNoteOns.size();
+
+      // Extract n_notes consecutive notes (wrapping around if needed)
+      for (unsigned int i = 0; i < actualNotes; i++) {
+        targetMelody.push_back(allNoteOns[(startPos + i) % allNoteOns.size()]);
+      }
+    }
+  }
+
+  // If no notes were extracted, provide a default
+  if (targetMelody.empty()) {
+    targetMelody = {60}; // Middle C as default
+  }
+
+  // Set colors based on channel
+  mBaseColor = Color::Gray;
+  mMatchingColor = NOTE_COLORS[channel];
+
+  // Initialize components
+  mMelodyComp = new MelodyComponent(this, targetMelody);
+  SetScale(Vector3(1.0f));
+
+  Mesh *mesh = game->GetRenderer()->LoadMesh("cube");
+  mMeshComp = new MeshComponent(this, *mesh);
+  mMeshComp->SetColor(mBaseColor);
   mCollider = new OBBCollider(this, ColliderLayer::Ground, Vector3::Zero,
                               Vector3(0.5f, 0.5f, 0.5f), false);
 }
@@ -203,31 +265,28 @@ void MusicButtonActor::OnCollision(Vector3 penetration,
   if (mIsActivated)
     return;
 
-
   if (other->GetLayer() == ColliderLayer::Note) {
 
-    
     mMelodyComp->OnNoteCollision(dynamic_cast<NoteActor *>(other->GetOwner()));
 
     if (mMelodyComp->FullMatch()) {
       Activate();
     } else {
     }
-
   }
 }
 
 void MusicButtonActor::OnUpdate(float deltaTime) {
   if (mIsActivated)
     return;
+  if (mMelodyComp->GetPercentage() == 0.0f) {
+    mMeshComp->SetBloomed(false);
+  } else {
+    mMeshComp->SetBloomed(true);
+  }
 
-  const auto baseColor = Vector3(0.5f, 0.5f, 0.5f);
-  const auto matchingColor = Vector3(0.0f, 1.0f, 0.0f) * mMelodyComp->GetPercentage();
-  mMeshComp->SetColor(baseColor + matchingColor);
-
-  // TODO: decide if blooming will happen, I think it is too much
-  // if (mMelodyComp->GetPercentage() > 0.0f) mMeshComp->SetBloomed(true);
-  // else mMeshComp->SetBloomed(false);
+  mMeshComp->SetColor(
+      Vector3::Lerp(mBaseColor, mMatchingColor, mMelodyComp->GetPercentage()));
 }
 
 void MusicButtonActor::Activate() {
@@ -247,9 +306,17 @@ void MusicButtonActor::Activate() {
   shine->Start(0.5f);
 
   // Item
-  ItemActor *item = new ItemActor(GetGame());
+  ItemActor *item = new HPItemActor(GetGame());
 
-  item->SetPosition(GetPosition() + Vector3(0.0f, 0.0f, 0.0f));
+  item->SetPosition(GetPosition());
 
   SetState(ActorState::Destroy);
+
+  std::vector<NoteQueueEvent> sequence;
+
+  for (int note : mMelodyComp->GetMelody()) {
+    sequence.emplace_back(0.0f, mChannel, note + 60, true, 100);
+    sequence.emplace_back(0.5f, mChannel, note + 60, false);
+  }
+  MIDIPlayer::playSequence(sequence);
 }

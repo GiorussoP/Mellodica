@@ -34,7 +34,7 @@ void Level3::Initialize() {
 }
 
 void Level3::LoadLevel(const std::string &levelPath) {
-  int enemyCounter = 1;
+  int enemyCounter = 1, noteCounter = 1;
 
   MapReader mapReader(levelPath + "_terrain.csv");
 
@@ -447,6 +447,14 @@ void Level3::LoadLevel(const std::string &levelPath) {
       box->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
+    case 17: {
+      // Random number of notes between 3 and 10
+      int n_notes = 3 + std::rand() % 8;
+      auto musicbox =
+          new MusicButtonActor(mGame, (noteCounter - 1) % 8, n_notes);
+      musicbox->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
 
     case 9: {
       int enemyValue = GetEnemyBitmask(enemyCounter - 1);
@@ -462,6 +470,7 @@ void Level3::LoadLevel(const std::string &levelPath) {
       enemy->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
+
     case 16: {
       auto finish = new NextSceneActor(mGame);
       finish->SetPosition(Vector3(x, 1.0f, z));

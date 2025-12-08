@@ -3,6 +3,7 @@
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
+#include "MelodyComponent.hpp"
 #include "Renderer.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
@@ -27,7 +28,7 @@ void Level0::Initialize() {
 }
 
 void Level0::LoadLevel(const std::string &levelPath) {
-  int enemyCounter = 1;
+  int enemyCounter = 1, noteCounter = 1;
 
   MapReader mapReader(levelPath + "_terrain.csv");
 
@@ -438,6 +439,14 @@ void Level0::LoadLevel(const std::string &levelPath) {
     case 15: {
       auto box = new BreakableBox(mGame);
       box->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+    case 17: {
+      // Random number of notes between 3 and 10
+      int n_notes = 3 + std::rand() % 8;
+      auto musicbox =
+          new MusicButtonActor(mGame, (noteCounter - 1) % 8, n_notes);
+      musicbox->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
 
