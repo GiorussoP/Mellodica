@@ -105,3 +105,33 @@ add_custom_target(run
     COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${EXEC_NAME}
     DEPENDS ${EXEC_NAME}
 )
+
+# Only enable packaging when we are building a Release build
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Packaging enabled for Release build")
+
+    include(InstallRequiredSystemLibraries)
+
+    # Install the executable
+    install(TARGETS ${EXEC_NAME}
+            BUNDLE DESTINATION .
+            RUNTIME DESTINATION bin)
+
+    # ---- Linux AppImage ----
+    if(UNIX AND NOT APPLE)
+        set(CPACK_GENERATOR AppImage)
+        set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+        set(CPACK_PROJECT_VERSION "1.0.0")
+    endif()
+
+    # ---- macOS DMG ----
+    if(APPLE)
+        set(CPACK_GENERATOR DragNDrop)
+        set(MACOSX_BUNDLE TRUE)
+        set(CPACK_BUNDLE_NAME ${PROJECT_NAME})
+        set(CPACK_PROJECT_VERSION "1.0.0")
+    endif()
+
+    include(CPack)
+endif()
+
