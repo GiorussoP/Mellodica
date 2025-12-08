@@ -1,8 +1,8 @@
 #pragma once
-#include "DrawComponent.hpp"
+#include "components/DrawComponent.hpp"
 #include "Math.hpp"
-#include "Mesh.hpp"
-#include "TextureAtlas.hpp"
+#include "render/Mesh.hpp"
+#include "render/TextureAtlas.hpp"
 #include <vector>
 
 class MeshComponent : public DrawComponent {

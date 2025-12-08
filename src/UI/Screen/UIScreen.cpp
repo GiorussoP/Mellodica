@@ -6,7 +6,7 @@
 #include "../../../include/Game.hpp"
 #include "../../../include/UI/HUDElement.hpp"
 #include "../../../include/UI/UIButton.hpp"
-#include "Renderer.hpp"
+#include "render/Renderer.hpp"
 
 UIScreen::UIScreen(class Game *game, const std::string &fontName)
     : mGame(game), mState(UIState::Active), mSelectedButton(-1) {

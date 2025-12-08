@@ -1,8 +1,8 @@
 #ifndef RIGIDBODYCOMPONENT_HPP
 #define RIGIDBODYCOMPONENT_HPP
 
-#include "Component.hpp"
-#include "Actor.hpp"
+#include "components/Component.hpp"
+#include "actors/Actor.hpp"
 #include "Math.hpp"
 
 class RigidBodyComponent : public Component {

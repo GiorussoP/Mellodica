@@ -1,5 +1,5 @@
-#include "RigidBodyComponent.hpp"
-#include "ColliderComponent.hpp"
+#include "components/RigidBodyComponent.hpp"
+#include "components/ColliderComponent.hpp"
 
 const float GRAVITY = 2500.0f;
 const float MAX_SPEED = 750.0f;

@@ -3,7 +3,7 @@
 //
 
 
-#include "VLQ.h"
+#include "MIDI/MIDIParser/VLQ.h"
 
 
 VLQ::VLQ(const char* filePath, long addr): length {0}, data {0} {

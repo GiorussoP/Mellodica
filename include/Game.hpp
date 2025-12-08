@@ -1,13 +1,13 @@
 #pragma once
-#include "BattleSystem.hpp"
+#include "actors/BattleSystem.hpp"
 #include "Math.hpp"
-#include "Player.hpp"
+#include "actors/Player.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>
 #include <unordered_set>
 #include <vector>
 
-#include "Camera.hpp"
+#include "render/Camera.hpp"
 
 class Scene;
 

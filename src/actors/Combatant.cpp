@@ -1,8 +1,6 @@
-#include "Combatant.hpp"
-#include "../../include/actors/Combatant.hpp"
-
+#include "actors/Combatant.hpp"
 #include "Game.hpp"
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 #include "actors/NoteActor.hpp"
 #include "render/Renderer.hpp"
 

@@ -1,0 +1,99 @@
+name: Release Packaging
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type (Release only works)"
+        default: "Release"
+        required: false
+      debug_build:
+        description: "Force run packaging on Debug build (for development only)"
+        type: boolean
+        default: false
+        required: false
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      BUILD_TYPE: Release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      ###############################################################
+      # LINUX — build deps
+      ###############################################################
+      - name: Install dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            g++ clang cmake ninja-build \
+            libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev \
+            libfluidsynth-dev libglew-dev libgl1-mesa-dev \
+            patchelf desktop-file-utils file
+
+      ###############################################################
+      # MACOS — build deps
+      ###############################################################
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew update
+          brew install \
+            cmake glib jack sdl2 sdl2_image sdl2_ttf \
+            glew libsndfile pkg-config gettext dylibbundler
+
+          # Build fluidsynth (same as your main workflow)
+          curl -L -o fluidsynth.tar.gz \
+            https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
+          tar xf fluidsynth.tar.gz
+          mv fluidsynth-2.4.8 fluidsynth
+          cd fluidsynth
+          mkdir build && cd build
+          cmake .. \
+            -Denable-sdl2=1 \
+            -Denable-framework=0 \
+            -Denable-floats=1 \
+            -Denable-libsndfile=1 \
+            -Denable-gentables=0 \
+            -DCMAKE_INSTALL_PREFIX=/usr/local
+          make -j$(sysctl -n hw.logicalcpu)
+          sudo make install
+          sudo update_dyld_shared_cache
+
+      ###############################################################
+      # Configure + build + package using CPack
+      ###############################################################
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+      - name: Build
+        run: cmake --build build --config $BUILD_TYPE -j
+
+      - name: Package
+        run: cmake --build build --target package
+
+      ###############################################################
+      # Upload artifacts
+      ###############################################################
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-release
+          path: build/*.AppImage, build/*.dmg, build/*.zip, build/*.tar.gz

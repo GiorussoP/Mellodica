@@ -2,7 +2,7 @@
 // Created by MStefan99 on 6.8.20.
 //
 
-#include "MetaEvent.h"
+#include "MIDI/MIDIParser/MetaEvent.h"
 
 
 MetaEvent::MetaEvent(const char* filePath, long addr) {

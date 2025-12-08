@@ -1,5 +1,5 @@
 #pragma once
-#include "Actor.hpp"
+#include "actors/Actor.hpp"
 #include "Math.hpp"
 
 enum class CameraMode {

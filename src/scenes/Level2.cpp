@@ -1,10 +1,10 @@
 #include "scenes/Level2.hpp"
 
-#include "BattleSystem.hpp"
+#include "actors/BattleSystem.hpp"
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "Renderer.hpp"
+#include "render/Renderer.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
 #include "actors/Player.hpp"

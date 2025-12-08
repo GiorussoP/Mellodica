@@ -1,4 +1,4 @@
-#include "Ghost.hpp"
+#include "actors/Ghost.hpp"
 #include "Game.hpp"
 #include "render/Renderer.hpp"
 

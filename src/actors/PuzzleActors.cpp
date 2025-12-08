@@ -4,8 +4,8 @@
 
 #include "actors/PuzzleActors.hpp"
 #include "Game.hpp"
-#include "MIDIPlayer.hpp"
-#include "Renderer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
+#include "render/Renderer.hpp"
 #include "actors/Player.hpp"
 #include "actors/ShineActor.hpp"
 

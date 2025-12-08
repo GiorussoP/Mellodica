@@ -1,7 +1,7 @@
 #include "actors/NotePlayerActor.hpp"
-#include "BattleSystem.hpp"
+#include "actors/BattleSystem.hpp"
 #include "Game.hpp"
-#include "SynthEngine.hpp"
+#include "MIDI/SynthEngine.hpp"
 #include "actors/NoteActor.hpp"
 
 float NotePlayerActor::noteSpacing = 0.5f;

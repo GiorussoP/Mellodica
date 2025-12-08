@@ -5,11 +5,11 @@
 #include "../../../include/UI/Screen/MainMenuScreen.hpp"
 
 #include "Game.hpp"
-#include "Level0.hpp"
-#include "Level1.hpp"
-#include "Level2.hpp"
-#include "Level3.hpp"
-#include "MIDIPlayer.hpp"
+#include "scenes/Level0.hpp"
+#include "scenes/Level1.hpp"
+#include "scenes/Level2.hpp"
+#include "scenes/Level3.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 #include "scenes/CreditsScene.hpp"
 
 MainMenuScreen::MainMenuScreen(class Game *game, const std::string &fontName)

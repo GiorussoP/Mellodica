@@ -2,7 +2,7 @@
 // Created by MStefan99 on 4.8.20.
 //
 
-#include "MTrkEvent.h"
+#include "MIDI/MIDIParser/MTrkEvent.h"
 
 
 MTrkEvent::MTrkEvent(const char* filePath, long addr):

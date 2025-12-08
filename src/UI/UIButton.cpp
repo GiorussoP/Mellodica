@@ -3,7 +3,7 @@
 //
 
 #include "../../include/UI/UIButton.hpp"
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 
 UIButton::UIButton(Game *game, std::function<void()> onClick,
                    const std::string &hudTexturePath,

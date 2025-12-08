@@ -1,7 +1,7 @@
-#include "EnemyGroup.hpp"
+#include "actors/EnemyGroup.hpp"
 
 #include "Game.hpp"
-#include "MIDIPlayer.hpp"
+#include "MIDI/MIDIPlayer.hpp"
 
 EnemyGroup::EnemyGroup(class Game *game, std::vector<Combatant *> enemies,
                        float radius)
