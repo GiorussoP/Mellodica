@@ -3,7 +3,7 @@
 #include "render/Renderer.hpp"
 
 Ghost::Ghost(Game *game, int channel, int health)
-    : Combatant(game, channel, health) {
+    : Combatant(game, channel, health, CombatantType::Phantasm) {
   InitializeSprite();
 }
 

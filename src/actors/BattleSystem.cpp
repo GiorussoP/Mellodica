@@ -47,6 +47,8 @@ BattleSystem::BattleSystem(Game *game)
 BattleSystem::~BattleSystem() {}
 
 void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
+  mGame->SaveState();
+
   mInBattle = true;
   mIsTransitioning = true;
 

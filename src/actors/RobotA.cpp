@@ -3,7 +3,7 @@
 #include "render/Renderer.hpp"
 
 RobotA::RobotA(Game *game, int channel, int health)
-    : Combatant(game, channel, health) {
+    : Combatant(game, channel, health, CombatantType::Robot) {
   InitializeSprite();
 }
 

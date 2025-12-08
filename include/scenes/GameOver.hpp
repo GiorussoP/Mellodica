@@ -6,7 +6,7 @@
 class GameOver : public Scene {
 
 public:
-  GameOver(Game *game) : Scene(game) {};
+  GameOver(Game *game) : Scene(game, scene6) {};
   void Initialize() override;
 };
 

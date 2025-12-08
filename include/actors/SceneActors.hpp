@@ -326,3 +326,13 @@ public:
 private:
   bool mTriggered;
 };
+
+class NextSceneActor : public Actor {
+public:
+  NextSceneActor(Game *game);
+  void OnCollision(Vector3 penetration, ColliderComponent *other) override;
+
+private:
+  ColliderComponent *mColliderComponent;
+  bool mTriggered;
+};

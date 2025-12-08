@@ -8,6 +8,11 @@
 #include "render/Renderer.hpp"
 #include "render/Texture.hpp"
 #include "render/TextureAtlas.hpp"
+#include "scenes/CreditsScene.hpp"
+#include "scenes/Level0.hpp"
+#include "scenes/Level1.hpp"
+#include "scenes/Level2.hpp"
+#include "scenes/Level3.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -829,5 +834,52 @@ void TriggerActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
   if (!mTriggered && other->GetOwner() == mGame->GetPlayer()) {
     mGame->LoadScene(new MainMenu(mGame));
     mTriggered = true;
+  }
+}
+
+NextSceneActor::NextSceneActor(Game *game)
+    : Actor(game), mColliderComponent(nullptr), mTriggered(false) {
+  // Register as always-active so it's included in collision detection
+  game->AddAlwaysActive(this);
+
+  // Add AABB collider
+  mColliderComponent = new AABBCollider(this, ColliderLayer::Entity,
+                                        Vector3::Zero, Vector3(0.5f), false);
+}
+
+void NextSceneActor::OnCollision(Vector3 penetration,
+                                 ColliderComponent *other) {
+  if (!mTriggered && other->GetLayer() == ColliderLayer::Player) {
+    // Get current scene and load next based on progression
+    auto currentScene = mGame->GetCurrentScene();
+    if (!currentScene)
+      return;
+
+    mGame->SaveState();
+    auto sceneID = currentScene->GetSceneID();
+
+    std::cout << "NextSceneActor: Current Scene ID = "
+              << static_cast<int>(sceneID) << std::endl;
+    switch (sceneID) {
+    case Scene::SceneEnum::scene0:
+      mGame->LoadScene(new Level1(mGame));
+      mTriggered = true;
+      break;
+    case Scene::SceneEnum::scene1:
+      mGame->LoadScene(new Level2(mGame));
+      mTriggered = true;
+      break;
+    case Scene::SceneEnum::scene2:
+      mGame->LoadScene(new Level3(mGame));
+      mTriggered = true;
+      break;
+    case Scene::SceneEnum::scene3:
+      mGame->LoadScene(new CreditsScene(mGame));
+      mTriggered = true;
+      break;
+    default:
+      // Do nothing for other scenes
+      break;
+    }
   }
 }

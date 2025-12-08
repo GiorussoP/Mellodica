@@ -6,7 +6,7 @@
 class CreditsScene : public Scene {
 
 public:
-  CreditsScene(Game *game) : Scene(game) {};
+  CreditsScene(Game *game) : Scene(game, scene7) {};
   void Initialize() override;
 };
 

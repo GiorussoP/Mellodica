@@ -50,6 +50,9 @@ public:
   Player *GetPlayer() { return mPlayer; }
   void SetPlayer(Player *player) { mPlayer = player; }
 
+  // Scene getter
+  Scene *GetCurrentScene() { return mCurrentScene; }
+
   // Battle system getter
   BattleSystem *GetBattleSystem() { return mBattleSystem; }
   void SetBattleSystem(BattleSystem *battleSystem) {
@@ -63,6 +66,8 @@ public:
   // Game Save function
   void SaveState();
   std::map<std::string, int> LoadState();
+  void ResetSaveToLevel0();
+  void RestorePlayerAllies();
 
 private:
   void ProcessInput();

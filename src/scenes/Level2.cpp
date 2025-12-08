@@ -418,12 +418,15 @@ void Level2::LoadLevel(const std::string &levelPath) {
         mGame->SetPlayer(new Player(mGame));
       }
       mGame->GetPlayer()->SetPosition(Vector3(x, 1.0f, z));
+      // Restore allies from save file
+      mGame->RestorePlayerAllies();
       if (mGame->GetCamera()) {
         mGame->GetCamera()->SetMode(CameraMode::Isometric);
         mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
         mGame->GetCamera()->SetIsometricDirection(
             IsometricDirections::NorthEast);
       }
+
       break;
     }
 
@@ -451,6 +454,11 @@ void Level2::LoadLevel(const std::string &levelPath) {
       }
       auto enemy = new EnemyGroup(mGame, enemies);
       enemy->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+    case 16: {
+      auto finish = new NextSceneActor(mGame);
+      finish->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
     case -1: {

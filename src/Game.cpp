@@ -5,6 +5,8 @@
 #include "MIDI/SynthEngine.hpp"
 #include "Player.hpp"
 #include "actors/Actor.hpp"
+#include "actors/Ghost.hpp"
+#include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
 #include "components/ColliderComponent.hpp"
 #include "components/DrawComponent.hpp"
@@ -23,9 +25,9 @@
 #include <GL/glew.h>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <unordered_set>
-#include <fstream>
 
 #include "Level0.hpp"
 #include "Level1.hpp"
@@ -121,11 +123,19 @@ bool Game::Initialize() {
   MIDIPlayer::startMIDIThread();
 
   // Initialize game actors
-  LoadScene(new OpeningScene(this));
-
-  //SDL_Log("Saving state for test");
-
-  //SaveState();
+  // Load saved state and check if we should skip opening
+  auto savedState = LoadState();
+  if (savedState.find("SCENE_STATE") != savedState.end()) {
+    int savedScene = savedState["SCENE_STATE"];
+    // If saved level is level1, level2, or level3, skip opening
+    if (savedScene >= 1 && savedScene <= 3) {
+      LoadScene(new MainMenu(this));
+    } else {
+      LoadScene(new OpeningScene(this));
+    }
+  } else {
+    LoadScene(new OpeningScene(this));
+  }
 
   return true;
 }
@@ -204,6 +214,14 @@ void Game::RunLoop() {
 }
 
 void Game::Shutdown() {
+  if (!mBattleSystem->IsInBattle() &&
+      (mCurrentScene->GetSceneID() == Scene::scene0 ||
+       mCurrentScene->GetSceneID() == Scene::scene1 ||
+       mCurrentScene->GetSceneID() == Scene::scene2 ||
+       mCurrentScene->GetSceneID() == Scene::scene3)) {
+    SaveState();
+  }
+
   std::cout << "Shutdown: Starting cleanup..." << std::endl;
 
   // Stop MIDI thread first
@@ -382,7 +400,8 @@ void Game::ProcessInput() {
 }
 
 void Game::UpdateActors(float deltaTime) {
-  mUpdatingActors = true;
+  // Note: mUpdatingActors is set in UpdateGame(), not here, to cover collision
+  // checks too
 
   // Update player first if it exists
   if (mPlayer && mPlayer->GetState() != ActorState::Destroy) {
@@ -418,7 +437,8 @@ void Game::UpdateActors(float deltaTime) {
     }
   }
 
-  mUpdatingActors = false;
+  // Note: mUpdatingActors is set to false in UpdateGame() after collision
+  // checks
 
   // Move pending actors to active and register with chunk grid
   for (auto pending : mPendingActors) {
@@ -510,6 +530,8 @@ void Game::UpdateGame(float deltaTime) {
     FindActiveActors();
   }
 
+  mUpdatingActors = true;
+
   UpdateActors(deltaTime);
 
   // Update Camera after updating actors, as they can request camera movements
@@ -517,6 +539,8 @@ void Game::UpdateGame(float deltaTime) {
 
   // Check collisions after all actors have been updated
   CheckCollisions();
+
+  mUpdatingActors = false;
 }
 
 void Game::CheckCollisions() {
@@ -727,6 +751,12 @@ void Game::GenerateOutput() {
 }
 
 void Game::SaveState() {
+  // Don't save if there's no player or current scene
+  if (!mPlayer || !mCurrentScene) {
+    SDL_Log("Cannot save: no player or scene exists");
+    return;
+  }
+
   std::ofstream file("game_save.ckpt");
 
   if (!file.is_open()) {
@@ -737,26 +767,41 @@ void Game::SaveState() {
   SDL_Log("Saving Player State");
   file << "PLAYER_STATE\n";
   auto playerPos = mPlayer->GetPosition();
-  file << (int)playerPos.x << "\n" << (int)playerPos.y << "\n" << (int)playerPos.z << "\n";
+  file << (int)playerPos.x << "\n"
+       << (int)playerPos.y << "\n"
+       << (int)playerPos.z << "\n";
+  // Clamp health to at least 1 when saving
+  int healthToSave = mPlayer->getHealth();
+  if (healthToSave <= 0) {
+    healthToSave = 1;
+  }
+  file << healthToSave << "\n";
+  file << (int)mPlayer->getEnergy() << "\n";
   file << "PLAYER_ALLIES\n";
   SDL_Log("Saving Allies State");
   auto alliesVector = mPlayer->GetActiveAllies();
+  SDL_Log("Number of allies to save: %zu", alliesVector.size());
   file << alliesVector.size() << "\n";
   for (size_t i = 0; i < alliesVector.size(); i++) {
-    //Ally ID
+    // Ally ID
     file << i << "\n";
-    //Ally State
+    // Ally State
     file << alliesVector[i]->GetMaxHealth() << "\n";
-    file << alliesVector[i]->GetHealth() << "\n";
+    // Clamp ally health to at least 1 when saving
+    int allyHealth = alliesVector[i]->GetHealth();
+    if (allyHealth <= 0) {
+      allyHealth = 1;
+    }
+    file << allyHealth << "\n";
     file << alliesVector[i]->GetChannel() << "\n";
     auto combType = alliesVector[i]->GetCombatantType();
     switch (combType) {
-      case CombatantType::Phantasm:
-        file << "Phantasm\n";
-        break;
-      case CombatantType::Robot:
-        file << "Robot\n";
-        break;
+    case CombatantType::Phantasm:
+      file << "Phantasm\n";
+      break;
+    case CombatantType::Robot:
+      file << "Robot\n";
+      break;
     }
   }
   SDL_Log("Saving scene state");
@@ -767,15 +812,30 @@ void Game::SaveState() {
   SDL_Log("Saving scene state %d", scenestate);
 
   switch (scenestate) {
-    case Scene::SceneEnum::scene0:
-      file << "0\n";
-      break;
-    case Scene::SceneEnum::scene1:
-      file << "1\n";
-      break;
-    case Scene::SceneEnum::scene2:
-      file << "2\n";
-      break;
+  case Scene::SceneEnum::scene0:
+    file << "0\n";
+    break;
+  case Scene::SceneEnum::scene1:
+    file << "1\n";
+    break;
+  case Scene::SceneEnum::scene2:
+    file << "2\n";
+    break;
+  case Scene::SceneEnum::scene3:
+    file << "3\n";
+    break;
+  case Scene::SceneEnum::scene4:
+    file << "4\n";
+    break;
+  case Scene::SceneEnum::scene5:
+    file << "5\n";
+    break;
+  case Scene::SceneEnum::scene6:
+    file << "6\n";
+    break;
+  case Scene::SceneEnum::scene7:
+    file << "7\n";
+    break;
   }
 
   file.close();
@@ -811,7 +871,14 @@ std::map<std::string, int> Game::LoadState() {
       posZ = std::atoi(line.c_str());
       my_map["PLAYER_Z"] = posZ;
 
-      //Need code for health and energy.
+      // Load health and energy
+      std::getline(file, line);
+      int health = std::atoi(line.c_str());
+      my_map["PLAYER_HEALTH"] = health;
+
+      std::getline(file, line);
+      int energy = std::atoi(line.c_str());
+      my_map["PLAYER_ENERGY"] = energy;
     }
     if (line == "PLAYER_ALLIES") {
       SDL_Log("Loading Allies State");
@@ -822,26 +889,26 @@ std::map<std::string, int> Game::LoadState() {
         my_map["NUM_OF_ALLIES"] = numOfAllies;
       }
       for (int i = 0; i < numOfAllies; i++) {
-        //ID
+        // ID
         std::getline(file, line);
         auto key = "ALLY_" + line;
 
-        //maxhealth
+        // maxhealth
         std::getline(file, line);
         int maxHealth = std::atoi(line.c_str());
         my_map[key + "_MAXHEALTH"] = maxHealth;
 
-        //health
+        // health
         std::getline(file, line);
         int health = std::atoi(line.c_str());
         my_map[key + "_HEALTH"] = health;
 
-        //channel
+        // channel
         std::getline(file, line);
         int channel = std::atoi(line.c_str());
         my_map[key + "_CHANNEL"] = channel;
 
-        //combatant type
+        // combatant type
         std::getline(file, line);
         if (line == "Phantasm") {
           my_map[key + "_COMBTYPE"] = 0;
@@ -851,7 +918,6 @@ std::map<std::string, int> Game::LoadState() {
           my_map[key + "_COMBTYPE"] = 2;
         }
       }
-
     }
     if (line == "SCENE_STATE") {
       SDL_Log("Loading Scene State");
@@ -864,3 +930,90 @@ std::map<std::string, int> Game::LoadState() {
   return my_map;
 }
 
+void Game::ResetSaveToLevel0() {
+  std::ofstream file("game_save.ckpt");
+
+  if (!file.is_open()) {
+    SDL_Log("Failed to reset game_save.ckpt");
+    return;
+  }
+
+  SDL_Log("Resetting save to Level0");
+  // Write minimal save with level 0
+  file << "SCENE_STATE\n";
+  file << "0\n";
+
+  file.close();
+  SDL_Log("Save reset to Level0 completed");
+}
+
+void Game::RestorePlayerAllies() {
+  if (!mPlayer) {
+    SDL_Log("Cannot restore allies: no player exists");
+    return;
+  }
+
+  auto savedState = LoadState();
+
+  // Restore player health and energy
+  if (savedState.find("PLAYER_HEALTH") != savedState.end()) {
+    int health = savedState["PLAYER_HEALTH"];
+    mPlayer->setHealth(health);
+    SDL_Log("Restored player health: %d", health);
+  }
+
+  if (savedState.find("PLAYER_ENERGY") != savedState.end()) {
+    int energy = savedState["PLAYER_ENERGY"];
+    mPlayer->setEnergy(static_cast<float>(energy));
+    SDL_Log("Restored player energy: %d", energy);
+  }
+
+  if (savedState.find("NUM_OF_ALLIES") == savedState.end()) {
+    SDL_Log("No allies to restore");
+    return;
+  }
+
+  int numAllies = savedState["NUM_OF_ALLIES"];
+  SDL_Log("Restoring %d allies", numAllies);
+
+  for (int i = 0; i < numAllies; i++) {
+    std::string allyKey = "ALLY_" + std::to_string(i);
+
+    if (savedState.find(allyKey + "_MAXHEALTH") == savedState.end()) {
+      SDL_Log("Missing ally %d data, skipping", i);
+      continue;
+    }
+
+    int maxHealth = savedState[allyKey + "_MAXHEALTH"];
+    int health = savedState[allyKey + "_HEALTH"];
+    int channel = savedState[allyKey + "_CHANNEL"];
+    int combType = savedState[allyKey + "_COMBTYPE"];
+
+    SDL_Log("Restoring ally %d: health=%d/%d, channel=%d, type=%d", i, health,
+            maxHealth, channel, combType);
+
+    // Create the appropriate combatant type
+    Combatant *ally = nullptr;
+    if (combType == 0) { // Phantasm
+      ally = new Ghost(this, channel, maxHealth);
+    } else if (combType == 1) { // Robot
+      ally = new RobotA(this, channel, maxHealth);
+    }
+
+    if (ally) {
+      // Set the restored health
+      ally->SetHealth(health);
+
+      // Position ally behind player (simple offset)
+      Vector3 playerPos = mPlayer->GetPosition();
+      ally->SetPosition(playerPos);
+
+      // Add to player's allies
+      mPlayer->GetActiveAllies().push_back(ally);
+
+      SDL_Log("Ally %d restored successfully", i);
+    }
+  }
+
+  SDL_Log("Finished restoring allies");
+}

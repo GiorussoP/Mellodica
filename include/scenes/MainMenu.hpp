@@ -6,7 +6,7 @@
 class MainMenu : public Scene {
 
 public:
-  MainMenu(Game *game) : Scene(game, scene0) {};
+  MainMenu(Game *game) : Scene(game, scene5) {};
   void Initialize() override;
 };
 

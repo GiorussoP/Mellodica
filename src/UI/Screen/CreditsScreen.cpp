@@ -50,6 +50,8 @@ void CreditsScreen::HandleKeyPress(int key) {
   if (key == SDLK_RETURN || key == SDLK_SPACE ||
       (key >= SDLK_0 && key <= SDLK_9) || key == SDLK_MINUS ||
       key == SDLK_EQUALS) {
+    // Reset save to level0 after viewing credits
+    mGame->ResetSaveToLevel0();
     mGame->LoadScene(new MainMenu(mGame));
   }
 }
@@ -65,6 +67,8 @@ void CreditsScreen::Update(float deltaTime) {
 
   // After 30 seconds or when text is off screen, go to main menu
   if (mTimer >= 88.0f) {
+    // Reset save to level0 after viewing credits
+    mGame->ResetSaveToLevel0();
     mGame->LoadScene(new MainMenu(mGame));
   }
 

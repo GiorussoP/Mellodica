@@ -21,6 +21,11 @@ void Level0::Initialize() {
 
   LoadLevel("assets/levels/level0");
 
+  auto end = new NextSceneActor(mGame);
+  end->SetPosition(mGame->GetPlayer()->GetPosition() +
+                   Vector3(0.0f, 0.0f, -10.0f));
+  end->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
@@ -417,12 +422,15 @@ void Level0::LoadLevel(const std::string &levelPath) {
         mGame->SetPlayer(new Player(mGame));
       }
       mGame->GetPlayer()->SetPosition(Vector3(x, 1.0f, z));
+      // Restore allies from save file
+      mGame->RestorePlayerAllies();
       if (mGame->GetCamera()) {
         mGame->GetCamera()->SetMode(CameraMode::Isometric);
         mGame->GetCamera()->SetPosition(mGame->GetPlayer()->GetPosition());
         mGame->GetCamera()->SetIsometricDirection(
             IsometricDirections::NorthEast);
       }
+
       break;
     }
 
@@ -450,6 +458,11 @@ void Level0::LoadLevel(const std::string &levelPath) {
       }
       auto enemy = new EnemyGroup(mGame, enemies);
       enemy->SetPosition(Vector3(x, 1.0f, z));
+      break;
+    }
+    case 16: {
+      auto finish = new NextSceneActor(mGame);
+      finish->SetPosition(Vector3(x, 1.0f, z));
       break;
     }
     case -1: {
