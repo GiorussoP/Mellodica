@@ -60,6 +60,10 @@ public:
   void PushUI(class UIScreen *screen) { mUIStack.emplace_back(screen); }
   const std::vector<class UIScreen *> &GetUIStack() { return mUIStack; }
 
+  // Game Save function
+  void SaveState();
+  std::map<std::string, int> LoadState();
+
 private:
   void ProcessInput();
   void UpdateGame(float deltaTime);

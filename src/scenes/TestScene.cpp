@@ -111,6 +111,16 @@ void TestSceneA::Initialize() {
                                       new Ghost(mGame, 1, 500)};
   auto enemyGroup8 = new EnemyGroup(mGame, ghosts8);
   enemyGroup8->SetPosition(Vector3(5.0f, 1.0f, 20.0f));
+
+  SDL_Log("Saving state for test");
+  mGame->SaveState();
+
+  SDL_Log("Loading state for test");
+  auto myMap = mGame->LoadState();
+
+  for (const auto& [key, value] : myMap) {
+      std::cout << key << " => " << value << '\n';
+  }
 }
 
 void TestSceneB::Initialize() {

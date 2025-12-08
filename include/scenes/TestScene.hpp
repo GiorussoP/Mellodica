@@ -6,13 +6,13 @@
 class TestSceneA : public Scene {
 
 public:
-  TestSceneA(Game *game) : Scene(game) {};
+  TestSceneA(Game *game) : Scene(game, scene1) {};
   void Initialize() override;
 };
 
 class TestSceneB : public Scene {
 public:
-  TestSceneB(Game *game) : Scene(game) {};
+  TestSceneB(Game *game) : Scene(game, scene2) {};
   void Initialize() override;
 };
 

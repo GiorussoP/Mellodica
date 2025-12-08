@@ -11,7 +11,14 @@ class Game;
 class Scene {
 
 public:
-  Scene(Game *game) : mGame(game) {}
+
+  enum SceneEnum {
+    scene0,
+    scene1,
+    scene2
+  };
+
+  Scene(Game *game, Scene::SceneEnum sceneID) : mGame(game), mSceneID(sceneID) {}
   virtual ~Scene() {}
 
   virtual void Initialize() = 0;
@@ -25,11 +32,14 @@ public:
   // First 8 are single enemies, rest are sorted by complexity
   int GetEnemyBitmask(int encounterNumber);
 
+  SceneEnum GetSceneID() const { return mSceneID; }
+
 private:
   std::unordered_set<Actor *> mActors;
 
 protected:
   Game *mGame;
+  SceneEnum mSceneID;
 };
 
 #endif

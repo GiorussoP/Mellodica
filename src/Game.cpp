@@ -25,6 +25,7 @@
 #include <cmath>
 #include <iostream>
 #include <unordered_set>
+#include <fstream>
 
 #include "Level0.hpp"
 #include "Level1.hpp"
@@ -121,6 +122,10 @@ bool Game::Initialize() {
 
   // Initialize game actors
   LoadScene(new OpeningScene(this));
+
+  //SDL_Log("Saving state for test");
+
+  //SaveState();
 
   return true;
 }
@@ -720,3 +725,142 @@ void Game::GenerateOutput() {
     }
   }
 }
+
+void Game::SaveState() {
+  std::ofstream file("game_save.ckpt");
+
+  if (!file.is_open()) {
+    SDL_Log("Failed to save game_save.ckpt");
+    return;
+  }
+
+  SDL_Log("Saving Player State");
+  file << "PLAYER_STATE\n";
+  auto playerPos = mPlayer->GetPosition();
+  file << (int)playerPos.x << "\n" << (int)playerPos.y << "\n" << (int)playerPos.z << "\n";
+  file << "PLAYER_ALLIES\n";
+  SDL_Log("Saving Allies State");
+  auto alliesVector = mPlayer->GetActiveAllies();
+  file << alliesVector.size() << "\n";
+  for (size_t i = 0; i < alliesVector.size(); i++) {
+    //Ally ID
+    file << i << "\n";
+    //Ally State
+    file << alliesVector[i]->GetMaxHealth() << "\n";
+    file << alliesVector[i]->GetHealth() << "\n";
+    file << alliesVector[i]->GetChannel() << "\n";
+    auto combType = alliesVector[i]->GetCombatantType();
+    switch (combType) {
+      case CombatantType::Phantasm:
+        file << "Phantasm\n";
+        break;
+      case CombatantType::Robot:
+        file << "Robot\n";
+        break;
+    }
+  }
+  SDL_Log("Saving scene state");
+  file << "SCENE_STATE\n";
+
+  auto scenestate = mCurrentScene->GetSceneID();
+
+  SDL_Log("Saving scene state %d", scenestate);
+
+  switch (scenestate) {
+    case Scene::SceneEnum::scene0:
+      file << "0\n";
+      break;
+    case Scene::SceneEnum::scene1:
+      file << "1\n";
+      break;
+    case Scene::SceneEnum::scene2:
+      file << "2\n";
+      break;
+  }
+
+  file.close();
+  SDL_Log("End saving process");
+}
+
+std::map<std::string, int> Game::LoadState() {
+  std::ifstream file("game_save.ckpt");
+
+  if (!file.is_open()) {
+    SDL_Log("Failed to load game_save.ckpt");
+    return std::map<std::string, int>();
+  }
+
+  auto my_map = std::map<std::string, int>();
+
+  std::string line;
+
+  while (std::getline(file, line)) {
+    if (line == "PLAYER_STATE") {
+      int posX, posY, posZ;
+      SDL_Log("Loading Player State");
+
+      std::getline(file, line);
+      posX = std::atoi(line.c_str());
+      my_map["PLAYER_X"] = posX;
+
+      std::getline(file, line);
+      posY = std::atoi(line.c_str());
+      my_map["PLAYER_Y"] = posY;
+
+      std::getline(file, line);
+      posZ = std::atoi(line.c_str());
+      my_map["PLAYER_Z"] = posZ;
+
+      //Need code for health and energy.
+    }
+    if (line == "PLAYER_ALLIES") {
+      SDL_Log("Loading Allies State");
+      int numOfAllies;
+      std::getline(file, line);
+      numOfAllies = std::atoi(line.c_str());
+      if (numOfAllies > 0) {
+        my_map["NUM_OF_ALLIES"] = numOfAllies;
+      }
+      for (int i = 0; i < numOfAllies; i++) {
+        //ID
+        std::getline(file, line);
+        auto key = "ALLY_" + line;
+
+        //maxhealth
+        std::getline(file, line);
+        int maxHealth = std::atoi(line.c_str());
+        my_map[key + "_MAXHEALTH"] = maxHealth;
+
+        //health
+        std::getline(file, line);
+        int health = std::atoi(line.c_str());
+        my_map[key + "_HEALTH"] = health;
+
+        //channel
+        std::getline(file, line);
+        int channel = std::atoi(line.c_str());
+        my_map[key + "_CHANNEL"] = channel;
+
+        //combatant type
+        std::getline(file, line);
+        if (line == "Phantasm") {
+          my_map[key + "_COMBTYPE"] = 0;
+        } else if (line == "Robot") {
+          my_map[key + "_COMBTYPE"] = 1;
+        } else {
+          my_map[key + "_COMBTYPE"] = 2;
+        }
+      }
+
+    }
+    if (line == "SCENE_STATE") {
+      SDL_Log("Loading Scene State");
+      std::getline(file, line);
+      int scenestate = std::atoi(line.c_str());
+      my_map["SCENE_STATE"] = scenestate;
+    }
+  }
+
+  return my_map;
+}
+
