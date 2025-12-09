@@ -4,25 +4,6 @@ Uma mistura de jogo de ritmo com Shoot'em Up.
 
 ![Start Menu](./screenshots/start.png)
 
-## Compilação
-
-Para compilar o jogo, primeiro instale as seguintes dependências:
-- `g++`, `cmake`
--  SDL2, SDL2_image
-- fluidsynth (versão 2.3.4, ou [4.4.8 compilada com suporte ao driver sdl2](https://github.com/FluidSynth/fluidsynth/releases/tag/v2.4.8))
-- libgl, glew
-
-Agora, na raíz do projeto, rode os seguintes comandos
-
-```shell
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
-```
-Com isso, o executável do jogo estará em `./build/mellodica`
-
-Para compilar a **versão de desenvolvimento**, troce o `CMAKE_BUILD_TYPE` para `Debug`.
-
 ## Membros do grupo
 
 - Giovanni Russo Paschoal (Full Stack, foco em engine/mecânicas/shaders)
@@ -60,20 +41,84 @@ O objetivo do jogador é explorar o nível até encontrar a saída para o próxi
 
 ![Inimigos e aliados batalhando perto de uma casa](./screenshots/battle2a.png)
 
-## Controles
+## Instalação
 
-- A/D: mover câmera 
-- Setas: mover personagem 
-- ESPAÇO: solta nota
-- 0-9,-+: solta nota específica 
-- Esc: sai do jogo
+Caso você esteja usando Linux, você pode simplesmente baixar a AppImage disponível [aqui](https://github.com/GiorussoP/Mellodica/releases/latest) e executá-la! Caso você nunca tenha usado um AppImage antes, [aqui segue um tutorial](https://docs.appimage.org/introduction/quickstart.html#how-to-run-an-appimage).
 
-## Funcionalidades a serem testadas
+Caso contrário, você vai precisar compilar o código fonte do projeto. Para isso, primeiro clone o repositório ou baixe o zip do código fonte disponível [aqui](https://github.com/GiorussoP/Mellodica/releases/latest)
 
-- Se movimentar pelo mapa
-- Movimentar a camera
-- Entrar e sair de batalhas
-- Atirar notas musicais
-- Desviar de ataques durante a batalha
-- Ampliar e reduzir o campo de batalha com movimentação vertical
-- Esconder atrás de objetos
+## Compilação
+
+As instruções abaixo foram testadas no Linux e no MacOS. Compilar no Windows também deveria ser possível, mas não testamos. Para distribuições Linux diferentes de Ubuntu, basta adaptar a instalação das dependências, o que deveria ser tranquilo.
+
+### Instalação das dependências
+
+#### Ubuntu
+
+Para compilar o jogo, primeiro instale as dependências:
+
+``` shell
+sudo apt update
+sudo apt install -y \
+    g++ cmake make \
+    libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev \
+    libglew-dev libgl1-mesa-dev
+```
+
+Agora você vai instalar a biblioteca [fluidsynth](https://www.fluidsynth.org/). Você pode instalar ela com o apt caso esteja usando o Ubuntu LTS, caso contrário vai precisar instalar diretamente do código fonte. Isso pois precisamos de uma versão mais antiga da biblioteca para executar corretamente. Para garantir, compile e instale ela seguindo os comandos abaixo:
+
+``` shell
+curl -L -o fluidsynth.tar.gz \
+    https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
+tar xf fluidsynth.tar.gz
+cd fluidsynth-2.4.8
+mkdir build && cd build
+cmake .. -Denable-sdl2=1
+make
+sudo make install
+```
+
+#### MacOS
+
+Caso você ainda não tenha o homebrew instalado, siga o tutorial [aqui](https://brew.sh/). Com o homebrew instalado, execute o comando abaixo para instalar as dependências:
+
+``` shell
+brew install \
+    cmake glib jack sdl2 sdl2_image sdl2_ttf \
+    glew libsndfile pkg-config gettext
+```
+
+Agora você vai instalar a biblioteca [fluidsynth](https://www.fluidsynth.org/). Primeiro, baixe o zip da versão 2.4.8 [aqui](https://github.com/FluidSynth/fluidsynth/releases/tag/v2.4.8). Após isso, extraia o zip e execute os seguintes comandos:
+
+``` shell
+curl -L -o fluidsynth.tar.gz \
+    https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
+tar xf fluidsynth.tar.gz
+cd fluidsynth-2.4.8
+mkdir build && cd build
+cmake .. \
+    -Denable-sdl2=1 \
+    -Denable-framework=0 \
+    -Denable-floats=1 \
+    -Denable-libsndfile=1 \
+    -Denable-gentables=0 \
+    -DCMAKE_INSTALL_PREFIX=/usr/local
+make
+sudo make install
+sudo update_dyld_shared_cache
+```
+
+### Compilar o projeto
+
+Agora, na raíz do projeto, rode os seguintes comandos
+
+```shell
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j1
+```
+
+**Alerta**: O processo de compilação pode acabar consumindo MUITA memória do seu computador, se executado com várias threads. Para previnir isso, acima estamos executando o último comando passando uma quantidade de threads limitada a apenas 1 com `-j1`. Caso a compilação esteja muito lenta, você pode aumentar esse limite ou até mesmo deixar o Cmake decidir quantas threads utilizar com `-j`, mas note que isso pode acabar travando o seu computador e até mesmo crashar a compilação.
+
+Com isso, o executável do jogo estará em `./build/mellodica`.
+
+Para compilar a **versão de desenvolvimento**, troque o `CMAKE_BUILD_TYPE` para `Debug`.
