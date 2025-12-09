@@ -4,9 +4,10 @@
 #include "ChunkGrid.hpp"
 #include "MIDI/MIDIPlayer.hpp"
 #include "MIDI/SynthEngine.hpp"
-#include "actors/Player.hpp"
 #include "actors/Actor.hpp"
 #include "actors/Ghost.hpp"
+#include "actors/Human.hpp"
+#include "actors/Player.hpp"
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
 #include "components/ColliderComponent.hpp"
@@ -30,11 +31,11 @@
 #include <iostream>
 #include <unordered_set>
 
+#include "UI/Screen/UIScreen.hpp"
 #include "scenes/Level0.hpp"
 #include "scenes/Level1.hpp"
 #include "scenes/Level2.hpp"
 #include "scenes/Level3.hpp"
-#include "UI/Screen/UIScreen.hpp"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -241,7 +242,7 @@ void Game::RunLoop() {
 }
 
 void Game::Shutdown() {
-  if (!mBattleSystem->IsInBattle() &&
+  if (mBattleSystem && !mBattleSystem->IsInBattle() &&
       (mCurrentScene->GetSceneID() == Scene::scene0 ||
        mCurrentScene->GetSceneID() == Scene::scene1 ||
        mCurrentScene->GetSceneID() == Scene::scene2 ||
@@ -267,12 +268,6 @@ void Game::Shutdown() {
 
   mAlwaysActiveActors.clear();
 
-  // Delete Chunk grid first
-  std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
-  delete mChunkGrid;
-  mChunkGrid = nullptr;
-  std::cout << "Shutdown: Chunk grid deleted" << std::endl;
-
   // Delete all actors
   std::cout << "Shutdown: Deleting " << mActors.size() << " actors..."
             << std::endl;
@@ -281,6 +276,12 @@ void Game::Shutdown() {
   }
   mActors.clear();
   std::cout << "Shutdown: All actors deleted" << std::endl;
+
+  // Delete Chunk grid
+  std::cout << "Shutdown: Deleting Chunk grid..." << std::endl;
+  delete mChunkGrid;
+  mChunkGrid = nullptr;
+  std::cout << "Shutdown: Chunk grid deleted" << std::endl;
 
   // Shutdown renderer
   std::cout << "Shutdown: Shutting down renderer..." << std::endl;
@@ -830,6 +831,9 @@ void Game::SaveState() {
     case CombatantType::Robot:
       file << "Robot\n";
       break;
+    case CombatantType::Human:
+      file << "Human\n";
+      break;
     }
   }
   SDL_Log("Saving scene state");
@@ -942,8 +946,10 @@ std::map<std::string, int> Game::LoadState() {
           my_map[key + "_COMBTYPE"] = 0;
         } else if (line == "Robot") {
           my_map[key + "_COMBTYPE"] = 1;
-        } else {
+        } else if (line == "Human") {
           my_map[key + "_COMBTYPE"] = 2;
+        } else {
+          my_map[key + "_COMBTYPE"] = 3;
         }
       }
     }
@@ -1026,6 +1032,11 @@ void Game::RestorePlayerAllies() {
       ally = new Ghost(this, channel, maxHealth);
     } else if (combType == 1) { // Robot
       ally = new RobotA(this, channel, maxHealth);
+    } else if (combType == 2) { // Human
+      ally = new Human(this, channel, maxHealth);
+    } else {
+      SDL_Log("Unknown combatant type for ally %d, skipping", i);
+      continue;
     }
 
     if (ally) {

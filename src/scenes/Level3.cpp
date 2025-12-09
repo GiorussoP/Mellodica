@@ -26,11 +26,11 @@ void Level3::Initialize() {
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
 
-  auto boss = new EnemyGroup(mGame, {new Ghost(mGame, 0), new RobotA(mGame, 1),
-                                     new RobotA(mGame, 2), new Ghost(mGame, 3),
-                                     new RobotA(mGame, 4, 1500),
-                                     new Ghost(mGame, 5, 1500),
-                                     new Ghost(mGame, 6), new Ghost(mGame, 7)});
+  auto boss = new EnemyGroup(
+      mGame, {new Ghost(mGame, 0, 1000), new Ghost(mGame, 1, 1000),
+              new Ghost(mGame, 2, 1000), new RobotA(mGame, 1000),
+              new Human(mGame, 4, 1000), new Human(mGame, 5, 1000),
+              new RobotA(mGame, 6, 1000), new Human(mGame, 7, 3000)});
   boss->SetPosition(mGame->GetPlayer()->GetPosition() +
                     Vector3(0.0f, 0.0f, +10.0f));
 }
@@ -491,7 +491,7 @@ void Level3::LoadLevel(const std::string &levelPath) {
             enemy = new RobotA(mGame, i, 1000);
             break;
           case 7:
-            enemy = new Human(mGame, i, 3000);
+            enemy = new Ghost(mGame, i, 1000);
             break;
           default:
             break;

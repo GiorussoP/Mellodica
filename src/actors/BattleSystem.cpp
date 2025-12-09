@@ -45,7 +45,11 @@ BattleSystem::BattleSystem(Game *game)
   SynthEngine::setPan(12, 64);
 }
 
-BattleSystem::~BattleSystem() {}
+BattleSystem::~BattleSystem() {
+  if (mGame->GetBattleSystem() == this) {
+    mGame->SetBattleSystem(nullptr);
+  }
+}
 
 void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
   mGame->SaveState();
