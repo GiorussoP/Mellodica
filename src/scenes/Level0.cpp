@@ -11,6 +11,7 @@
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
 #include "render/Renderer.hpp"
+#include "TutorialScreen.hpp"
 
 void Level0::Initialize() {
 
@@ -25,6 +26,8 @@ void Level0::Initialize() {
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
+
+  new TutorialScreen(mGame);
 }
 
 void Level0::LoadLevel(const std::string &levelPath) {

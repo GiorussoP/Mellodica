@@ -72,6 +72,9 @@ public:
   void ResetSaveToLevel0();
   void RestorePlayerAllies();
 
+  bool IsPaused() const { return mIsPaused; }
+  void SetPaused(bool paused) { mIsPaused = paused; }
+
 private:
   void ProcessInput();
   void UpdateGame(float deltaTime);
@@ -120,4 +123,6 @@ private:
   Uint32 mTicksCount;
   bool mIsRunning;
   bool mIsDebugging;
+
+  bool mIsPaused;
 };
