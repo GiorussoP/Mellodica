@@ -37,6 +37,8 @@
 #include "scenes/Level2.hpp"
 #include "scenes/Level3.hpp"
 
+#include "UI/Screen/PauseScreen.hpp"
+
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 const int FPS = 60;
@@ -48,7 +50,7 @@ Game::Game()
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
       mPendingScene(nullptr), mTicksCount(0), mIsRunning(true),
       mIsDebugging(false), mPlayer(nullptr), mCamera(nullptr),
-      mBattleSystem(nullptr) {
+      mBattleSystem(nullptr), mIsPaused(false) {
   mCamera = new Camera(this, Vector3::Zero);
 }
 
@@ -393,7 +395,18 @@ void Game::ProcessInput() {
   Input::Update();
 
   if (Input::WasKeyPressed(SDL_SCANCODE_ESCAPE)) {
-    mIsRunning = false;
+    if (dynamic_cast<MainMenu*>(mCurrentScene) != nullptr) {
+      mIsRunning = false;
+    }
+
+    else if (!mIsPaused) {
+      new PauseScreen(this);
+    }
+    else {
+      if (!mUIStack.empty()) {
+        mUIStack.back()->Close();
+      }
+    }
   }
 
   if (Input::WasKeyPressed(SDL_SCANCODE_F11)) {
@@ -432,21 +445,6 @@ void Game::UpdateActors(float deltaTime) {
   // Note: mUpdatingActors is set in UpdateGame(), not here, to cover collision
   // checks too
 
-  // Update player first if it exists
-  if (mPlayer && mPlayer->GetState() != ActorState::Destroy) {
-    auto it = std::find(mActiveActors.begin(), mActiveActors.end(), mPlayer);
-    if (it != mActiveActors.end()) {
-      mPlayer->Update(deltaTime);
-    }
-  }
-
-  // Update all other active actors
-  for (auto actor : mActiveActors) {
-    if (actor != mPlayer && actor->GetState() != ActorState::Destroy) {
-      actor->Update(deltaTime);
-    }
-  }
-
   // Updating UI screens
   for (auto &ui : mUIStack) {
     if (ui->GetUIState() != UIScreen::UIState::Closing) {
@@ -463,6 +461,26 @@ void Game::UpdateActors(float deltaTime) {
       it = mUIStack.erase(it);
     } else {
       ++it;
+    }
+  }
+
+  if (mIsPaused) {
+    FindActiveActors();
+    return;
+  }
+
+  // Update player first if it exists
+  if (mPlayer && mPlayer->GetState() != ActorState::Destroy) {
+    auto it = std::find(mActiveActors.begin(), mActiveActors.end(), mPlayer);
+    if (it != mActiveActors.end()) {
+      mPlayer->Update(deltaTime);
+    }
+  }
+
+  // Update all other active actors
+  for (auto actor : mActiveActors) {
+    if (actor != mPlayer && actor->GetState() != ActorState::Destroy) {
+      actor->Update(deltaTime);
     }
   }
 
