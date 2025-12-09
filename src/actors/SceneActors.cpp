@@ -887,6 +887,7 @@ void NextSceneActor::OnCollision(Vector3 penetration,
     if (!currentScene)
       return;
 
+    mGame->GetPlayer()->GetActiveAllies().clear();
     mGame->SaveState();
     auto sceneID = currentScene->GetSceneID();
 
