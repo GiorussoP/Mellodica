@@ -22,6 +22,7 @@
 // CubeActor implementation
 CubeActor::CubeActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
+  mGame->AddAlwaysActive(this);
   std::string levelPath = game->GetLevelAssetPath();
   Texture *texture = game->GetRenderer()->LoadTexture(levelPath + "cubes.png");
   // Get atlas from renderer cache
@@ -57,6 +58,7 @@ void SolidCubeActor::OnUpdate(float deltaTime) {
 // WallActor implementation
 WallActor::WallActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
+  mGame->AddAlwaysActive(this);
   std::string levelPath = game->GetLevelAssetPath();
   Texture *texture = game->GetRenderer()->LoadTexture(levelPath + "wall.png");
   // Get atlas from renderer cache
@@ -537,6 +539,7 @@ PyramidActor::PyramidActor(Game *game, const Vector3 &color, int startingIndex)
 }
 
 Hole::Hole(Game *game, const Vector3 &color) : GroundActor(game, color, -1) {
+  mGame->AddAlwaysActive(this);
   mMeshComponent->SetBloomed(true);
   mColliderComponent =
       new AABBCollider(this, ColliderLayer::Hole, Vector3(0.0f, 1.0f, 0.0f),
@@ -887,7 +890,10 @@ void NextSceneActor::OnCollision(Vector3 penetration,
     if (!currentScene)
       return;
 
-    mGame->GetPlayer()->GetActiveAllies().clear();
+    if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene0) {
+      mGame->GetPlayer()->GetActiveAllies().clear();
+    }
+
     mGame->SaveState();
     auto sceneID = currentScene->GetSceneID();
 

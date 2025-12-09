@@ -66,8 +66,8 @@ public:
                    Vector3 baseColor = Vector3(0.5f, 0.5f, 0.5f),
                    Vector3 matchingColor = Vector3(1.0f, 1.0f, 1.0f));
 
-  MusicButtonActor(class Game *game, unsigned int channel,
-                   unsigned int n_notes);
+  MusicButtonActor(class Game *game, unsigned int channel, unsigned int n_notes,
+                   bool random = false);
 
   void OnUpdate(float deltaTime) override;
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;

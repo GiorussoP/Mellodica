@@ -1,8 +1,8 @@
 #include "actors/NoteActor.hpp"
 #include "Game.hpp"
-#include "render/Renderer.hpp"
 #include "MIDI/SynthEngine.hpp"
 #include "components/ColliderComponent.hpp"
+#include "render/Renderer.hpp"
 
 #include "MIDI/MIDIPlayer.hpp"
 #include "actors/ShineActor.hpp"

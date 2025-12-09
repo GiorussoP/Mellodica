@@ -450,11 +450,9 @@ void Level1::LoadLevel(const std::string &levelPath) {
     }
 
     case 17: {
-      // Random number of notes between 3 and 10
-      int n_notes = 3 + std::rand() % 8;
-      auto musicbox =
-          new MusicButtonActor(mGame, (noteCounter - 1) % 8, n_notes);
+      auto musicbox = new MusicButtonActor(mGame, (noteCounter - 1) % 8, 6);
       musicbox->SetPosition(Vector3(x, 1.0f, z));
+      ++noteCounter;
       break;
     }
 

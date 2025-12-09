@@ -197,7 +197,7 @@ MusicButtonActor::MusicButtonActor(Game *game, std::vector<int> targetMelody,
 }
 
 MusicButtonActor::MusicButtonActor(Game *game, unsigned int channel,
-                                   unsigned int n_notes)
+                                   unsigned int n_notes, bool random)
     : Actor(game), mIsActivated(false), mChannel(-1) {
 
   // Apply modulo to channel to ensure it's within 0-15 range
@@ -221,18 +221,26 @@ MusicButtonActor::MusicButtonActor(Game *game, unsigned int channel,
       }
     }
 
-    // If we have NoteOn events, select n_notes randomly
-    if (!allNoteOns.empty()) {
-      // Use modulo to wrap n_notes if it exceeds available notes
-      unsigned int actualNotes =
-          std::min(n_notes, static_cast<unsigned int>(allNoteOns.size()));
+    if (random) {
+      // If we have NoteOn events, select n_notes randomly
+      if (!allNoteOns.empty()) {
+        // Use modulo to wrap n_notes if it exceeds available notes
+        unsigned int actualNotes =
+            std::min(n_notes, static_cast<unsigned int>(allNoteOns.size()));
 
-      // Select random starting position
-      unsigned int startPos = rand() % allNoteOns.size();
+        // Select random starting position
+        unsigned int startPos = rand() % allNoteOns.size();
 
-      // Extract n_notes consecutive notes (wrapping around if needed)
-      for (unsigned int i = 0; i < actualNotes; i++) {
-        targetMelody.push_back(allNoteOns[(startPos + i) % allNoteOns.size()]);
+        // Extract n_notes consecutive notes (wrapping around if needed)
+        for (unsigned int i = 0; i < actualNotes; i++) {
+          targetMelody.push_back(
+              allNoteOns[(startPos + i) % allNoteOns.size()]);
+        }
+      }
+    } else {
+      // Extract the first n_notes from the channel, with wrapping
+      for (unsigned int i = 0; i < n_notes; i++) {
+        targetMelody.push_back(allNoteOns[i % allNoteOns.size()]);
       }
     }
   }
@@ -243,8 +251,8 @@ MusicButtonActor::MusicButtonActor(Game *game, unsigned int channel,
   }
 
   // Set colors based on channel
-  mBaseColor = Color::Gray;
-  mMatchingColor = NOTE_COLORS[channel];
+  mBaseColor = NOTE_COLORS[channel];
+  mMatchingColor = Color::White;
 
   // Initialize components
   mMelodyComp = new MelodyComponent(this, targetMelody);
