@@ -430,6 +430,9 @@ GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
     : Actor(game), mMeshComponent(nullptr) {
   std::string levelPath = game->GetLevelAssetPath();
   Texture *texture = game->GetRenderer()->LoadTexture(levelPath + "floor.png");
+
+  mGame->AddAlwaysActive(this);
+
   // Get atlas from renderer cache
   TextureAtlas *atlas =
       game->GetRenderer()->LoadAtlas(levelPath + "floor.json");
@@ -441,6 +444,10 @@ GroundActor::GroundActor(Game *game, const Vector3 &color, int startingIndex)
   mMeshComponent =
       new MeshComponent(this, *mesh, texture, atlas, startingIndex);
   mMeshComponent->SetColor(color);
+
+  if (mGame->GetCurrentScene()->GetSceneID() == Scene::SceneEnum::scene2) {
+    mMeshComponent->SetBloomed(true);
+  }
 }
 
 void GroundActor::OnUpdate(float deltaTime) {
