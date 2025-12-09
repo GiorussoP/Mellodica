@@ -58,16 +58,22 @@ void Camera::Update(float deltaTime) {
   case CameraMode::Fixed:
     break;
   case CameraMode::Isometric:
-    SetPosition(
-        Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
+    if (mTargetPosition.LengthSq() > 0.001f &&
+        !std::isnan(mTargetPosition.x)) {
+      SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition,
+                                mMoveSpeed * deltaTime));
+    }
     SetRotation(Quaternion::Slerp(
         GetRotation(),
         ISOMETRIC_DIRECTIONS[static_cast<int>(mIsometricDirection)],
         mTurnSpeed * deltaTime));
     break;
   case CameraMode::Following:
-    SetPosition(
-        Vector3::Lerp(GetPosition(), mTargetPosition, mMoveSpeed * deltaTime));
+    if (mTargetPosition.LengthSq() > 0.001f &&
+        !std::isnan(mTargetPosition.x)) {
+      SetPosition(Vector3::Lerp(GetPosition(), mTargetPosition,
+                                mMoveSpeed * deltaTime));
+    }
     SetRotation(Quaternion::Slerp(GetRotation(), mTargetRotation,
                                   mTurnSpeed * deltaTime));
     break;

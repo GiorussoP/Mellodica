@@ -62,6 +62,10 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
   mBattleDir = Vector3::Normalize(mCurrentEnemyGroup->GetPosition() -
                                   mGame->GetPlayer()->GetPosition());
 
+  if (mBattleDir.LengthSq() < 0.001f) {
+    mBattleDir = Vector3::UnitX;
+  }
+
   Vector3 enemyPos = mCurrentEnemyGroup->GetPosition();
   Vector3 playerPos = mGame->GetPlayer()->GetPosition();
   Vector3 toPlayer = playerPos - enemyPos;
