@@ -25,15 +25,21 @@ public:
   int GetNoteFromPosition(Vector3 position);
 
   void MarkNoteDead(NoteActor *note) {
-    if (note != nullptr && mActiveNotes[note->GetNote() % MAX_NOTES] == note) {
-      mActiveNotes[note->GetNote() % MAX_NOTES] = nullptr;
+    if (note != nullptr) {
+      int noteIndex = mMirrored
+                          ? (MAX_NOTES - 1) - (note->GetNote() % MAX_NOTES)
+                          : note->GetNote() % MAX_NOTES;
 
-      if (note->GetMidiChannel() == 12 && mMirrored == false) {
-        SynthEngine::stopNote(12, note->GetNote());
+      if (mActiveNotes[noteIndex] == note) {
+        mActiveNotes[noteIndex] = nullptr;
+
+        if (note->GetMidiChannel() == 12 && mMirrored == false) {
+          SynthEngine::stopNote(12, note->GetNote());
+        }
+
+        std::cout << "Marked note " << note->GetNote() << " on channel "
+                  << note->GetMidiChannel() << " as dead." << std::endl;
       }
-
-      std::cout << "Marked note " << note->GetNote() << " on channel "
-                << note->GetMidiChannel() << " as dead." << std::endl;
     }
   };
 

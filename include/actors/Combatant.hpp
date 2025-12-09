@@ -13,11 +13,12 @@ const float COMBATANT_MOVE_SPEED = 5.0f;
 
 enum class CombatantState { Idle, Attacking, Dead, Moving };
 
-enum class CombatantType { Phantasm, Robot };
+enum class CombatantType { Phantasm, Robot, Human };
 
 class Combatant : public Actor {
 public:
-  Combatant(class Game *game, int channel, int health = 1000, CombatantType type = CombatantType::Phantasm);
+  Combatant(class Game *game, int channel, int health = 1000,
+            CombatantType type = CombatantType::Phantasm);
   virtual ~Combatant();
 
   virtual void InitializeSprite() = 0;
@@ -42,7 +43,7 @@ public:
 
   void SetSpriteColorByChannel();
 
-  CombatantType GetCombatantType() const { return mCombatantType;}
+  CombatantType GetCombatantType() const { return mCombatantType; }
 
 protected:
   SpriteComponent *mSpriteComponent;

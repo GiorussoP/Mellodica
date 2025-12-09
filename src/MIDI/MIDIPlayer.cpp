@@ -798,8 +798,7 @@ void MIDIPlayer::loadSong2a() {
                             {128, 80}}); // Square wave sound (channel 15)
 
   // Initializing MIDI Player
-  MIDIPlayer::loadSong(getAssetPath("songs/a2a.mid").data()
-                             , true);
+  MIDIPlayer::loadSong(getAssetPath("songs/a2a.mid").data(), true);
   MIDIPlayer::setChannelTranspose(11, -60);
 }
 
@@ -848,4 +847,6 @@ void MIDIPlayer::loadSong3() {
   MIDIPlayer::loadSong(getAssetPath("songs/a3.mid").data(), true);
 
   MIDIPlayer::setChannelTranspose(1, -12);
+  MIDIPlayer::setChannelTranspose(2, 36);
+  MIDIPlayer::setChannelTranspose(4, 12);
 }

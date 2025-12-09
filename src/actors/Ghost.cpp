@@ -11,7 +11,7 @@ Ghost::Ghost(Game *game, int channel, int health)
 Ghost::~Ghost() {}
 
 void Ghost::InitializeSprite() {
-  const std::string texture_name =getAssetPath("sprites/robots/ghost");
+  const std::string texture_name = getAssetPath("sprites/robots/ghost");
   TextureAtlas *atlas = mGame->GetRenderer()->LoadAtlas(texture_name + ".json");
   Texture *texture = mGame->GetRenderer()->LoadTexture(texture_name + ".png");
   int textureIndex = mGame->GetRenderer()->GetTextureIndex(texture);

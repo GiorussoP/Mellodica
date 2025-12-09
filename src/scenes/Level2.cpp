@@ -460,7 +460,7 @@ void Level2::LoadLevel(const std::string &levelPath) {
       std::vector<Combatant *> enemies;
       for (int i = 0; i < 8; i++) {
         if (enemyValue & (1 << i)) {
-          enemies.push_back(new RobotA(mGame, i, 500));
+          enemies.push_back(new RobotA(mGame, i, 700));
         }
       }
       auto enemy = new EnemyGroup(mGame, enemies);

@@ -6,6 +6,7 @@
 #include "MIDI/MIDIPlayer.hpp"
 #include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
+#include "actors/Human.hpp"
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
@@ -464,7 +465,7 @@ void Level1::LoadLevel(const std::string &levelPath) {
       std::vector<Combatant *> enemies;
       for (int i = 0; i < 8; i++) {
         if (enemyValue & (1 << i)) {
-          enemies.push_back(new RobotA(mGame, i, 500));
+          enemies.push_back(new Human(mGame, i, 500));
         }
       }
       auto enemy = new EnemyGroup(mGame, enemies);

@@ -6,6 +6,7 @@
 #include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
+#include "actors/Human.hpp"
 #include "actors/Player.hpp"
 #include "actors/PuzzleActors.hpp"
 #include "actors/RobotA.hpp"
@@ -466,7 +467,36 @@ void Level3::LoadLevel(const std::string &levelPath) {
       std::vector<Combatant *> enemies;
       for (int i = 0; i < 8; i++) {
         if (enemyValue & (1 << i)) {
-          enemies.push_back(new RobotA(mGame, i, 500));
+          Combatant *enemy;
+
+          switch (i) {
+          case 0:
+            enemy = new Ghost(mGame, i, 1000);
+            break;
+          case 1:
+            enemy = new Ghost(mGame, i, 1000);
+            break;
+          case 2:
+            enemy = new Ghost(mGame, i, 1000);
+            break;
+          case 3:
+            enemy = new RobotA(mGame, i, 1000);
+            break;
+          case 4:
+            enemy = new Human(mGame, i, 1000);
+            break;
+          case 5:
+            enemy = new Human(mGame, i, 1000);
+          case 6:
+            enemy = new RobotA(mGame, i, 1000);
+            break;
+          case 7:
+            enemy = new Human(mGame, i, 3000);
+            break;
+          default:
+            break;
+          }
+          enemies.push_back(enemy);
         }
       }
       auto enemy = new EnemyGroup(mGame, enemies);
