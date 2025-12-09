@@ -1,4 +1,4 @@
-#include "Human.hpp"
+#include "actors/Human.hpp"
 #include "AssetLoader.hpp"
 #include "Game.hpp"
 #include "render/Renderer.hpp"
