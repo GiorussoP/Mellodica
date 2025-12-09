@@ -33,6 +33,9 @@ NoteActor::NoteActor(Game *game, unsigned int midChannel, unsigned int midiNote,
 }
 
 NoteActor::~NoteActor() {
+  if (mNotePlayerActor) {
+    mNotePlayerActor->MarkNoteDead(this);
+  }
   // Don't delete mShineActor - it's managed by the game's actor list
   // Just clear our pointer to it
   mShineActor = nullptr;

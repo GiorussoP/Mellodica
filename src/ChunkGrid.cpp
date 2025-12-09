@@ -107,7 +107,7 @@ void ChunkGrid::UpdateActor(Actor *actor) {
   // Check if actor moved to invalid cell
   if (newCellIndex < 0 || newCellIndex >= static_cast<int>(mCells.size())) {
     // Actor moved outside grid - Destroy it
-    actor->SetState(ActorState::Destroy);
+    // actor->SetState(ActorState::Destroy);
     return;
   }
 

@@ -36,9 +36,18 @@ void SynthEngine::init(const char *soundfont_path, const char *audio_driver) {
 }
 
 void SynthEngine::clean() {
-  delete_fluid_audio_driver(driver);
-  delete_fluid_synth(synth);
-  delete_fluid_settings(settings);
+  if (driver) {
+    delete_fluid_audio_driver(driver);
+    driver = nullptr;
+  }
+  if (synth) {
+    delete_fluid_synth(synth);
+    synth = nullptr;
+  }
+  if (settings) {
+    delete_fluid_settings(settings);
+    settings = nullptr;
+  }
 }
 
 std::vector<std::pair<std::string, SoundPreset>>
@@ -120,6 +129,8 @@ void SynthEngine::setChannels(const std::vector<SoundPreset> &presets) {
 
 void SynthEngine::startNote(unsigned int ch, unsigned int note,
                             unsigned int velocity) {
+  if (!synth)
+    return;
 
   int panning_shift = (note % 12) - 6; // Shift based on note within an octave
   setPan(ch, 64 + panning_shift * 6);
@@ -127,7 +138,8 @@ void SynthEngine::startNote(unsigned int ch, unsigned int note,
 }
 
 void SynthEngine::stopNote(unsigned int ch, unsigned int note) {
-  fluid_synth_noteoff(synth, ch, note);
+  if (synth)
+    fluid_synth_noteoff(synth, ch, note);
 }
 
 void SynthEngine::setPan(unsigned int ch, unsigned int pan) {
