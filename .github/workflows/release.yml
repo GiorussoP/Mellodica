@@ -1,5 +1,9 @@
 name: Release Packaging
 
+permissions:
+  contents: write   # REQUIRED for action-gh-release to upload files
+
+
 on:
   release:
     types: [released, published]
