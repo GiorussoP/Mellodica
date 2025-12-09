@@ -47,6 +47,10 @@ CreditsScreen::~CreditsScreen() { UIScreen::~UIScreen(); }
 
 void CreditsScreen::HandleKeyPress(int key) {
   // On specific key presses, jump to main menu
+
+  // DO NOTHING, players could accidentally skip credits
+
+  /*
   if (key == SDLK_RETURN || key == SDLK_SPACE ||
       (key >= SDLK_0 && key <= SDLK_9) || key == SDLK_MINUS ||
       key == SDLK_EQUALS) {
@@ -54,6 +58,7 @@ void CreditsScreen::HandleKeyPress(int key) {
     mGame->ResetSaveToLevel0();
     mGame->LoadScene(new MainMenu(mGame));
   }
+    */
 }
 
 void CreditsScreen::Update(float deltaTime) {

@@ -32,7 +32,7 @@ void Level3::Initialize() {
               new Human(mGame, 4, 1000), new Human(mGame, 5, 1000),
               new RobotA(mGame, 6, 1000), new Human(mGame, 7, 3000)});
   boss->SetPosition(mGame->GetPlayer()->GetPosition() +
-                    Vector3(0.0f, 0.0f, +10.0f));
+                    Vector3(0.0f, 0.0f, +75.0f));
 }
 
 void Level3::LoadLevel(const std::string &levelPath) {
@@ -454,8 +454,7 @@ void Level3::LoadLevel(const std::string &levelPath) {
     case 17: {
       // Random number of notes between 3 and 10
       int n_notes = 3 + std::rand() % 8;
-      auto musicbox =
-          new MusicButtonActor(mGame, (noteCounter - 1) % 8, n_notes);
+      auto musicbox = new MusicButtonActor(mGame, 7, 10);
       musicbox->SetPosition(Vector3(x, 1.0f, z));
       break;
     }

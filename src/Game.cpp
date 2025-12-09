@@ -499,18 +499,24 @@ void Game::FindActiveActors() {
   // to ensure the game world around the player remains visible
   Vector3 queryPosition = mCamera->GetPosition();
 
-  if (mBattleSystem && mBattleSystem->IsTransitioning() && mPlayer) {
-    queryPosition = mPlayer->GetPosition();
-  }
-
   std::vector<Actor *> visibleActors =
       mChunkGrid->GetVisibleActors(queryPosition);
 
+  if (mBattleSystem && mBattleSystem->IsTransitioning() && mPlayer) {
+    std::vector<Actor *> playerActors =
+        mChunkGrid->GetVisibleActors(mPlayer->GetPosition());
+    visibleActors.insert(visibleActors.end(), playerActors.begin(),
+                         playerActors.end());
+  }
+
   // Filter out destroyed actors from chunk grid results
   mActiveActors.clear();
+  std::unordered_set<Actor *> uniqueActors;
   for (auto actor : visibleActors) {
-    if (actor->GetState() != ActorState::Destroy) {
+    if (actor->GetState() != ActorState::Destroy &&
+        uniqueActors.find(actor) == uniqueActors.end()) {
       mActiveActors.push_back(actor);
+      uniqueActors.insert(actor);
     }
   }
 

@@ -3,12 +3,12 @@
 #include "MIDI/MIDIPlayer.hpp"
 
 #include "Game.hpp"
-#include "render/Mesh.hpp"
-#include "render/Renderer.hpp"
 #include "UI/Screen/BattleScreen.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/NotePlayerActor.hpp"
 #include "actors/Player.hpp"
+#include "render/Mesh.hpp"
+#include "render/Renderer.hpp"
 
 BattleSystem::BattleSystem(Game *game)
     : Actor(game), mGame(game), mInBattle(false), mIsTransitioning(false),
@@ -152,7 +152,8 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
                             {0.0f, 15, 60, false},
                             {0.0f, 15, 63, false}});
   // Screen
-  mBattleScreen = new BattleScreen(mGame,getAssetPath( "fonts/MedodicaRegular.otf"));
+  mBattleScreen =
+      new BattleScreen(mGame, getAssetPath("fonts/MedodicaRegular.otf"));
 }
 
 void BattleSystem::EndBattle(bool won) {
@@ -502,6 +503,8 @@ void BattleSystem::OnUpdate(float deltaTime) {
     } else {
 
       // Is transitioning to outside battle
+      mGame->GetCamera()->SetTargetPosition(mGame->GetPlayer()->GetPosition());
+
       mField->SetScale(Vector3::Lerp(
           mField->GetScale(), Vector3(1.0f, 1.0f, 0.0f), 4.0f * deltaTime));
 

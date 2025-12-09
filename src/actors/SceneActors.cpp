@@ -876,7 +876,7 @@ NextSceneActor::NextSceneActor(Game *game)
 
   // Add AABB collider
   mColliderComponent = new AABBCollider(this, ColliderLayer::Entity,
-                                        Vector3::Zero, Vector3(0.5f), false);
+                                        Vector3::Zero, Vector3(0.1f), false);
 }
 
 void NextSceneActor::OnCollision(Vector3 penetration,
