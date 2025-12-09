@@ -26,6 +26,7 @@ PauseScreen::PauseScreen(Game *game)
   auto btnQuit =
       AddButton(getAssetPath("sprites/scenes/quitbutton160x40.png"), [this]() {
         mGame->SetPaused(false);
+        mGame->SaveState();
         mGame->LoadScene(new MainMenu(mGame));
       });
   btnQuit->ButtonSetScale(Vector3(0.8f, 0.5f, 0.0f));

@@ -1,6 +1,7 @@
 .vscode
 obj
 a.out
+game_save.ckpt
 .idea/
 .pxo
 .ckpt
