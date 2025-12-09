@@ -2,9 +2,9 @@
 // Created by luiza on 09/12/2025.
 //
 
-#include "../../../include/UI/Screen/TutorialScreen.hpp"
-#include "../../../include/Game.hpp"
-#include "../../../include/UI/TextElement.hpp"
+#include "UI/Screen/TutorialScreen.hpp"
+#include "Game.hpp"
+#include "UI/TextElement.hpp"
 #include <SDL2/SDL.h>
 
 TutorialScreen::TutorialScreen(Game *game)

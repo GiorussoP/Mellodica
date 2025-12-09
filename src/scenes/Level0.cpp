@@ -3,6 +3,7 @@
 #include "CSV.h"
 #include "Game.hpp"
 #include "MIDI/MIDIPlayer.hpp"
+#include "UI/Screen/TutorialScreen.hpp"
 #include "actors/BattleSystem.hpp"
 #include "actors/EnemyGroup.hpp"
 #include "actors/Ghost.hpp"
@@ -11,7 +12,6 @@
 #include "actors/RobotA.hpp"
 #include "actors/SceneActors.hpp"
 #include "render/Renderer.hpp"
-#include "TutorialScreen.hpp"
 
 void Level0::Initialize() {
 
