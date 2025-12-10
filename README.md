@@ -4,6 +4,8 @@ Uma mistura de jogo de ritmo com Shoot'em Up.
 
 ![Start Menu](./screenshots/start.png)
 
+[Vídeo de Gameplay](https://youtu.be/J3wr1rgTLiQ)
+
 ## Membros do grupo
 
 - Giovanni Russo Paschoal (Full Stack, foco em engine/mecânicas/shaders)
