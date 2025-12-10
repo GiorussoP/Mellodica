@@ -652,12 +652,12 @@ void MIDIPlayer::loadGameOverTheme() {
 }
 
 void MIDIPlayer::loadOpeningTheme() {
-  SynthEngine::setChannels({{0, 40}, // Violin
-                            {0, 73}, // Flute
-                            {0, 46}, // Orchestral Harp
-                            {0, 52}, // Concert Choir
-                            {0, 56}, // Trumpet
-                            {0, 32}, // Acoustic bass
+  SynthEngine::setChannels({{0, 40},  // Violin
+                            {0, 73},  // Flute
+                            {12, 48}, //  Full orchestra
+                            {0, 52},  // Concert Choir
+                            {0, 56},  // Trumpet
+                            {0, 32},  // Acoustic bass
                             {0, 0},
                             {0, 0},
                             {0, 0},
@@ -673,7 +673,7 @@ void MIDIPlayer::loadOpeningTheme() {
   MIDIPlayer::loadSong(getAssetPath("songs/main_theme.mid").data(), true);
 
   // Slow down the song
-  MIDIPlayer::setSpeed(0.8);
+  MIDIPlayer::setSpeed(0.5);
 
   for (int i = 0; i < 16; i++) {
     if (i != 2) {

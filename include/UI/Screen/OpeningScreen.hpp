@@ -16,7 +16,16 @@ public:
   void Update(float deltaTime) override;
 
 private:
-  Actor *mStory;
+  HUDElement *mStory0;
+  HUDElement *mStory1;
+  HUDElement *mStory2;
+  HUDElement *mStory3;
+  HUDElement *mStory4;
+  HUDElement *mStory5;
+  HUDElement *mStory6;
+  TextElement *mStoryText;
+
+  unsigned int mImageIndex;
   float mStoryPosition;
   float mTimer;
 };

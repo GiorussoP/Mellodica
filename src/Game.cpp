@@ -394,17 +394,21 @@ void Game::ProcessInput() {
 
   Input::Update();
 
-  if (Input::WasKeyPressed(SDL_SCANCODE_ESCAPE)) {
-    if (dynamic_cast<MainMenu*>(mCurrentScene) != nullptr) {
-      mIsRunning = false;
-    }
+  if (GetCurrentScene()->GetSceneID() != Scene::SceneEnum::scene4 &&
+      GetCurrentScene()->GetSceneID() != Scene::SceneEnum::scene5 &&
+      GetCurrentScene()->GetSceneID() != Scene::SceneEnum::scene6 &&
+      GetCurrentScene()->GetSceneID() != Scene::SceneEnum::scene7) {
+    if (Input::WasKeyPressed(SDL_SCANCODE_ESCAPE)) {
+      if (dynamic_cast<MainMenu *>(mCurrentScene) != nullptr) {
+        mIsRunning = false;
+      }
 
-    else if (!mIsPaused) {
-      new PauseScreen(this);
-    }
-    else {
-      if (!mUIStack.empty()) {
-        mUIStack.back()->Close();
+      else if (!mIsPaused) {
+        new PauseScreen(this);
+      } else {
+        if (!mUIStack.empty()) {
+          mUIStack.back()->Close();
+        }
       }
     }
   }
