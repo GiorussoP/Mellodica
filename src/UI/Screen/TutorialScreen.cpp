@@ -16,6 +16,7 @@ TutorialScreen::TutorialScreen(Game *game)
       " A, D       -  Movimentar câmera \n"
       " Espaço     -  Atirar nota \n"
       " (1,2,3,4,5,6,7,8,9,0,-,+) - Atirar nota específica \n\n"
+      "Encontre uma saída!\n\n"
       " Pressione [ENTER] para fechar ";
 
   auto textElement = AddText(instructions, Vector3(1.0f, 1.0f, 1.0f),
