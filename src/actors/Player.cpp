@@ -1,18 +1,18 @@
 #include "actors/Player.hpp"
 #include "AssetLoader.hpp"
 #include "Game.hpp"
-#include "scenes/GameOver.hpp"
-#include "scenes/Level1.hpp"
 #include "MIDI/MIDIPlayer.hpp"
-#include "scenes/MainMenu.hpp"
-#include "actors/NoteActor.hpp"
+#include "MIDI/SynthEngine.hpp"
 #include "UI/Screen/PlayerHud.hpp"
-#include "render/Renderer.hpp"
+#include "actors/NoteActor.hpp"
 #include "actors/SceneActors.hpp"
 #include "components/SpriteComponent.hpp"
-#include "MIDI/SynthEngine.hpp"
+#include "render/Renderer.hpp"
 #include "render/Texture.hpp"
 #include "render/TextureAtlas.hpp"
+#include "scenes/GameOver.hpp"
+#include "scenes/Level1.hpp"
+#include "scenes/MainMenu.hpp"
 
 #include <cmath>
 
@@ -26,9 +26,10 @@ constexpr SDL_Scancode notebuttons[12] = {
     SDL_SCANCODE_9, SDL_SCANCODE_0, SDL_SCANCODE_MINUS, SDL_SCANCODE_EQUALS};
 
 constexpr SDL_Scancode numpadbuttons[12] = {
-  SDL_SCANCODE_KP_1, SDL_SCANCODE_KP_2, SDL_SCANCODE_KP_3,     SDL_SCANCODE_KP_4,
-  SDL_SCANCODE_KP_5, SDL_SCANCODE_KP_6, SDL_SCANCODE_KP_7,     SDL_SCANCODE_KP_8,
-  SDL_SCANCODE_KP_9, SDL_SCANCODE_KP_0, SDL_SCANCODE_KP_MINUS, SDL_SCANCODE_KP_PLUS};
+    SDL_SCANCODE_KP_1, SDL_SCANCODE_KP_2,     SDL_SCANCODE_KP_3,
+    SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_5,     SDL_SCANCODE_KP_6,
+    SDL_SCANCODE_KP_7, SDL_SCANCODE_KP_8,     SDL_SCANCODE_KP_9,
+    SDL_SCANCODE_KP_0, SDL_SCANCODE_KP_MINUS, SDL_SCANCODE_KP_PLUS};
 
 Player::Player(Game *game)
     : Actor(game), mMoveForward(false), mMoveBackward(false), mMoveLeft(false),
@@ -56,10 +57,10 @@ Player::Player(Game *game)
 
   // Get atlas from renderer cache
   TextureAtlas *atlas = game->GetRenderer()->LoadAtlas(
-getAssetPath("sprites/main-character/player.json"));
+      getAssetPath("sprites/main-character/player.json"));
   // Get texture index from renderer cache
   Texture *texture = game->GetRenderer()->LoadTexture(
-getAssetPath("sprites/main-character/player.png"));
+      getAssetPath("sprites/main-character/player.png"));
   int textureIndex = game->GetRenderer()->GetTextureIndex(texture);
 
   // Create sprite component with atlas
@@ -156,7 +157,8 @@ void Player::OnUpdate(float deltaTime) {
   bool playing = false;
   bool newPlayingNotes[12] = {false};
   for (int i = 0; i < 12; ++i) {
-    if (Input::IsKeyDown(notebuttons[i]) || Input::IsKeyDown(numpadbuttons[i])) {
+    if (Input::IsKeyDown(notebuttons[i]) ||
+        Input::IsKeyDown(numpadbuttons[i])) {
       playing = true;
       newPlayingNotes[i] = true;
     }
@@ -224,8 +226,20 @@ void Player::OnUpdate(float deltaTime) {
                                         ->GetActiveNotes()[i] == nullptr))) {
       // Play note
       mGame->GetBattleSystem()->GetPlayerNotePlayer()->PlayNote(
-          i + 60, 12,
-          mGame->GetBattleSystem()->IsInBattle()); // MIDI note offset
+          i + 60, 12, mGame->GetBattleSystem()->IsInBattle(), 1.0f,
+          mPosition + mGame->GetBattleSystem()->GetBattleDirection() -
+              mGame->GetBattleSystem()->GetPlayerNotePlayer()->GetNotePosition(
+                  i)); // MIDI note offset
+
+      if (mGame->GetBattleSystem()->IsInBattle() && mFrontNote == -1) {
+        Vector3 targetPosition =
+            mGame->GetBattleSystem()->GetPlayerNotePlayer()->GetNotePosition(
+                i) -
+            mGame->GetBattleSystem()->GetBattleDirection();
+
+        mPosition = mGame->GetClosestMovePosition(
+            mPosition, targetPosition, mColliderComponent->GetRadius());
+      }
     }
 
     mPlayingNotes[i] = newPlayingNotes[i];

@@ -45,6 +45,119 @@ const int FPS = 60;
 const int FRAME_TIME = 1000 / FPS;
 const float MIDI_UPDATE_INTERVAL = 0.001f; // Update MIDI every 1ms
 
+namespace {
+
+bool SegmentIntersectsSphere(const Vector3 &start, const Vector3 &end,
+                             const Vector3 &center, float radius) {
+  Vector3 direction = end - start;
+  Vector3 offset = start - center;
+  float radiusSq = radius * radius;
+
+  if (offset.LengthSq() <= radiusSq) {
+    return true;
+  }
+
+  float a = Vector3::Dot(direction, direction);
+  if (a <= 0.0f) {
+    return false;
+  }
+
+  float b = 2.0f * Vector3::Dot(offset, direction);
+  float c = Vector3::Dot(offset, offset) - radiusSq;
+  float discriminant = b * b - 4.0f * a * c;
+  if (discriminant < 0.0f) {
+    return false;
+  }
+
+  float sqrtDiscriminant = std::sqrt(discriminant);
+  float inv2a = 0.5f / a;
+  float t0 = (-b - sqrtDiscriminant) * inv2a;
+  float t1 = (-b + sqrtDiscriminant) * inv2a;
+
+  return (t0 >= 0.0f && t0 <= 1.0f) || (t1 >= 0.0f && t1 <= 1.0f) ||
+         (t0 < 0.0f && t1 > 1.0f);
+}
+
+bool SegmentIntersectsAABB(const Vector3 &start, const Vector3 &end,
+                           const Vector3 &minCorner, const Vector3 &maxCorner) {
+  Vector3 direction = end - start;
+  float tMin = 0.0f;
+  float tMax = 1.0f;
+
+  auto clipAxis = [&](float startValue, float directionValue, float minValue,
+                      float maxValue) -> bool {
+    constexpr float epsilon = 1.0e-6f;
+
+    if (std::fabs(directionValue) < epsilon) {
+      return startValue >= minValue && startValue <= maxValue;
+    }
+
+    float invDirection = 1.0f / directionValue;
+    float t1 = (minValue - startValue) * invDirection;
+    float t2 = (maxValue - startValue) * invDirection;
+
+    if (t1 > t2) {
+      std::swap(t1, t2);
+    }
+
+    tMin = std::max(tMin, t1);
+    tMax = std::min(tMax, t2);
+    return tMin <= tMax;
+  };
+
+  return clipAxis(start.x, direction.x, minCorner.x, maxCorner.x) &&
+         clipAxis(start.y, direction.y, minCorner.y, maxCorner.y) &&
+         clipAxis(start.z, direction.z, minCorner.z, maxCorner.z);
+}
+
+bool SegmentIntersectsCollider(const Vector3 &start, const Vector3 &end,
+                               const ColliderComponent &collider,
+                               float playerRadius) {
+  if (collider.GetType() == ColliderType::AABB) {
+    const auto &aabb = static_cast<const AABBCollider &>(collider);
+    Vector3 minCorner = aabb.GetMin() - Vector3(playerRadius);
+    Vector3 maxCorner = aabb.GetMax() + Vector3(playerRadius);
+
+    Vector3 correctedMin(std::min(minCorner.x, maxCorner.x),
+                         std::min(minCorner.y, maxCorner.y),
+                         std::min(minCorner.z, maxCorner.z));
+    Vector3 correctedMax(std::max(minCorner.x, maxCorner.x),
+                         std::max(minCorner.y, maxCorner.y),
+                         std::max(minCorner.z, maxCorner.z));
+
+    return SegmentIntersectsAABB(start, end, correctedMin, correctedMax);
+  }
+
+  if (collider.GetType() == ColliderType::OBB) {
+    const auto &obb = static_cast<const OBBCollider &>(collider);
+    Vector3 center = obb.GetCenter();
+    Quaternion inverseRotation = collider.GetOwner()->GetRotation();
+    inverseRotation.Conjugate();
+
+    Vector3 localStart = Vector3::Transform(start - center, inverseRotation);
+    Vector3 localEnd = Vector3::Transform(end - center, inverseRotation);
+
+    Vector3 scale = collider.GetOwner()->GetScale();
+    Vector3 scaledSize = Vector3(std::fabs(obb.GetSize().x * scale.x),
+                                 std::fabs(obb.GetSize().y * scale.y),
+                                 std::fabs(obb.GetSize().z * scale.z));
+
+    Vector3 expandedSize = scaledSize + Vector3(playerRadius);
+    return SegmentIntersectsAABB(localStart, localEnd, expandedSize * -1.0f,
+                                 expandedSize);
+  }
+
+  if (collider.GetType() == ColliderType::Sphere) {
+    const auto &sphere = static_cast<const SphereCollider &>(collider);
+    return SegmentIntersectsSphere(start, end, sphere.GetCenter(),
+                                   sphere.GetRadius() + playerRadius);
+  }
+
+  return false;
+}
+
+} // namespace
+
 Game::Game()
     : mUpdatingActors(false), mWindow(nullptr), mGLContext(nullptr),
       mRenderer(nullptr), mChunkGrid(nullptr), mCurrentScene(nullptr),
@@ -142,6 +255,80 @@ bool Game::Initialize() {
   }
 
   return true;
+}
+
+Vector3 Game::GetClosestMovePosition(const Vector3 &from, const Vector3 &to,
+                                     float radius) const {
+  if (!mPlayer) {
+    return to;
+  }
+
+  float playerRadius = radius - 0.001;
+
+  // Move in coarse steps until we hit something, then binary search the last
+  // valid position.
+  const float stepSize = 0.25f;
+
+  Vector3 delta = to - from;
+  float distance = delta.Length();
+  if (distance <= 0.0f) {
+    return from;
+  }
+
+  int steps = std::max(1, static_cast<int>(std::ceil(distance / stepSize)));
+
+  Vector3 lastClear = from + Vector3::Normalize(delta) * stepSize;
+  Vector3 firstBlocked = to;
+
+  auto hasCollisionAlongPath = [&](const Vector3 &candidate) {
+    for (auto actor : mActiveActors) {
+      auto collider = actor->GetComponent<ColliderComponent>();
+      if (!collider || collider->GetOwner() == mPlayer) {
+        continue;
+      }
+
+      if (collider->GetLayer() == ColliderLayer::Player ||
+          collider->GetLayer() == ColliderLayer::Note ||
+          (!collider->IsStatic() &&
+           collider->GetType() == ColliderType::Sphere)) {
+        continue;
+      }
+
+      if (SegmentIntersectsCollider(from, candidate, *collider, playerRadius)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  for (int step = 1; step <= steps; ++step) {
+    float t = static_cast<float>(step) / static_cast<float>(steps);
+    Vector3 candidate = from + delta * t;
+
+    if (hasCollisionAlongPath(candidate)) {
+      firstBlocked = candidate;
+      break;
+    }
+
+    lastClear = candidate;
+  }
+
+  if ((lastClear - to).LengthSq() <= 0.0001f) {
+    return to;
+  }
+
+  for (int i = 0; i < 12; ++i) {
+    Vector3 mid = Vector3::Lerp(lastClear, firstBlocked, 0.5f);
+    if (hasCollisionAlongPath(mid)) {
+      firstBlocked = mid;
+    } else {
+      lastClear = mid;
+    }
+  }
+
+  return lastClear -
+         Vector3::Normalize(delta) * 0.25f; // Small offset to avoid sticking
 }
 
 std::string Game::GetLevelAssetPath() const {

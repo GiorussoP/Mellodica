@@ -39,7 +39,7 @@ void RigidBodyComponent::Update(float deltaTime) {
     mVelocity = Vector3::Normalize(mVelocity) * MAX_SPEED;
   }
 
-  if (mVelocity.LengthSq() < 0.001f) {
+  if (mVelocity.LengthSq() < 0.2f) {
     mVelocity = Vector3::Zero;
   }
 

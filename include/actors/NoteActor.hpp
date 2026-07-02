@@ -32,7 +32,7 @@ public:
 
   NotePlayerActor *GetNotePlayerActor() const { return mNotePlayerActor; }
 
-  void Start();
+  void Start(Vector3 fromOffset = Vector3::Zero);
   void OnUpdate(float deltaTime) override;
   void End();
   void OnCollision(Vector3 penetration, ColliderComponent *other) override;

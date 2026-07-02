@@ -132,6 +132,8 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
         CombatantState::Dead) {
       continue;
     }
+    mGame->GetPlayer()->GetActiveAllies()[i]->SetPosition(
+        mGame->GetPlayer()->GetPosition());
     Vector3 pos =
         mGame->GetPlayer()->GetPosition() + allyRight * i * 1.5f -
         allyRight *
@@ -288,15 +290,23 @@ void BattleSystem::OnUpdate(float deltaTime) {
                   if (activeNote != nullptr)
                     mEnemyNotePlayer->EndNote(note.note);
 
+                  Vector3 right = Vector3::Cross(Vector3::UnitY, mBattleDir);
                   // Play note
-                  mEnemyNotePlayer->PlayNote(note.note, note.channel);
+                  mEnemyNotePlayer->PlayNote(
+                      note.note, note.channel, true, 1.0f,
+                      mEnemyNotePlayer->GetPosition() +
+                          Vector3::Dot(enemy->GetPosition() -
+                                           mEnemyNotePlayer->GetPosition(),
+                                       right) *
+                              right -
+                          mEnemyNotePlayer->GetNotePosition(note.note));
 
                   // Update enemy state and position
                   enemy->SetCombatantState(CombatantState::Attacking);
-                  enemy->SetPosition(
-                      mEnemyNotePlayer->GetNotePosition(note.note) +
-                      mBattleDir);
-
+                  enemy->SetPosition(mGame->GetClosestMovePosition(
+                      enemy->GetPosition(),
+                      mEnemyNotePlayer->GetNotePosition(note.note) + mBattleDir,
+                      enemy->GetColliderComponent()->GetRadius()));
                 } else {
                   // Don't stop other's notes
                   if (!(activeNote == nullptr ||
@@ -357,14 +367,24 @@ void BattleSystem::OnUpdate(float deltaTime) {
                 if (activeNote != nullptr)
                   mPlayerNotePlayer->EndNote(note.note);
 
+                Vector3 right = Vector3::Cross(Vector3::UnitY, mBattleDir);
                 // Play note
-                mPlayerNotePlayer->PlayNote(note.note, note.channel);
+                mPlayerNotePlayer->PlayNote(
+                    note.note, note.channel, true, 1.0f,
+                    mPlayerNotePlayer->GetPosition() +
+                        Vector3::Dot(ally->GetPosition() -
+                                         mPlayerNotePlayer->GetPosition(),
+                                     right) *
+                            right -
+                        mPlayerNotePlayer->GetNotePosition(note.note));
 
                 // Update ally state and position
                 ally->SetCombatantState(CombatantState::Attacking);
-                ally->SetPosition(
+                ally->SetPosition(mGame->GetClosestMovePosition(
+                    ally->GetPosition(),
                     mPlayerNotePlayer->GetNotePosition(note.note) -
-                    2.0f * mBattleDir);
+                        2.0f * mBattleDir,
+                    ally->GetColliderComponent()->GetRadius()));
 
               } else {
 

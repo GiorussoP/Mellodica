@@ -41,13 +41,28 @@ NoteActor::~NoteActor() {
   mShineActor = nullptr;
 }
 
-void NoteActor::Start() {
+void NoteActor::Start(Vector3 fromOffset) {
   mIsPlaying = true;
   mRigidBodyComponent->SetVelocity(Vector3::Normalize(mDirection) * mSpeed);
 
   mShineActor = new ShineActor(mGame, mMeshComponent->GetColor(), false);
-  mShineActor->SetPosition(mPosition - mDirection * mScale.z * 0.5f);
-  mShineActor->Start(SHINE_TIME);
+  Vector3 targetPos = mPosition - mDirection * mScale.z * 0.5f;
+
+  float dist = fromOffset.Length();
+
+  if (mGame->GetBattleSystem()->IsInBattle() && dist >= 0.75f) {
+    mShineActor->SetPosition(targetPos + 0.5f * fromOffset);
+    mShineActor->GetComponent<SpriteComponent>()->SetScale(
+        Vector3(std::max(dist * 1.4f, 1.0f), 0.25f, 1.0f));
+    mShineActor->Start(SHINE_TIME);
+  } else {
+    mShineActor->SetPosition((targetPos));
+
+    mShineActor->GetComponent<SpriteComponent>()->SetScale(
+        Vector3(1.0f, 1.0f, 1.0f));
+    mShineActor->Start(SHINE_TIME);
+  }
+
   mShineActor->GetComponent<SpriteComponent>()->SetBloomed(true);
 }
 
@@ -102,6 +117,8 @@ void NoteActor::OnCollision(Vector3 penetration, ColliderComponent *other) {
   if (mShineActor && mShineActor->GetState() != ActorState::Destroy) {
     mShineActor->Start(SHINE_TIME);
     mShineActor->SetPosition(mPosition + mDirection * mScale.z * 0.5f);
+    mShineActor->GetComponent<SpriteComponent>()->SetScale(
+        Vector3(1.0f, 1.0f, 1.0f));
   }
 
   if (mIsPlaying) {

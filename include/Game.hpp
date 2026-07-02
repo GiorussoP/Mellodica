@@ -1,6 +1,6 @@
 #pragma once
-#include "actors/BattleSystem.hpp"
 #include "Math.hpp"
+#include "actors/BattleSystem.hpp"
 #include "actors/Player.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>
@@ -39,6 +39,11 @@ public:
 
   // Camera
   Camera *GetCamera() const { return mCamera; }
+
+  // Return the furthest reachable point along a straight path before hitting
+  // a static world collider.
+  Vector3 GetClosestMovePosition(const Vector3 &from, const Vector3 &to,
+                                 float radius) const;
 
   // Debugging getter
   bool IsDebugging() const { return mIsDebugging; }

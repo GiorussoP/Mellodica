@@ -18,7 +18,7 @@ public:
   };
   ~NotePlayerActor() {};
   bool PlayNote(unsigned int note, unsigned int channel, bool in_battle = true,
-                float speed = 1.0f);
+                float speed = 1.0f, Vector3 fromOffset = Vector3::Zero);
   bool EndNote(unsigned int note);
 
   Vector3 GetNotePosition(unsigned int noteIndex);

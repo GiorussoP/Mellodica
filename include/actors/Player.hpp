@@ -51,7 +51,7 @@ private:
   float mMaxEnergy;
 
   RigidBodyComponent *mRigidBodyComponent;
-  ColliderComponent *mColliderComponent;
+  SphereCollider *mColliderComponent;
   SpriteComponent *mSpriteComponent;
 
   Vector3 mFront;

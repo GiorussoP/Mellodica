@@ -1,13 +1,14 @@
 #include "actors/NotePlayerActor.hpp"
-#include "actors/BattleSystem.hpp"
 #include "Game.hpp"
 #include "MIDI/SynthEngine.hpp"
+#include "actors/BattleSystem.hpp"
 #include "actors/NoteActor.hpp"
 
 float NotePlayerActor::noteSpacing = 0.5f;
 
 bool NotePlayerActor::PlayNote(unsigned int note, unsigned int channel,
-                               bool in_battle, float speed) {
+                               bool in_battle, float speed,
+                               Vector3 fromOffset) {
 
   int noteIndex =
       mMirrored ? (MAX_NOTES - 1) - (note % MAX_NOTES) : note % MAX_NOTES;
@@ -28,13 +29,15 @@ bool NotePlayerActor::PlayNote(unsigned int note, unsigned int channel,
   float offset = 0.5f * MAX_NOTES * noteSpacing + noteSpacing / 2.0f;
 
   if (in_battle) {
-    mActiveNotes[noteIndex]->SetPosition(
-        position + right * (-offset + (noteIndex)*noteSpacing + noteSpacing));
+    Vector3 pos =
+        position + right * (-offset + (noteIndex)*noteSpacing + noteSpacing);
+    mActiveNotes[noteIndex]->SetPosition(pos);
+
   } else {
     mActiveNotes[noteIndex]->SetPosition(position);
   }
 
-  mActiveNotes[noteIndex]->Start();
+  mActiveNotes[noteIndex]->Start(fromOffset);
   // std::cout << "Playing note " << noteIndex << " on channel " << channel
   //          << std::endl;
 

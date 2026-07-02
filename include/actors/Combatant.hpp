@@ -30,6 +30,8 @@ public:
   int GetMaxHealth() const { return mMaxHealth; }
   int GetChannel() const { return mChannel; }
 
+  SphereCollider *GetColliderComponent() { return mColliderComponent; }
+
   CombatantState GetCombatantState() const { return mCombatantState; }
   void SetCombatantState(CombatantState state) { mCombatantState = state; }
 
@@ -55,7 +57,7 @@ private:
 
   CombatantState mCombatantState;
 
-  ColliderComponent *mColliderComponent;
+  SphereCollider *mColliderComponent;
   RigidBodyComponent *mRigidBodyComponent;
 
   Vector3 mTargetPosition;
