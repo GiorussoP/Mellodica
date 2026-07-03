@@ -4,6 +4,9 @@
 #include "scenes/Scene.hpp"
 
 class Level0 : public Scene {
+private:
+  float level_size_x, level_size_y;
+
 public:
   Level0(class Game *game) : Scene(game, scene0) {}
   void Initialize() override;

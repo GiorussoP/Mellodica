@@ -26,6 +26,11 @@ void Level1::Initialize() {
 
   LoadLevel(getAssetPath("levels/level1"));
 
+  // Creating big cube underneath the level to look nice
+  auto bigCube = new GrassCubeActor(mGame);
+  bigCube->SetPosition(Vector3(0.0f, -35.0f, 0.0f));
+  bigCube->SetScale(Vector3(1000.0f, 1.0f, 1000.0f));
+  mGame->AddAlwaysActive(bigCube);
   // Creating the battle system
   mGame->SetBattleSystem(new BattleSystem(mGame));
   MIDIPlayer::play();
@@ -63,8 +68,8 @@ void Level1::LoadLevel(const std::string &levelPath) {
     }
     case 84: {
       auto wall = new RockWall(mGame);
-      wall->SetPosition(Vector3(x, 2.0f, z));
-      wall->SetScale(Vector3(size_x, 1.0f, size_y));
+      wall->SetPosition(Vector3(x, -26.5f, z));
+      wall->SetScale(Vector3(size_x, 20.0f, size_y));
       break;
     }
     case 85: {
