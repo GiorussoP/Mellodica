@@ -48,7 +48,7 @@ file(GLOB_RECURSE SOURCE_FILES
     "${SOURCE_DIR}/*.c"
 )
 
-add_executable(${EXEC_NAME} ${SOURCE_FILES})
+add_executable(${EXEC_NAME} WIN32 ${SOURCE_FILES})
 
 target_link_directories(${EXEC_NAME} PRIVATE ${FLUIDSYNTH_LIBRARY_DIRS})
 
