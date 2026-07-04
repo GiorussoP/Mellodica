@@ -53,8 +53,8 @@ jobs:
             mingw-w64-x86_64-SDL2
             mingw-w64-x86_64-SDL2_image
             mingw-w64-x86_64-SDL2_ttf
-            mingw-w64-x86_64-fluidsynth
             mingw-w64-x86_64-glew
+            mingw-w64-x86_64-glib2
 
       - name: Install dependencies (macOS)
         if: startsWith(matrix.os, 'macos')
@@ -70,8 +70,7 @@ jobs:
           curl -L -o fluidsynth.tar.gz \
             https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
           tar xf fluidsynth.tar.gz
-          mv fluidsynth-2.4.8 fluidsynth
-          cd fluidsynth
+          cd fluidsynth-2.4.8
           mkdir build && cd build
           cmake .. \
             -Denable-sdl2=1 \
@@ -83,6 +82,32 @@ jobs:
           make -j"$(sysctl -n hw.logicalcpu)"
           sudo make install
           sudo update_dyld_shared_cache
+
+      - name: Build FluidSynth (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: msys2 {0}
+        run: |
+          curl -L -o fluidsynth.tar.gz \
+            https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
+          tar xf fluidsynth.tar.gz
+          cd fluidsynth-2.4.8
+          mkdir build && cd build
+          export CMAKE_PREFIX_PATH=/mingw64
+          export PKG_CONFIG_PATH=/mingw64/lib/pkgconfig
+          export CC=/mingw64/bin/gcc.exe
+          export CXX=/mingw64/bin/g++.exe
+          cmake .. \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/mingw64 \
+            -Denable-sdl2=1 \
+            -Denable-floats=1 \
+            -Denable-dsound=0 \
+            -Denable-wasapi=0 \
+            -Denable-waveout=0 \
+            -Denable-libsndfile=0
+          cmake --build .
+          cmake --install .
 
       - name: Configure CMake (Linux/macOS)
         if: matrix.os != 'windows-latest'

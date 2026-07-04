@@ -612,10 +612,14 @@ void Game::ProcessInput() {
       }
     }
   }
+
+  /*
   if (Input::WasKeyPressed(SDL_SCANCODE_M)) {
     MIDIPlayer::loadSong2a();
     MIDIPlayer::play();
   }
+
+
   if (Input::WasKeyPressed(SDL_SCANCODE_F3)) {
     // LoadScene(new TestSceneB(this));
   }
@@ -626,6 +630,7 @@ void Game::ProcessInput() {
     std::cout << "=== DEBUG MODE " << (mIsDebugging ? "ENABLED" : "DISABLED")
               << " ===" << std::endl;
   }
+  */
 
   for (auto &actor : mActiveActors) {
     actor->ProcessInput();
