@@ -155,6 +155,11 @@ public:
   // Normalize this vector
   void Normalize() {
     float length = Length();
+    if (length <= 0.0001f) {
+      x = 0.0f;
+      y = 0.0f;
+      return;
+    }
     x /= length;
     y /= length;
   }
@@ -299,6 +304,12 @@ public:
   // Normalize this vector
   void Normalize() {
     float length = Length();
+    if (length <= 0.0001f) {
+      x = 0.0f;
+      y = 0.0f;
+      z = 0.0f;
+      return;
+    }
     x /= length;
     y /= length;
     z /= length;
@@ -501,6 +512,13 @@ public:
   // Normalize this vector
   void Normalize() {
     float length = Length();
+    if (length <= 0.0001f) {
+      x = 0.0f;
+      y = 0.0f;
+      z = 0.0f;
+      w = 0.0f;
+      return;
+    }
     x /= length;
     y /= length;
     z /= length;
@@ -989,6 +1007,13 @@ public:
 
   void Normalize() {
     float length = Length();
+    if (length <= 0.0001f) {
+      x = 0.0f;
+      y = 0.0f;
+      z = 0.0f;
+      w = 1.0f;
+      return;
+    }
     x /= length;
     y /= length;
     z /= length;

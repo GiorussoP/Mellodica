@@ -16,13 +16,15 @@ TutorialScreen::TutorialScreen(Game *game)
       " A, D       -  Move camera \n"
       " Space      -  Shoot note \n"
       " (1,2,3,4,5,6,7,8,9,0,-,+) - Shoot specific note \n\n"
+      " Esc        -  Pause game \n"
+      " F11        -  Toggle fullscreen \n\n"
       " Find an exit!\n\n"
       " Press [ENTER] to close ";
 
   auto textElement = AddText(instructions, Vector3(1.0f, 1.0f, 1.0f),
                              Vector3(0.0f, 0.0f, 0.0f), 0.75f);
 
-  textElement->SetScale(Vector3(0.8f, 0.8f, 1.0f));
+  textElement->SetScale(Vector3(0.9f, 0.9f, 1.0f));
   textElement->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
 }
 

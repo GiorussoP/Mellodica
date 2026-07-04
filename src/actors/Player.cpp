@@ -261,6 +261,33 @@ void Player::OnUpdate(float deltaTime) {
       }
       pos -= mFront;
     }
+
+    if (Input::WasKeyPressed(SDL_SCANCODE_P)) {
+      std::cout << '__________DEBUG ALLY STATES__________' << std::endl;
+      // Print ally channel, states and distances for debugging
+      for (auto &ally : mActiveAllies) {
+        float distance = (ally->GetPosition() - mPosition).Length();
+        std::string stateStr;
+        switch (ally->GetCombatantState()) {
+        case CombatantState::Idle:
+          stateStr = "Idle";
+          break;
+        case CombatantState::Attacking:
+          stateStr = "Attacking";
+          break;
+        case CombatantState::Dead:
+          stateStr = "Dead";
+          break;
+        case CombatantState::Moving:
+          stateStr = "Moving";
+          break;
+        }
+        SDL_Log("Ally %d at position (%.2f, %.2f, %.2f) is %s, distance: %.2f",
+                ally->GetChannel(), ally->GetPosition().x,
+                ally->GetPosition().y, ally->GetPosition().z, stateStr.c_str(),
+                distance);
+      }
+    }
   }
 
   // Calculate movement direction

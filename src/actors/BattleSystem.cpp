@@ -161,26 +161,34 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
 }
 
 void BattleSystem::EndBattle(bool won) {
+  // Evita que a função processe duas vezes se for chamada em duplicidade no
+  // mesmo frame
+  if (!mInBattle)
+    return;
+
   mInBattle = false;
   mIsTransitioning = true;
 
   std::cout << "Battle ended." << std::endl;
-  // Find closest isometric direction to current camera up vector
-  Vector3 camUp = mGame->GetCamera()->GetCameraUp();
-  int closestDir = 0;
-  float bestDot = -1.0f;
-  for (int i = 0; i < 8; ++i) {
-    Vector3 isoUp =
-        Vector3::Transform(Vector3::UnitY, Camera::ISOMETRIC_DIRECTIONS[i]);
-    float dot = Vector3::Dot(camUp, isoUp);
-    if (dot > bestDot) {
-      bestDot = dot;
-      closestDir = i;
+
+  // Garantir que a câmera e o jogo existem antes de operar
+  if (mGame && mGame->GetCamera()) {
+    Vector3 camUp = mGame->GetCamera()->GetCameraUp();
+    int closestDir = 0;
+    float bestDot = -1.0f;
+    for (int i = 0; i < 8; ++i) {
+      Vector3 isoUp =
+          Vector3::Transform(Vector3::UnitY, Camera::ISOMETRIC_DIRECTIONS[i]);
+      float dot = Vector3::Dot(camUp, isoUp);
+      if (dot > bestDot) {
+        bestDot = dot;
+        closestDir = i;
+      }
     }
+    mGame->GetCamera()->SetIsometricDirection(
+        static_cast<IsometricDirections>(closestDir));
+    mGame->GetCamera()->SetMode(CameraMode::Isometric);
   }
-  mGame->GetCamera()->SetIsometricDirection(
-      static_cast<IsometricDirections>(closestDir));
-  mGame->GetCamera()->SetMode(CameraMode::Isometric);
 
   MIDIPlayer::muteChannel(9); // END BATTLE DRUMS
   MIDIPlayer::setSpeed(0.7f);
@@ -188,73 +196,98 @@ void BattleSystem::EndBattle(bool won) {
   // Mute enemies
   if (mCurrentEnemyGroup) {
     for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
-      MIDIPlayer::muteChannel(enemy->GetChannel());
-      if (enemy->GetCombatantState() != CombatantState::Dead)
-        enemy->SetCombatantState(CombatantState::Idle);
+      if (enemy) {
+        MIDIPlayer::muteChannel(enemy->GetChannel());
+        if (enemy->GetCombatantState() != CombatantState::Dead)
+          enemy->SetCombatantState(CombatantState::Idle);
+      }
     }
   }
 
+  // ATENÇÃO: Certifique-se de que GetActiveAllies() retorna uma REFERÊNCIA
+  // (std::vector<Combatant*>&) Caso contrário, salve o vetor em uma variável
+  // local e reinsira-o no Player depois.
+  auto &allies = mGame->GetPlayer()->GetActiveAllies();
+
   // Mute allies
-  for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
-    MIDIPlayer::muteChannel(ally->GetChannel());
-    if (ally->GetCombatantState() != CombatantState::Dead)
-      ally->SetCombatantState(CombatantState::Idle);
+  for (auto ally : allies) {
+    if (ally) {
+      MIDIPlayer::muteChannel(ally->GetChannel());
+      if (ally->GetCombatantState() != CombatantState::Dead)
+        ally->SetCombatantState(CombatantState::Idle);
+    }
   }
 
   // Mute Player
   MIDIPlayer::muteChannel(12);
 
   // End all notes playing from player and enemy note players
-  mPlayerNotePlayer->ClearNotes();
-  mEnemyNotePlayer->ClearNotes();
+  if (mPlayerNotePlayer)
+    mPlayerNotePlayer->ClearNotes();
+  if (mEnemyNotePlayer)
+    mEnemyNotePlayer->ClearNotes();
 
-  // Destroy dead allies
-
-  for (auto it = mGame->GetPlayer()->GetActiveAllies().begin();
-       it != mGame->GetPlayer()->GetActiveAllies().end();) {
+  // Destroy dead allies - Usando a referência direta e segura 'allies'
+  for (auto it = allies.begin(); it != allies.end();) {
     if ((*it)->GetCombatantState() == CombatantState::Dead) {
       (*it)->SetState(ActorState::Destroy);
-      it = mGame->GetPlayer()->GetActiveAllies().erase(it);
+      it = allies.erase(it);
     } else {
       (*it)->SetCombatantState(CombatantState::Idle);
       ++it;
     }
   }
 
-  // Transfer new dead enemies to player allies if won
-  for (auto it = mCurrentEnemyGroup->GetEnemies().begin();
-       it != mCurrentEnemyGroup->GetEnemies().end();) {
-    if ((*it)->GetCombatantState() == CombatantState::Dead) {
-      auto deadEnemy = *it;
+  // Transfer new dead enemies to player allies if won (Protegido contra
+  // mCurrentEnemyGroup nulo)
+  if (mCurrentEnemyGroup) {
+    // ATENÇÃO: Certifique-se de que GetEnemies() também retorna uma REFERÊNCIA
+    auto &enemies = mCurrentEnemyGroup->GetEnemies();
 
-      bool hasChannel = false;
-      for (auto ally : mGame->GetPlayer()->GetActiveAllies()) {
-        if (ally->GetChannel() == deadEnemy->GetChannel()) {
-          hasChannel = true;
-          break;
+    for (auto it = enemies.begin(); it != enemies.end();) {
+      if ((*it)->GetCombatantState() == CombatantState::Dead) {
+        auto deadEnemy = *it;
+
+        bool hasChannel = false;
+        for (auto ally : allies) {
+          if (ally && deadEnemy &&
+              ally->GetChannel() == deadEnemy->GetChannel()) {
+            hasChannel = true;
+            break;
+          }
         }
-      }
 
-      if (won && !hasChannel) {
-        deadEnemy->SetCombatantState(CombatantState::Idle);
-        deadEnemy->SetMaxHealth(deadEnemy->GetMaxHealth() / 2);
-        deadEnemy->SetHealth(deadEnemy->GetMaxHealth());
-        mGame->GetPlayer()->GetActiveAllies().push_back(deadEnemy);
+        if (won && !hasChannel && deadEnemy) {
+          deadEnemy->SetCombatantState(CombatantState::Idle);
+          deadEnemy->SetMaxHealth(deadEnemy->GetMaxHealth() / 2);
+          deadEnemy->SetHealth(deadEnemy->GetMaxHealth());
+          allies.push_back(deadEnemy);
+        } else if (deadEnemy) {
+          deadEnemy->SetState(ActorState::Destroy);
+        }
+        it = enemies.erase(it);
+
       } else {
-        deadEnemy->SetState(ActorState::Destroy);
+        (*it)->SetCombatantState(CombatantState::Idle);
+        ++it;
       }
-      it = mCurrentEnemyGroup->GetEnemies().erase(it);
-
-    } else {
-      (*it)->SetCombatantState(CombatantState::Idle);
-      ++it;
     }
   }
 
-  mGame->GetPlayer()->SetRotation(Math::LookRotation(mBattleDir));
+  // Proteção contra Divisão por Zero se mBattleDir for nulo (0,0,0)
+  if (mBattleDir.LengthSq() > 0.001f) {
+    mGame->GetPlayer()->SetRotation(Math::LookRotation(mBattleDir));
+  } else {
+    // Se a direção for inválida, vira o player para uma direção padrão (ex:
+    // UnitX) em vez de crashar
+    mGame->GetPlayer()->SetRotation(Math::LookRotation(Vector3::UnitX));
+  }
 
-  mBattleScreen->Close();
-  mBattleScreen = nullptr;
+  // Proteção do ponteiro da tela de batalha
+  if (mBattleScreen) {
+    mBattleScreen->Close();
+    mBattleScreen = nullptr;
+  }
 
   // Clear the enemy group pointer to avoid accessing destroyed object
   mCurrentEnemyGroup = nullptr;
