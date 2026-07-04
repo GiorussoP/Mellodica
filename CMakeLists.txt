@@ -76,14 +76,18 @@ target_include_directories(${EXEC_NAME}
 # Link libraries and add include directories to the executable
 target_link_libraries(${EXEC_NAME}
     # Link the found libraries (similar to LDFLAGS)
-    SDL2::SDL2 # Replaces -lSDL2
+    
+    # IMPORTANTE: A ordem no MinGW importa.
+    # mingw32 e SDL2main DEVEM vir antes de SDL2 no Windows.
+    $<$<PLATFORM_ID:Windows>:mingw32> 
     SDL2::SDL2main # Replaces -lSDL2main
+    SDL2::SDL2 # Replaces -lSDL2
+    
     SDL2_image::SDL2_image # Replaces -lSDL2_image
     SDL2_ttf::SDL2_ttf # Replaces -lSDL2_ttf
     GLEW::GLEW # Replaces -lGLEW
     OpenGL::GL
     ${FLUIDSYNTH_LIBRARIES} # Replaces -lfluidsynth
-
 )
 
 # Add include directories (similar to INCLUDE_FLAGS)
