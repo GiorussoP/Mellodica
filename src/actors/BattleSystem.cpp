@@ -111,6 +111,8 @@ void BattleSystem::StartBattle(EnemyGroup *enemyGroup) {
         mEnemyNotePlayer->GetPosition() + right * i * 1.5f -
         right * ((mCurrentEnemyGroup->GetEnemies().size() - 1) * 1.5f / 2.0f);
 
+    mCurrentEnemyGroup->GetEnemies()[i]->SetPosition(
+        mCurrentEnemyGroup->GetPosition());
     pos += 1.0f * mBattleDir;
     mCurrentEnemyGroup->GetEnemies()[i]->GoToPositionAtSpeed(pos, 1.5f);
     mCurrentEnemyGroup->GetEnemies()[i]->SetCombatantState(
@@ -184,10 +186,12 @@ void BattleSystem::EndBattle(bool won) {
   MIDIPlayer::setSpeed(0.7f);
 
   // Mute enemies
-  for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
-    MIDIPlayer::muteChannel(enemy->GetChannel());
-    if (enemy->GetCombatantState() != CombatantState::Dead)
-      enemy->SetCombatantState(CombatantState::Idle);
+  if (mCurrentEnemyGroup) {
+    for (auto enemy : mCurrentEnemyGroup->GetEnemies()) {
+      MIDIPlayer::muteChannel(enemy->GetChannel());
+      if (enemy->GetCombatantState() != CombatantState::Dead)
+        enemy->SetCombatantState(CombatantState::Idle);
+    }
   }
 
   // Mute allies

@@ -271,7 +271,7 @@ Vector3 Game::GetClosestMovePosition(const Vector3 &from, const Vector3 &to,
 
   Vector3 delta = to - from;
   float distance = delta.Length();
-  if (distance <= 0.0f) {
+  if (distance <= 0.01f) {
     return from;
   }
 
