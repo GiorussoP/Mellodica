@@ -52,9 +52,9 @@ OpeningScreen::OpeningScreen(class Game *game, const std::string &fontName)
   mStory5->GetSpriteComponent().SetVisible(false);
   mStory6->GetSpriteComponent().SetVisible(false);
 
-  mStoryText = AddText("Sempre fui uma criança\napaixonada por música...",
+  mStoryText = AddText("I've always been a child\nin love with music...",
                        Color::White, Vector3(0.0f, 0.0f, 0.0f), 0.0f);
-  mStoryText->SetPosition(Vector3(0.0f, -0.8f, 0.0f));
+  mStoryText->SetPosition(Vector3(0.0f, -0.75f, 0.0f));
 }
 
 OpeningScreen::~OpeningScreen() { UIScreen::~UIScreen(); }
@@ -87,34 +87,33 @@ void OpeningScreen::Update(float deltaTime) {
       mStory0->GetSpriteComponent().SetVisible(false);
       mStory1->GetSpriteComponent().SetVisible(true);
       mStoryText->SetText(
-          "E cresci assim, sempre me\ndesenvolvendo mais e mais...");
+          "And I grew up like that, always\ncomposing more and more...");
       break;
     case 2:
       mStory1->GetSpriteComponent().SetVisible(false);
       mStory2->GetSpriteComponent().SetVisible(true);
-      mStoryText->SetText(
-          "Quanto mais a melodia aumentava\nmais o apoio diminuía...");
+      mStoryText->SetText("But as the melody grew,\nthe support faded away...");
       break;
     case 3:
       mStory2->GetSpriteComponent().SetVisible(false);
       mStory3->GetSpriteComponent().SetVisible(true);
       mStoryText->SetText(
-          "E certa noite, em meio à \nfrustração, algo aconteceu...");
+          "And one night, amidst the\nfrustration, something happened...");
       break;
     case 4:
       mStory3->GetSpriteComponent().SetVisible(false);
       mStory4->GetSpriteComponent().SetVisible(true);
-      mStoryText->SetText("O piano ficou estranho...");
+      mStoryText->SetText("The piano felt weird...");
       break;
     case 5:
       mStory4->GetSpriteComponent().SetVisible(false);
       mStory5->GetSpriteComponent().SetVisible(true);
-      mStoryText->SetText("Acredite se quiser, o piano\n ME ENGOLIU!");
+      mStoryText->SetText("Believe it or not, the piano\n SWALLOWED ME ALIVE!");
       break;
     case 6:
       mStory5->GetSpriteComponent().SetVisible(false);
       mStory6->GetSpriteComponent().SetVisible(true);
-      mStoryText->SetText("E agora estou aqui...");
+      mStoryText->SetText("And now I'm here...");
       break;
 
     default:

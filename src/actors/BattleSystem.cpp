@@ -201,10 +201,8 @@ void BattleSystem::EndBattle(bool won) {
   MIDIPlayer::muteChannel(12);
 
   // End all notes playing from player and enemy note players
-  for (int i = 0; i < 12; ++i) {
-    mPlayerNotePlayer->EndNote(i);
-    mEnemyNotePlayer->EndNote(i);
-  }
+  mPlayerNotePlayer->ClearNotes();
+  mEnemyNotePlayer->ClearNotes();
 
   // Destroy dead allies
 

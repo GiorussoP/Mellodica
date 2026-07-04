@@ -187,8 +187,8 @@ bool Game::Initialize() {
 
   // Create window
   mWindow = SDL_CreateWindow(
-      "TP Final - Mellodica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      WINDOW_WIDTH, WINDOW_HEIGHT,
+      "Mellodica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH,
+      WINDOW_HEIGHT,
       SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
   if (!mWindow) {
@@ -801,9 +801,16 @@ void Game::CheckCollisions() {
 
   // Check collisions between all pairs
   for (size_t i = 0; i < colliders.size(); i++) {
+    if (colliders[i]->GetOwner()->GetState() == ActorState::Destroy) {
+      continue;
+    }
     for (size_t j = i + 1; j < colliders.size(); j++) {
       ColliderComponent *colliderA = colliders[i];
       ColliderComponent *colliderB = colliders[j];
+
+      if (colliderB->GetOwner()->GetState() == ActorState::Destroy) {
+        continue;
+      }
 
       // Check if they intersect
       if (colliderA->Intersect(*colliderB)) {

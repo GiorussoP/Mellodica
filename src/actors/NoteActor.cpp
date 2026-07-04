@@ -50,7 +50,8 @@ void NoteActor::Start(Vector3 fromOffset) {
 
   float dist = fromOffset.Length();
 
-  if (mGame->GetBattleSystem()->IsInBattle() && dist >= 0.75f) {
+  if (mGame->GetBattleSystem() && mGame->GetBattleSystem()->IsInBattle() &&
+      dist >= 0.75f) {
     mShineActor->SetPosition(targetPos + 0.5f * fromOffset);
     mShineActor->GetComponent<SpriteComponent>()->SetScale(
         Vector3(std::max(dist * 1.4f, 1.0f), 0.25f, 1.0f));

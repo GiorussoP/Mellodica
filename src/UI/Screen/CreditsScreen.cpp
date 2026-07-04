@@ -17,15 +17,15 @@ CreditsScreen::CreditsScreen(class Game *game, const std::string &fontName)
 
   // Add credits text
   mCreditsText = AddText(
-      "MELLODICA\n\n\n\n\nGiovanni Russo Paschoal:\n Engine, Programação "
-      "MIDI, Shaders\n\n\n\n"
-      "Luis Henrique Gomes Higino:\n Engine, Algoritmos e Mecânicas\n\n\n\n"
-      "Luisa Lopes Carvalhães:\n Arte 2D, Animações, Assets\n\n\n\n"
-      "Luiza Sodre Salgado\n Itens, Puzzles e Mecânicas\n\n\n\n"
-      "Raphael Aroldo Carreiro Mendes:\n HUD, menus e interfaces\n\n\n\n"
-      "Trilha sonora por:\n jennix\n\n\n\n"
-      "Agradecimentos especiais:\n Lucas N. Ferreira\n\n\n\n\nObrigado "
-      "por jogar!",
+      "MELLODICA\n\n\n\n\nGiovanni Russo Paschoal:\n Engine, MIDI "
+      "Programming, Shaders\n\n\n\n"
+      "Luis Henrique Gomes Higino:\n Engine, Algorithms & Mechanics\n\n\n\n"
+      "Luisa Lopes Carvalhães:\n 2D Art, Animations, Assets\n\n\n\n"
+      "Luiza Sodre Salgado\n Items, Puzzles & Mechanics\n\n\n\n"
+      "Raphael Aroldo Carreiro Mendes:\n HUD, Menus & Interfaces\n\n\n\n"
+      "Soundtrack by:\n jennix\n\n\n\n"
+      "Special thanks to:\n Lucas N. Ferreira\n\n\n\n\nThanks "
+      "for playing!",
       Color::Yellow, Vector3(0.0f, 0.0f, 0.0f), 0.0f);
   mCreditsText->SetPosition(Vector3(0.35f, -3.0f, 0.0f)); // Start below screen
   mCreditsText->SetScale(Vector3(1.2f, 4.0f, 1.0f));

@@ -65,6 +65,22 @@ bool NotePlayerActor::EndNote(unsigned int note) {
   return true;
 }
 
+void NotePlayerActor::ClearNotes() {
+  for (auto &activeNote : mActiveNotes) {
+    if (activeNote == nullptr) {
+      continue;
+    }
+
+    if (activeNote->GetMidiChannel() == 12 && mMirrored == false) {
+      SynthEngine::stopNote(12, activeNote->GetNote());
+    }
+
+    activeNote->End();
+    activeNote->SetState(ActorState::Destroy);
+    activeNote = nullptr;
+  }
+}
+
 Vector3 NotePlayerActor::GetNotePosition(unsigned int note) {
 
   int noteIndex =

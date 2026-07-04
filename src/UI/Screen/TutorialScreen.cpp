@@ -11,13 +11,13 @@ TutorialScreen::TutorialScreen(Game *game)
     : UIScreen(game, "fonts/MedodicaRegular.otf") {
 
   std::string instructions =
-      "                   CONTROLES:   \n"
-      " Setas      -  Movimentar personagem \n"
-      " A, D       -  Movimentar câmera \n"
-      " Espaço     -  Atirar nota \n"
-      " (1,2,3,4,5,6,7,8,9,0,-,+) - Atirar nota específica \n\n"
-      "Encontre uma saída!\n\n"
-      " Pressione [ENTER] para fechar ";
+      "                   CONTROLS:   \n"
+      " Arrow Keys -  Move character \n"
+      " A, D       -  Move camera \n"
+      " Space      -  Shoot note \n"
+      " (1,2,3,4,5,6,7,8,9,0,-,+) - Shoot specific note \n\n"
+      " Find an exit!\n\n"
+      " Press [ENTER] to close ";
 
   auto textElement = AddText(instructions, Vector3(1.0f, 1.0f, 1.0f),
                              Vector3(0.0f, 0.0f, 0.0f), 0.75f);
