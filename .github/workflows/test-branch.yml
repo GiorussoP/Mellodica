@@ -91,6 +91,11 @@ jobs:
             https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.8.tar.gz
           tar xf fluidsynth.tar.gz
           cd fluidsynth-2.4.8
+          
+          # Hack para contornar a exigência do SDL2main no Windows: 
+          # Injeta uma função SDL_main "falsa" que apenas chama o main original
+          echo 'int SDL_main(int argc, char **argv) { return main(argc, argv); }' >> src/fluidsynth.c
+          
           mkdir build && cd build
           export CMAKE_PREFIX_PATH=/mingw64
           export PKG_CONFIG_PATH=/mingw64/lib/pkgconfig
