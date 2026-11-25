@@ -1,4 +1,4 @@
-# Mellodica
+# Mellodica - [Página no Itch.io](https://giorussop.itch.io/mellodica)
 
 Uma mistura de jogo de ritmo com Shoot'em Up.
 
